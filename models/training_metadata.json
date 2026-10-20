@@ -32,55 +32,116 @@
     "precip_sum_7d"
   ],
   "train_period": "2016-01-01 to 2023-12-31",
-  "test_period": "2024-01-01 to 2025-12-31",
+  "test_period": "2024-01-01 to 2025-12-24",
   "train_size": 1478532,
-  "test_size": 369886,
+  "test_size": 366344,
+  "spatial_block_cv": "Contiguous (North / Central / South MT)",
   "best_params": {
-    "n_estimators": 462,
-    "learning_rate": 0.07605130777637853,
-    "max_depth": 7,
-    "num_leaves": 60,
-    "min_child_samples": 179,
-    "subsample": 0.6860686386768415,
-    "colsample_bytree": 0.9344955244156088,
-    "reg_alpha": 0.0038579379927243663,
-    "reg_lambda": 0.007067479672699516
+    "n_estimators": 152,
+    "learning_rate": 0.02446643620431958,
+    "max_depth": 4,
+    "num_leaves": 57,
+    "min_child_samples": 146,
+    "subsample": 0.7272295531223001,
+    "colsample_bytree": 0.8789863837064875,
+    "reg_alpha": 3.5556140650938515,
+    "reg_lambda": 0.004114571754339331
+  },
+  "p_value_vs_climatology": 0.0,
+  "p_value_vs_persistence": 0.0,
+  "confidence_intervals": {
+    "Persistence": {
+      "PR-AUC_95CI": [
+        0.4181,
+        0.4406
+      ],
+      "ROC-AUC_95CI": [
+        0.7203,
+        0.7318
+      ],
+      "Brier_95CI": [
+        0.1054,
+        0.1093
+      ]
+    },
+    "Climatology": {
+      "PR-AUC_95CI": [
+        0.5051,
+        0.5281
+      ],
+      "ROC-AUC_95CI": [
+        0.8483,
+        0.8561
+      ],
+      "Brier_95CI": [
+        0.1061,
+        0.1094
+      ]
+    },
+    "LogisticRegression": {
+      "PR-AUC_95CI": [
+        0.5353,
+        0.5589
+      ],
+      "ROC-AUC_95CI": [
+        0.8228,
+        0.8327
+      ],
+      "Brier_95CI": [
+        0.165,
+        0.1681
+      ]
+    },
+    "LightGBM (Platt Calibrated)": {
+      "PR-AUC_95CI": [
+        0.61,
+        0.6316
+      ],
+      "ROC-AUC_95CI": [
+        0.876,
+        0.8833
+      ],
+      "Brier_95CI": [
+        0.0924,
+        0.0955
+      ]
+    }
   },
   "results": [
     {
-      "model": "Persistence",
-      "PR-AUC": 0.458,
-      "ROC-AUC": 0.7269,
-      "Brier": 0.115,
-      "Recall@P50": 0.5277
+      "model": "Persistence (Empirical)",
+      "PR-AUC": 0.4293,
+      "ROC-AUC": 0.726,
+      "Brier": 0.1074,
+      "Recall@P50": 0.5281
     },
     {
       "model": "Climatology",
-      "PR-AUC": 0.5159,
-      "ROC-AUC": 0.8525,
-      "Brier": 0.1072,
-      "Recall@P50": 0.4829
+      "PR-AUC": 0.5169,
+      "ROC-AUC": 0.8521,
+      "Brier": 0.1079,
+      "Recall@P50": 0.4855
     },
     {
       "model": "LogisticRegression",
-      "PR-AUC": 0.5458,
-      "ROC-AUC": 0.8285,
-      "Brier": 0.1659,
-      "Recall@P50": 0.5934
+      "PR-AUC": 0.5464,
+      "ROC-AUC": 0.8277,
+      "Brier": 0.1666,
+      "Recall@P50": 0.5941
     },
     {
-      "model": "LightGBM",
-      "PR-AUC": 0.6277,
-      "ROC-AUC": 0.8838,
-      "Brier": 0.1468,
-      "Recall@P50": 0.6685
+      "model": "LightGBM (Raw)",
+      "PR-AUC": 0.6205,
+      "ROC-AUC": 0.8793,
+      "Brier": 0.1474,
+      "Recall@P50": 0.6643
     },
     {
-      "model": "LightGBM (calibrated)",
-      "PR-AUC": 0.3468,
-      "ROC-AUC": 0.7635,
-      "Brier": 0.1844,
-      "Recall@P50": 0.032
+      "model": "LightGBM (Platt Calibrated)",
+      "PR-AUC": 0.6205,
+      "ROC-AUC": 0.8793,
+      "Brier": 0.0941,
+      "Recall@P50": 0.6643
     }
   ]
 }

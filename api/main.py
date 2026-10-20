@@ -30,6 +30,8 @@ app = FastAPI(
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _MODELS_DIR = _PROJECT_ROOT / "models"
 
+_platt = None
+
 try:
     if (_MODELS_DIR / "lightgbm_model.joblib").exists():
         _model = joblib.load(_MODELS_DIR / "lightgbm_model.joblib")
@@ -37,12 +39,15 @@ try:
         _model = joblib.load(_MODELS_DIR / "lightgbm_calibrated.joblib")
     else:
         _model = None
+    if (_MODELS_DIR / "platt_calibrator.joblib").exists():
+        _platt = joblib.load(_MODELS_DIR / "platt_calibrator.joblib")
     _feature_cols = joblib.load(_MODELS_DIR / "feature_cols.joblib")
     _scaler = None
     _model_loaded = True if _model is not None else False
 except Exception:
     _model_loaded = False
     _model = None
+    _platt = None
     _feature_cols = []
 
 
@@ -214,8 +219,34 @@ def predict(request: PredictionRequest) -> PredictionResponse:
             detail="Model not loaded. Run training first.",
         )
 
+    # Geographic domain validation (Mato Grosso bounding box)
+    if not (-18.2 <= request.latitude <= -7.2):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Latitude {request.latitude} outside pilot coverage (Mato Grosso bounds: [-18.1, -7.3])",
+        )
+    if not (-61.8 <= request.longitude <= -50.1):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Longitude {request.longitude} outside pilot coverage (Mato Grosso bounds: [-61.7, -50.2])",
+        )
+    if request.date.year < 2016 or request.date.year > 2030:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Date year {request.date.year} outside supported operating range [2016, 2030]",
+        )
+
     X = _build_features(request.latitude, request.longitude, request.date)
-    probability = float(_model.predict_proba(X)[0, 1])
+    raw_prob = float(_model.predict_proba(X)[0, 1])
+
+    # Apply Platt scaling calibration if available
+    if _platt is not None:
+        from scipy.special import logit
+        raw_logit = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
+        probability = float(_platt.predict_proba(raw_logit)[0, 1])
+    else:
+        probability = raw_prob
+
     probability = round(min(max(probability, 0.0), 1.0), 4)
 
     return PredictionResponse(

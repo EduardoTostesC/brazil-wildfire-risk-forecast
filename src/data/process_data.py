@@ -106,26 +106,27 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
     # Sorting by date ascending, a forward-looking window = shift(-1) then rolling(7).
     dataset = dataset.sort_values(["grid_id", "date"]).reset_index(drop=True)
 
-    # Use groupby + shift to look into the future
+    # Use groupby + reversed rolling sum to strictly look horizon days into the future
     def _compute_target(group: pd.DataFrame) -> pd.Series:
-        # Sum of fire_count in the next `horizon` days (exclusive of current day)
-        future_fires = (
-            group["fire_count"]
-            .shift(-1)                       # start from tomorrow
-            .rolling(window=horizon, min_periods=1)  # next 7 days
-            .sum()
-            .shift(-(horizon - 1))           # align to the first future day
+        # Sum of fire_count strictly in [D+1, D+horizon]
+        rev = group["fire_count"].iloc[::-1]
+        fwd_sum = rev.shift(1).rolling(window=horizon).sum().iloc[::-1]
+        return pd.Series(
+            np.where(fwd_sum.isna(), np.nan, (fwd_sum > 0).astype(float)),
+            index=group.index,
         )
-        return (future_fires > 0).astype(int)
 
     dataset["target"] = (
         dataset.groupby("grid_id", group_keys=False)
         .apply(_compute_target)
     )
 
-    # Drop rows where target cannot be computed (last 7 days of the dataset)
-    dataset = dataset.dropna(subset=["target"])
+    # Drop rows where future horizon exceeds dataset bounds (last 7 days of dataset)
+    initial_len = len(dataset)
+    dataset = dataset.dropna(subset=["target"]).copy()
     dataset["target"] = dataset["target"].astype(int)
+    dropped = initial_len - len(dataset)
+    print(f"  Target computed: {len(dataset):,} valid records (dropped {dropped:,} boundary records)")
 
     # --- 4. Merge climate data ---
     print("Step 4: Merging climate data...")

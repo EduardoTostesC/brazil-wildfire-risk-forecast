@@ -72,9 +72,9 @@ Suppressing canopy fires once they have spread across thousands of hectares is d
 |---|---|---|
 | **Spatial Unit** | Regular 0.5° grid (~56 km at equator) | Aligns with the native resolution of NASA's MERRA-2 global atmospheric reanalysis. Provides 506 cells covering 100% of Mato Grosso without interpolation artifacts. Configurable via `config.yaml`. |
 | **Temporal Unit** | Daily time-step, 7-day forward horizon | Matches tactical response timelines: gives wildfire response crews adequate mobilization time while maintaining high meteorological predictability. |
-| **Binary Target** | $y \in \{0, 1\}$ ($\ge 1$ hotspot in $[D+1, D+7]$) | Robust formulation mitigating counting noise and isolated false-positive single-pixel sensor detections. |
+| **Binary Target** | $y \in \{0, 1\}$ ($\ge 1$ hotspot in $[D+1, D+7]$) | Robust formulation mitigating counting noise and isolated false-positive single-pixel sensor detections. The last 7 days of the historical series are excluded as their forward window is incomplete. |
 | **Pilot Region** | Mato Grosso (MT), Brazil | Historic leader in Brazilian fire hotspots, encompassing three critical biomes: Cerrado, Amazonia, and Pantanal. |
-| **Historical Period**| 2016 to 2025 (10 full years) | 8 years for training (2016–2023: 1,478,532 records) and 2 full years for temporal testing (2024–2025: 369,886 records). |
+| **Historical Period**| 2016 to 2025 (10 full years) | 8 years for training (2016–2023: 1,478,532 records) and 2 full years for temporal testing (2024–2025: 366,344 records). |
 
 ---
 
@@ -124,43 +124,58 @@ A total of **30 predictive features** were engineered, strictly looking backward
 
 ## 📈 Real Results & Model Comparison
 
-The metrics below reflect the **actual execution** on the out-of-time test set (**2024–2025, 369,886 records**), trained strictly on historical data (**2016–2023, 1,478,532 records**):
+The metrics below reflect the **actual execution** on the out-of-time test set (**2024–2025, 366,344 records**), trained strictly on historical data (**2016–2023, 1,478,532 records**). All confidence intervals are computed via **1,000 bootstrap resamples** at the 95% level:
 
-| Model | PR-AUC (Primary) | ROC-AUC | Brier Score (Lower is Better) | Recall @ Precision $\ge$ 50% |
+| Model | PR-AUC (Primary, 95% CI) | ROC-AUC (95% CI) | Brier Score (95% CI, Lower is Better) | Recall @ Precision $\ge$ 50% |
 |:---|:---:|:---:|:---:|:---:|
-| **Baseline 1: Persistence** (recent fire in cell) | 0.4580 | 0.7269 | 0.1150 | 52.77% |
-| **Baseline 2: Climatology** (historical cell-month fire rate) | 0.5159 | 0.8525 | **0.1072** | 48.29% |
-| **Logistic Regression** (linear, balanced weights, scaled) | 0.5458 | 0.8285 | 0.1659 | 59.34% |
-| **LightGBM (Optuna Tuned)** | **0.6277** | **0.8838** | 0.1468 | **66.85%** |
-| **LightGBM (Isotonic Calibrated)** | 0.3468 | 0.7635 | 0.1844 | 03.20% |
+| **Baseline 1: Persistence (Empirical)** | 0.4293 (0.4181, 0.4406) | 0.7260 (0.7203, 0.7318) | 0.1074 (0.1054, 0.1093) | 52.81% |
+| **Baseline 2: Climatology** (historical cell-month fire rate) | 0.5169 (0.5051, 0.5281) | 0.8521 (0.8483, 0.8561) | 0.1079 (0.1061, 0.1094) | 48.55% |
+| **Logistic Regression** (linear, balanced weights, scaled) | 0.5464 (0.5353, 0.5589) | 0.8277 (0.8228, 0.8327) | 0.1666 (0.1650, 0.1681) | 59.41% |
+| **LightGBM (Raw)** | 0.6205 (0.6100, 0.6316) | 0.8793 (0.8760, 0.8833) | 0.1474 (0.1456, 0.1492) | 66.43% |
+| **LightGBM (Platt Calibrated)** | **0.6205** (0.6100, 0.6316) | **0.8793** (0.8760, 0.8833) | **0.0941** (0.0924, 0.0955) | **66.43%** |
 
 ### 💡 Key Technical Insights:
-1. **LightGBM Outperformed All Benchmarks**: Reaching a **PR-AUC of 0.6277** and **ROC-AUC of 0.8838**, capturing **66.85% of all wildfires** while maintaining an operational precision threshold of at least 50%.
-2. **Strong Baselines Prove Machine Learning Value**: Climatology alone yielded a solid ROC-AUC (0.8525) by tracking the dry season calendar, but its PR-AUC (0.5159) and Recall@P50 (48.29%) lagged significantly behind LightGBM. This demonstrates that LightGBM is not merely memorizing seasonal dates, but learning dynamic interactions between dry spells, winds, and regional fire spread.
-3. **The Isotonic Calibration Trade-off**: Post-hoc isotonic regression with extreme class imbalance compressed probabilities towards the base rate, disrupting the optimal ranking threshold. As a result, production serving relies on the **uncalibrated LightGBM model**, which preserves sharp ranking fidelity.
+1. **LightGBM Outperformed All Benchmarks Significantly**: Reaching a **PR-AUC of 0.6205** and **ROC-AUC of 0.8793**, capturing **66.43% of all wildfires** while maintaining an operational precision threshold of at least 50%. A paired bootstrap hypothesis test confirms that LightGBM's superiority over Climatology is statistically significant with **$p < 0.001$ ($p = 0.0000$)**.
+2. **Strong Baselines Prove Machine Learning Value**: Climatology achieves a high ROC-AUC (0.8521) purely by tracking the historical seasonal cycle. However, its PR-AUC (0.5169) and Recall@P50 (48.55%) lag far behind LightGBM. This demonstrates that LightGBM is not merely memorizing seasonal patterns, but learning dynamic interactions between dry spells, winds, and active fire propagation.
+3. **Platt Scaling Solves Probability Distortion**: Under severe class imbalance, uncalibrated tree models produce inflated mean probabilities (~33.8% vs. true 16.5% base rate). We applied parametric **Platt Scaling (logistic sigmoid on model log-odds)** fitted on an out-of-fold temporal validation split (2023). Platt scaling preserves 100% of the raw model's discriminative power (PR-AUC 0.6205, ROC-AUC 0.8793) while reducing the **Brier score from 0.1474 down to 0.0941**, beating Climatology's 0.1079 and producing well-calibrated risk probabilities for operational decision-making.
 
 <p align="center">
   <img src="reports/figures/calibration_curve.png" width="70%" alt="Probability Calibration Curve" />
 </p>
 
+### 🔄 Multi-Year Walk-Forward Validation (Expanding Window)
+
+To test stability across distinct meteorological cycles (including extreme drought years), we conducted an expanding-window temporal cross-validation:
+
+| Test Year | Train Period | Train Obs | Test Obs | Positive Base Rate | PR-AUC | ROC-AUC | Brier Score |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **2021** | 2016–2020 | 924,462 | 184,690 | 17.99% | 0.6308 | 0.8833 | 0.1508 |
+| **2022** | 2016–2021 | 1,109,152 | 184,690 | 18.43% | 0.6411 | 0.8783 | 0.1468 |
+| **2023** | 2016–2022 | 1,293,842 | 184,690 | 18.40% | 0.6322 | 0.8824 | 0.1447 |
+| **2024** | 2016–2023 | 1,478,532 | 185,196 | 21.38% | **0.6866** | 0.8806 | 0.1536 |
+| **2025** | 2016–2024 | 1,663,728 | 181,148 | 11.47% | 0.4866 | 0.8672 | 0.1409 |
+
+- **Resilience to Severe Drought (2024)**: During the historic 2024 drought in Central Brazil (positive rate rose to 21.4%), the model performed at its best (**PR-AUC 0.6866**), accurately detecting widespread hazard conditions.
+- **Robustness in Low-Fire Years (2025)**: Even when the fire rate plummeted to 11.5%, the model maintained a high **ROC-AUC of 0.8672**, confirming robust ranking ability across changing climatological regimes.
+
 ---
 
 ## 🔍 Explainability with SHAP
 
-Using `shap.TreeExplainer`, we computed game-theoretic feature contributions across test predictions:
+Using `shap.TreeExplainer` on the out-of-time test set, we computed game-theoretic feature attributions. Notice that under **Contiguous Spatial Block Cross-Validation** (North, Central, and South MT blocks), Optuna penalizes coordinate memorization, allowing dynamic behavioral and physical features to dominate:
 
 | Rank | Feature | Mean \|SHAP\| | Practical Interpretation |
 |:---:|:---|:---:|:---|
-| 1 | `lat_center` | 2.420 | Latitudinal gradient: Northern Mato Grosso (Amazonian deforestation arc) exhibits different fire patterns compared to the southern agricultural/Pantanal basins. |
-| 2 | `lon_center` | 1.078 | Longitudinal gradient: Captures East-to-West transitions between the Araguaia Cerrado and Western forested reserves. |
-| 3 | `fire_count_30d` | 0.974 | Monthly fire persistence: Cells that actively burned over the prior month exhibit high risk of continued flare-ups. |
-| 4 | `neighbor_fire_7d` | 0.422 | Neighborhood contagion: Active burning in the 8 adjacent cells is the strongest indicator of border-crossing fire spread. |
-| 5 | `fire_count_lastyear` | 0.254 | Annual recurrence: Areas subjected to cyclical agricultural clearing tend to burn again during the same window next year. |
-| 6 | `fire_count_14d` | 0.153 | Mid-term local fire persistence. |
-| 7 | `doy_sin` | 0.153 | Annual calendar cycle (peaks between August and October). |
-| 8 | `fire_count_7d` | 0.121 | Immediate 7-day fire activity. |
-| 9 | `T2M_MIN_mean_14d` | 0.108 | Elevated nighttime temperatures signify warm, dry atmospheric blocks preventing biomass moisture recovery. |
-| 10 | `PRECTOTCORR` | 0.102 | Daily precipitation acts as a direct inhibitor of ignition. |
+| 1 | `fire_count_30d` | 0.838 | **Monthly local persistence**: Accumulated fire history in the cell over the prior 30 days is the strongest risk driver. |
+| 2 | `lat_center` | 0.653 | **Latitudinal gradient**: Northern MT (Amazonian transition arc) has distinct fire dynamics compared to the southern agricultural/Pantanal basins. |
+| 3 | `neighbor_fire_7d` | 0.474 | **Neighborhood contagion**: Active burning in the 8 adjacent cells indicates regional spread across boundaries. |
+| 4 | `fire_count_lastyear` | 0.253 | **Annual cyclicality**: Locations with recurring agricultural clearing repeat burning during the same window next year. |
+| 5 | `lon_center` | 0.191 | **Longitudinal gradient**: Captures East-to-West biome transitions across Mato Grosso. |
+| 6 | `fire_count_14d` | 0.144 | Mid-term local fire persistence (14-day window). |
+| 7 | `fire_count_7d` | 0.101 | Immediate short-term fire activity (7-day window). |
+| 8 | `WS10M_mean_14d` | 0.027 | Wind speed average: Persistent wind accelerates biomass drying and fans fire fronts. |
+| 9 | `PRECTOTCORR` | 0.026 | Daily precipitation acts as a direct inhibitor of ignition. |
+| 10 | `precip_sum_30d` | 0.015 | Hydrological deficit: Low 30-day cumulative rainfall indicates deep soil and fuel drying. |
 
 <p align="center">
   <img src="reports/figures/shap_summary.png" width="48%" alt="SHAP Beeswarm Summary Plot" />
@@ -171,14 +186,17 @@ Using `shap.TreeExplainer`, we computed game-theoretic feature contributions acr
 
 ## 🔎 Error Analysis
 
-Evaluating month-by-month predictive accuracy across the out-of-time test set (2024–2025):
+Evaluating predictive performance across space and time on the out-of-time test set (2024–2025):
 
-- **High Accuracy Months (>81%)**: January through April (rainy season). The model produces negligible false alarms when soil moisture and humidity are saturated.
-- **Challenging Months (Accuracy 67%–72%)**: July through October (intense dry season). Wildfire base rates soar. In October, initial erratic convective rains generate microclimate variations across 50 km cells.
-- **False Negatives**: Concentrated during early dry season transitions (May/June), when isolated farm burns occur before regional humidity metrics drop to critical thresholds.
+- **Seasonal Dynamics**: High accuracy (>81%) in the rainy season (January–April) when humidity saturated soils suppress ignitions. Lower accuracy (67%–72%) during peak dry season (July–October) when high base rates and localized convective microclimates increase variance.
+- **Regional Disparities**:
+  - **North MT** (Amazonian transition): Highest base rate (28.4%) and highest model precision; dense vegetation and active land clearing create strong, persistent fire signals.
+  - **South MT** (Pantanal / Southern Cerrado): Base rate 14.7%; periodic extreme dry spells in wetlands require careful hydrological monitoring.
+  - **Central MT** (Agro belt): Lowest base rate (11.2%); highly mechanized agriculture exhibits fewer uncontrolled fires, leading to sparse positive labels.
 
 <p align="center">
-  <img src="reports/figures/accuracy_by_month.png" width="70%" alt="Accuracy by Month Across Year" />
+  <img src="reports/figures/accuracy_by_month.png" width="48%" alt="Accuracy by Month Across Year" />
+  <img src="reports/figures/accuracy_by_region.png" width="48%" alt="Accuracy by Spatial Region" />
 </p>
 
 ---
@@ -233,11 +251,14 @@ curl -X POST "http://localhost:8000/predict" \
 
 ```text
 brazil-wildfire-risk-forecast/
+├── .github/
+│   └── workflows/ci.yml          # GitHub Actions CI (lint, types, pytest)
 ├── .gitignore                    # Excludes heavy raw data and virtual environments
 ├── config.yaml                   # Global pipeline configurations (grid, region, dates)
 ├── Dockerfile                    # Containerization for API and Streamlit
 ├── LICENSE                       # MIT License
-├── Makefile                      # Command shortcuts (install, train, test, api)
+├── Makefile                      # Command shortcuts (Linux/macOS)
+├── run_pipeline.ps1              # Single-command automated pipeline (Windows PowerShell)
 ├── README.md                     # English documentation (this file)
 ├── README.pt-BR.md               # Brazilian Portuguese documentation
 ├── requirements.txt              # Exact pinned dependencies
@@ -261,6 +282,7 @@ brazil-wildfire-risk-forecast/
 │   ├── feature_cols.joblib       # Serialized feature list
 │   ├── lightgbm_model.joblib     # Production trained LightGBM model
 │   ├── logistic_regression.joblib# Linear baseline model
+│   ├── platt_calibrator.joblib   # Fitted Platt scaling calibrator (logistic sigmoid)
 │   ├── scaler.joblib             # Feature standardizer
 │   └── training_metadata.json    # Model performance and training metadata
 │
@@ -271,8 +293,10 @@ brazil-wildfire-risk-forecast/
 ├── reports/
 │   ├── feature_importance.csv    # Full SHAP importance table
 │   ├── model_comparison.csv      # Real model benchmark metrics
+│   ├── walk_forward_metrics.csv  # Expanding window temporal evaluation
 │   └── figures/
 │       ├── accuracy_by_month.png # Monthly accuracy chart
+│       ├── accuracy_by_region.png# Accuracy across MT spatial subregions
 │       ├── calibration_curve.png # Probability calibration plot
 │       ├── shap_bar.png          # SHAP feature importance bar plot
 │       └── shap_summary.png      # SHAP beeswarm summary plot
@@ -291,7 +315,7 @@ brazil-wildfire-risk-forecast/
 │       └── explain.py            # SHAP TreeExplainer generation
 │
 └── tests/
-    └── test_pipeline.py          # 13 automated tests (grid, leak, API, config)
+    └── test_pipeline.py          # 14 automated tests (grid, leak, API, bounds, config)
 ```
 
 ---
@@ -337,25 +361,38 @@ streamlit run app/streamlit_app.py
 Opens in your browser at `http://localhost:8501`.
 
 ### 6. Reproduce the Entire Pipeline from Scratch (Optional)
-To re-download historical data and re-train models:
+
+You can run the entire pipeline end-to-end with a single command:
+
+**On Windows (PowerShell):**
+```powershell
+.\run_pipeline.ps1
+```
+
+**On Linux / macOS:**
 ```bash
-# 1. Download INPE fire records
+make all
+```
+
+**Or step-by-step manually:**
+```bash
+# 1. Download INPE fire records (2016-2025)
 python -m src.data.download_fire
 
-# 2. Download NASA POWER weather data
+# 2. Download NASA POWER climate reanalysis
 python -m src.data.download_climate
 
-# 3. Build grid and assemble dataset
+# 3. Build geographic grid & assemble spatiotemporal dataset
 python -m src.data.build_grid
 python -m src.data.process_data
 
-# 4. Feature engineering
+# 4. Engineer 30 predictive features (leakage-free)
 python -m src.features.build_features
 
-# 5. Train baselines and tune LightGBM
+# 5. Train baselines, Bayesian tuning, Platt calibration & walk-forward validation
 python -m src.models.train
 
-# 6. Generate SHAP explainability reports
+# 6. Generate SHAP game-theoretic explainability report
 python -m src.models.explain
 ```
 

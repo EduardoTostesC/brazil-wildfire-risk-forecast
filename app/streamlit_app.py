@@ -44,8 +44,7 @@ def load_data():
 
     # Load model and generate predictions
     model_path = _PROJECT_ROOT / "models" / "lightgbm_model.joblib"
-    if not model_path.exists():
-        model_path = _PROJECT_ROOT / "models" / "lightgbm_calibrated.joblib"
+    calibrator_path = _PROJECT_ROOT / "models" / "platt_calibrator.joblib"
     feature_cols_path = _PROJECT_ROOT / "models" / "feature_cols.joblib"
 
     if model_path.exists() and feature_cols_path.exists():
@@ -53,9 +52,18 @@ def load_data():
         feature_cols = joblib.load(feature_cols_path)
         X = df[feature_cols].values.astype(np.float32)
         X = np.nan_to_num(X, nan=0.0)
-        df["probability"] = model.predict_proba(X)[:, 1]
+        raw_probs = model.predict_proba(X)[:, 1]
+
+        if calibrator_path.exists():
+            from scipy.special import logit
+            calibrator = joblib.load(calibrator_path)
+            raw_logit = logit(np.clip(raw_probs, 1e-6, 1 - 1e-6)).reshape(-1, 1)
+            df["probability"] = calibrator.predict_proba(raw_logit)[:, 1]
+        else:
+            df["probability"] = raw_probs
+
         df["risk_level"] = df["probability"].apply(
-            lambda p: "High" if p >= 0.6 else ("Medium" if p >= 0.3 else "Low")
+            lambda p: "High" if p >= 0.5 else ("Medium" if p >= 0.2 else "Low")
         )
     return df, is_sample
 
@@ -74,7 +82,7 @@ def create_risk_map(df_day: pd.DataFrame) -> folium.Map:
     center_lat = df_day["lat_center"].mean()
     center_lon = df_day["lon_center"].mean()
 
-    m = folium.Map(location=[center_lat, center_lon], zoom_start=6, tiles="cartodbpositron")
+    m = folium.Map(location=[center_lat, center_lon], zoom_start=6, tiles="OpenStreetMap")
 
     color_map = {"Low": "green", "Medium": "orange", "High": "red"}
 

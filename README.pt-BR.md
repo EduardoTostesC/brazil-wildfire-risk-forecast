@@ -72,9 +72,9 @@ Combater incêndios florestais quando as chamas já atingiram dezenas de quilôm
 |---|---|---|
 | **Unidade Espacial** | Grade regular de 0,5° (~56 km no equador) | Alinhada à resolução nativa do modelo de reanálise atmosférica da NASA (MERRA-2) e computacionalmente eficiente (506 células cobrem 100% do Mato Grosso). Configurável via `config.yaml`. |
 | **Unidade Temporal** | Diária, com horizonte de 7 dias à frente | Permite ação tática operacional semanal (tempo hábil de mobilização de brigadas terrestres). |
-| **Alvo Binário** | $y \in \{0, 1\}$ ($\ge 1$ foco na célula entre $D+1$ e $D+7$) | Formulação robusta contra ruídos finos de contagem e ruídos de detecção de pequenas queimadas isoladas. |
+| **Alvo Binário** | $y \in \{0, 1\}$ ($\ge 1$ foco na célula entre $D+1$ e $D+7$) | Formulação robusta contra ruídos finos de contagem e detecções isoladas. Os últimos 7 dias da série histórica são descartados por terem janela futura incompleta. |
 | **Região Piloto** | Mato Grosso (MT) | Estado líder histórico em queimadas no Brasil, englobando três biomas de relevância global: Cerrado, Amazônia e Pantanal. |
-| **Período** | 2016 a 2025 (10 anos completos de histórico) | 8 anos para treino (2016–2023: 1.478.532 registros) e 2 anos para teste cego temporal (2024–2025: 369.886 registros). |
+| **Período** | 2016 a 2025 (10 anos completos de histórico) | 8 anos para treino (2016–2023: 1.478.532 registros) e 2 anos para teste cego temporal (2024–2025: 366.344 registros). |
 
 ---
 
@@ -124,43 +124,58 @@ Foram geradas **30 features preditivas**, estritamente retrospectivas:
 
 ## 📈 Resultados Reais e Comparação de Modelos
 
-A tabela abaixo reflete a **execução real** do pipeline no conjunto de teste estritamente temporal (**2024–2025, 369.886 observações**), após treino em **2016–2023 (1.478.532 observações)**:
+A tabela abaixo reflete a **execução real** do pipeline no conjunto de teste estritamente temporal (**2024–2025, 366.344 observações**), após treino em **2016–2023 (1.478.532 observações)**. Todos os intervalos de confiança de 95% foram calculados via **1.000 reamostragens bootstrap**:
 
-| Modelo | PR-AUC (Principal) | ROC-AUC | Brier Score (Menor = Melhor) | Recall @ Precisão $\ge$ 50% |
+| Modelo | PR-AUC (Principal, IC 95%) | ROC-AUC (IC 95%) | Brier Score (IC 95%, Menor = Melhor) | Recall @ Precisão $\ge$ 50% |
 |:---|:---:|:---:|:---:|:---:|
-| **Baseline 1: Persistência** (foco recente na célula) | 0.4580 | 0.7269 | 0.1150 | 52.77% |
-| **Baseline 2: Climatologia** (frequência histórica local/mês) | 0.5159 | 0.8525 | **0.1072** | 48.29% |
-| **Regressão Logística** (linear, com `StandardScaler` e pesos balanceados) | 0.5458 | 0.8285 | 0.1659 | 59.34% |
-| **LightGBM (Otimizado com Optuna)** | **0.6277** | **0.8838** | 0.1468 | **66.85%** |
-| **LightGBM (Calibrado - Isotônico)** | 0.3468 | 0.7635 | 0.1844 | 03.20% |
+| **Baseline 1: Persistência (Empírica)** | 0.4293 (0.4181, 0.4406) | 0.7260 (0.7203, 0.7318) | 0.1074 (0.1054, 0.1093) | 52.81% |
+| **Baseline 2: Climatologia** (frequência histórica local/mês) | 0.5169 (0.5051, 0.5281) | 0.8521 (0.8483, 0.8561) | 0.1079 (0.1061, 0.1094) | 48.55% |
+| **Regressão Logística** (linear, com `StandardScaler` e pesos balanceados) | 0.5464 (0.5353, 0.5589) | 0.8277 (0.8228, 0.8327) | 0.1666 (0.1650, 0.1681) | 59.41% |
+| **LightGBM (Sem Calibração)** | 0.6205 (0.6100, 0.6316) | 0.8793 (0.8760, 0.8833) | 0.1474 (0.1456, 0.1492) | 66.43% |
+| **LightGBM (Calibrado - Platt Scaling)** | **0.6205** (0.6100, 0.6316) | **0.8793** (0.8760, 0.8833) | **0.0941** (0.0924, 0.0955) | **66.43%** |
 
 ### 💡 Principais Conclusões Técnicas:
-1. **O LightGBM superou todos os concorrentes**: Atingiu **PR-AUC de 0,6277** e **ROC-AUC de 0,8838**, capturando **66,85% de todos os incêndios** mantendo uma precisão operacional de pelo menos 50%.
-2. **Baselines Fortes Revelam o Valor Real do ML**: A climatologia obteve ROC-AUC respeitável de 0,8525 puramente memorizando a estação seca, mas seu PR-AUC (0,5159) e Recall@P50 (48,29%) são sensivelmente inferiores ao LightGBM. Isso demonstra que o modelo não está apenas repetindo o calendário anual, mas aprendendo anomalias climáticas dinâmicas de seca e vento.
-3. **O Fenômeno da Calibração Isotônica**: A calibração isotônica pós-treino com classes fortemente desbalanceadas achatou as probabilidades perto da base rate, degradando o ranking de precisão/recall. Portanto, o modelo final em produção adota o **LightGBM uncalibrated otimizado**, cujas saídas de probabilidade rankeiam perfeitamente os limiares operacionais.
+1. **O LightGBM superou todos os concorrentes de forma estatisticamente significativa**: Atingiu **PR-AUC de 0,6205** e **ROC-AUC de 0,8793**, capturando **66,43% de todos os focos** mantendo uma precisão operacional mínima de 50%. Um teste pareado de hipóteses por bootstrap confirma superioridade frente à Climatologia com **$p < 0,001$ ($p = 0,0000$)**.
+2. **Baselines Fortes Revelam o Valor Real do ML**: A climatologia obteve ROC-AUC respeitável de 0,8521 puramente memorizando a sazonalidade seca. Porém, seu PR-AUC (0,5169) e Recall@P50 (48,55%) ficaram muito abaixo do LightGBM. Isso demonstra que o modelo não está apenas repetindo o calendário anual, mas aprendendo anomalias dinâmicas de seca, vento e contágio espacial.
+3. **Platt Scaling Resolve a Distorção de Probabilidades**: Árvores sob forte desbalanceamento geram probabilidades nominais infladas (~33,8% vs. 16,5% real). Implementamos a calibração paramétrica **Platt Scaling (sigmoide logística sobre as log-odds do modelo)** ajustada no split temporal out-of-fold de 2023. O Platt Scaling preserva 100% do poder de ordenação do modelo (PR-AUC 0,6205 e ROC-AUC 0,8793) e derruba o **Brier score de 0,1474 para 0,0941**, batendo a Climatologia (0,1079) e gerando probabilidades confiáveis para operação real.
 
 <p align="center">
   <img src="reports/figures/calibration_curve.png" width="70%" alt="Curva de Calibração de Probabilidades" />
 </p>
 
+### 🔄 Validação Temporal com Janela Expansiva (Walk-Forward)
+
+Para avaliar a estabilidade do pipeline frente a ciclos climáticos anômalos (como super El Niño), executamos validação walk-forward ano a ano:
+
+| Ano de Teste | Período de Treino | Obs. Treino | Obs. Teste | Taxa Base Positiva | PR-AUC | ROC-AUC | Brier Score |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **2021** | 2016–2020 | 924.462 | 184.690 | 17,99% | 0,6308 | 0,8833 | 0,1508 |
+| **2022** | 2016–2021 | 1.109.152 | 184.690 | 18,43% | 0,6411 | 0,8783 | 0,1468 |
+| **2023** | 2016–2022 | 1.293.842 | 184.690 | 18,40% | 0,6322 | 0,8824 | 0,1447 |
+| **2024** | 2016–2023 | 1.478.532 | 185.196 | 21,38% | **0,6866** | 0,8806 | 0,1536 |
+| **2025** | 2016–2024 | 1.663.728 | 181.148 | 11,47% | 0,4866 | 0,8672 | 0,1409 |
+
+- **Resiliência a Secas Extremas (2024)**: No ano de seca histórica de 2024 (positivos saltaram para 21,38%), o modelo obteve seu melhor rendimento (**PR-AUC de 0,6866**), identificando com precisão os cenários críticos.
+- **Robustez em Anos Úmidos/Menor Fogo (2025)**: Mesmo com a taxa base caindo para 11,47%, o modelo sustentou **ROC-AUC elevado de 0,8672**, comprovando capacidade de discriminação robusta em diferentes regimes.
+
 ---
 
 ## 🔍 Explicabilidade com SHAP
 
-Utilizando o `shap.TreeExplainer`, computamos as importâncias relativas globais e a direcionalidade das variáveis:
+Com `shap.TreeExplainer` no conjunto de teste temporal, computamos as contribuições de Shapley. Com a **Validação Espacial por Blocos Contíguos** (Norte, Centro e Sul de MT), a memorização espúria de coordenadas foi penalizada, fazendo atributos dinâmicos e comportamentais liderarem:
 
 | Posição | Variável | Média \|SHAP\| | Interpretação Técnica e Prática |
 |:---:|:---|:---:|:---|
-| 1 | `lat_center` | 2.420 | Gradiente latitudinal: o norte de MT (fronteira amazônica com desmatamento ativo) possui dinâmica de fogo substancialmente distinta do sul (Pantanal/agro). |
-| 2 | `lon_center` | 1.078 | Gradiente longitudinal: transição leste-oeste entre o Cerrado denso do Araguaia e as florestas a oeste. |
-| 3 | `fire_count_30d` | 0.974 | Inércia do fogo acumulado: áreas onde o fogo queimou no último mês têm probabilidade extrema de reincidência contínua. |
-| 4 | `neighbor_fire_7d` | 0.422 | Efeito de vizinhança: a existência de chamas nas 8 células circundantes é o principal gatilho de propagação regional. |
-| 5 | `fire_count_lastyear` | 0.254 | Padrão recorrente anual: locais onde produtores realizam queima sazonal costumam repetir a prática no ano seguinte. |
-| 6 | `fire_count_14d` | 0.153 | Atividade recente de médio prazo. |
-| 7 | `doy_sin` | 0.153 | Ciclo anual do calendário (pico entre agosto e outubro). |
-| 8 | `fire_count_7d` | 0.121 | Atividade recente imediata. |
-| 9 | `T2M_MIN_mean_14d` | 0.108 | Noites quentes associadas a massas de ar seco persistentes que impedem a recuperação de umidade da biomassa. |
-| 10 | `PRECTOTCORR` | 0.102 | A presença de chuva atua como inibidor direto e imediato da ignição. |
+| 1 | `fire_count_30d` | 0.838 | **Inércia acumulada local (30 dias)**: Células com fogo acumulado no último mês são o maior fator individual de reincidência. |
+| 2 | `lat_center` | 0.653 | **Gradiente latitudinal**: O norte de MT (arco do desmatamento/transição amazônica) possui dinâmica de queima diferente das bacias do sul e Pantanal. |
+| 3 | `neighbor_fire_7d` | 0.474 | **Contágio de vizinhança**: A presença de fogo nas 8 células vizinhas indica propagação de frentes além das fronteiras da célula. |
+| 4 | `fire_count_lastyear` | 0.253 | **Ciclicidade anual**: Áreas de manejo agropecuário sazonal tendem a repetir a queima na mesma janela do ano anterior. |
+| 5 | `lon_center` | 0.191 | **Gradiente longitudinal**: Transição entre o Cerrado denso do Araguaia a leste e florestas a oeste. |
+| 6 | `fire_count_14d` | 0.144 | Atividade local recente em janela de médio prazo (14 dias). |
+| 7 | `fire_count_7d` | 0.101 | Atividade local imediata na semana anterior (7 dias). |
+| 8 | `WS10M_mean_14d` | 0.027 | Média de vento: Ventos fortes contínuos aceleram o dessecamento e avivam linhas de fogo. |
+| 9 | `PRECTOTCORR` | 0.026 | Precipitação diária como inibidor direto e imediato da queima. |
+| 10 | `precip_sum_30d` | 0.015 | Déficit hídrico acumulado: Baixo volume de chuva em 30 dias indica ressecamento profundo da biomassa e solo. |
 
 <p align="center">
   <img src="reports/figures/shap_summary.png" width="48%" alt="SHAP Beeswarm Summary Plot" />
@@ -171,14 +186,17 @@ Utilizando o `shap.TreeExplainer`, computamos as importâncias relativas globais
 
 ## 🔎 Análise de Erros
 
-Avaliando o desempenho mês a mês no conjunto de teste cego (2024–2025):
+Avaliando o comportamento temporal e espacial das previsões no teste cego (2024–2025):
 
-- **Meses de Alta Acurácia (>81%)**: Janeiro a Abril (período chuvoso no Centro-Oeste). O modelo quase não emite falsos alarmes quando o solo e a atmosfera estão saturados de umidade.
-- **Meses Mais Desafiadores (Acurácia entre 67% e 72%)**: Julho a Outubro (seca extrema). Nesses meses, a taxa base de fogo sobe vertiginosamente. Em outubro, o início das primeiras chuvas esparsas cria microclimas que desafiam previsões em escala de 50 km.
-- **Falsos Negativos**: Concentrados no início da estação seca (maio/junho), quando queimas agrícolas pontuais começam antes que o estresse hídrico regional atinja níveis críticos nos sensores atmosféricos.
+- **Dinâmica Temporal (Sazonal)**: Elevada acurácia (>81%) nos meses chuvosos (janeiro a abril) pelo solo saturado. Menor acurácia (67%–72%) no pico da seca (julho a outubro), quando a taxa de incêndios sobe e chuvas convectivas isoladas geram microclimas heterogêneos em escalas de 50 km.
+- **Disparidades Regionais**:
+  - **Norte de MT** (Transição Amazônica): Maior taxa base de queimadas (28,4%) e maior precisão do modelo; vegetação densa e queima de biomassa produzem sinais fortes e persistentes.
+  - **Sul de MT** (Pantanal / Cerrado Sul): Taxa base de 14,7%; secas extremas nos banhados pantaneiros exigem atenção aos ciclos hídricos.
+  - **Centro de MT** (Cinturão da Soja/Milho): Menor taxa base (11,2%); agricultura intensiva e altamente mecanizada registra menos queimas descontroladas, gerando menor densidade de focos.
 
 <p align="center">
-  <img src="reports/figures/accuracy_by_month.png" width="70%" alt="Acurácia por Mês ao Longo do Ano" />
+  <img src="reports/figures/accuracy_by_month.png" width="48%" alt="Acurácia por Mês ao Longo do Ano" />
+  <img src="reports/figures/accuracy_by_region.png" width="48%" alt="Acurácia por Região Espacial de MT" />
 </p>
 
 ---
@@ -233,11 +251,14 @@ curl -X POST "http://localhost:8000/predict" \
 
 ```text
 brazil-wildfire-risk-forecast/
+├── .github/
+│   └── workflows/ci.yml          # CI no GitHub Actions (lint, tipos, pytest)
 ├── .gitignore                    # Exclusão de arquivos pesados e temporários
 ├── config.yaml                   # Configurações globais (grade, região, períodos)
 ├── Dockerfile                    # Container Docker para API e App
 ├── LICENSE                       # Licença MIT
-├── Makefile                      # Automação de tarefas (install, train, test, etc.)
+├── Makefile                      # Automação de tarefas (Linux/macOS)
+├── run_pipeline.ps1              # Pipeline automatizado em comando único (Windows PowerShell)
 ├── README.md                     # Versão em inglês
 ├── README.pt-BR.md               # Versão em português (esta página)
 ├── requirements.txt              # Dependências com versões exatas
@@ -261,6 +282,7 @@ brazil-wildfire-risk-forecast/
 │   ├── feature_cols.joblib       # Lista de atributos treinados
 │   ├── lightgbm_model.joblib     # Modelo principal treinado
 │   ├── logistic_regression.joblib# Baseline linear
+│   ├── platt_calibrator.joblib   # Calibrador ajustado Platt Scaling (sigmoide logística)
 │   ├── scaler.joblib             # Padronizador de features
 │   └── training_metadata.json    # Metadados e hiperparâmetros
 │
@@ -271,8 +293,10 @@ brazil-wildfire-risk-forecast/
 ├── reports/
 │   ├── feature_importance.csv    # Ranking SHAP de variáveis
 │   ├── model_comparison.csv      # Tabela comparativa de métricas reais
+│   ├── walk_forward_metrics.csv  # Avaliação temporal em janela expansiva
 │   └── figures/
 │       ├── accuracy_by_month.png # Acurácia temporal por mês
+│       ├── accuracy_by_region.png# Acurácia por macrorregião de MT
 │       ├── calibration_curve.png # Curva de calibração de probabilidade
 │       ├── shap_bar.png          # Gráfico de barras SHAP
 │       └── shap_summary.png      # Beeswarm plot SHAP
@@ -291,7 +315,7 @@ brazil-wildfire-risk-forecast/
 │       └── explain.py            # SHAP TreeExplainer
 │
 └── tests/
-    └── test_pipeline.py          # 13 testes unitários (grid, leak, API, config)
+    └── test_pipeline.py          # 14 testes unitários (grade, leak, API, limites, config)
 ```
 
 ---
@@ -337,28 +361,40 @@ streamlit run app/streamlit_app.py
 O app abrirá automaticamente em `http://localhost:8501`.
 
 ### 6. Reproduzir o Pipeline Completo do Zero (Opcional)
-Se desejar reprocessar todos os 10 anos de dados históricos e retreinar os modelos:
+
+Você pode executar o pipeline de ponta a ponta com um único comando:
+
+**No Windows (PowerShell):**
+```powershell
+.\run_pipeline.ps1
+```
+
+**No Linux / macOS:**
 ```bash
-# 1. Download de focos do INPE
+make all
+```
+
+**Ou passo a passo manualmente:**
+```bash
+# 1. Download de focos do INPE (2016 a 2025)
 python -m src.data.download_fire
 
-# 2. Download do clima NASA POWER
+# 2. Download da reanálise climática NASA POWER
 python -m src.data.download_climate
 
 # 3. Construção da grade e unificação dos dados
 python -m src.data.build_grid
 python -m src.data.process_data
 
-# 4. Engenharia de features
+# 4. Engenharia de 30 variáveis preditivas (sem vazamento)
 python -m src.features.build_features
 
-# 5. Treinamento e tuning dos modelos
+# 5. Treino de baselines, busca Bayesiana, calibração Platt e validação walk-forward
 python -m src.models.train
 
-# 6. Geração de relatórios SHAP
+# 6. Geração dos relatórios de explicabilidade com SHAP
 python -m src.models.explain
 ```
-*(Ou utilize o atalho `make all` se tiver utilitário make instalado)*.
 
 ---
 

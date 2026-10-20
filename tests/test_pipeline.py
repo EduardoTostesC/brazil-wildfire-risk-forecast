@@ -195,6 +195,17 @@ class TestAPI:
         })
         assert response.status_code == 422
 
+    def test_predict_outside_mato_grosso(self, client):
+        """Test domain validation rejects coordinates outside Mato Grosso."""
+        # Atlantic ocean coordinates off the coast of Brazil
+        response = client.post("/predict", json={
+            "latitude": -22.0,
+            "longitude": -40.0,
+            "date": "2024-08-15",
+        })
+        assert response.status_code == 422
+        assert "outside pilot coverage" in response.json()["detail"]
+
 
 # ── Data processing tests ────────────────────────────────────────────────────
 
