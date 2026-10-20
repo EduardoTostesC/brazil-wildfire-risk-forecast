@@ -1,0 +1,86 @@
+{
+  "feature_cols": [
+    "PRECTOTCORR",
+    "PRECTOTCORR_mean_14d",
+    "PRECTOTCORR_mean_7d",
+    "RH2M",
+    "RH2M_mean_14d",
+    "RH2M_mean_7d",
+    "T2M_MAX",
+    "T2M_MAX_mean_14d",
+    "T2M_MAX_mean_7d",
+    "T2M_MIN",
+    "T2M_MIN_mean_14d",
+    "T2M_MIN_mean_7d",
+    "WS10M",
+    "WS10M_mean_14d",
+    "WS10M_mean_7d",
+    "doy_cos",
+    "doy_sin",
+    "dry_days",
+    "fire_count_14d",
+    "fire_count_30d",
+    "fire_count_7d",
+    "fire_count_lastyear",
+    "lat_center",
+    "lon_center",
+    "month_cos",
+    "month_sin",
+    "neighbor_fire_7d",
+    "precip_sum_14d",
+    "precip_sum_30d",
+    "precip_sum_7d"
+  ],
+  "train_period": "2016-01-01 to 2023-12-31",
+  "test_period": "2024-01-01 to 2025-12-31",
+  "train_size": 1478532,
+  "test_size": 369886,
+  "best_params": {
+    "n_estimators": 462,
+    "learning_rate": 0.07605130777637853,
+    "max_depth": 7,
+    "num_leaves": 60,
+    "min_child_samples": 179,
+    "subsample": 0.6860686386768415,
+    "colsample_bytree": 0.9344955244156088,
+    "reg_alpha": 0.0038579379927243663,
+    "reg_lambda": 0.007067479672699516
+  },
+  "results": [
+    {
+      "model": "Persistence",
+      "PR-AUC": 0.458,
+      "ROC-AUC": 0.7269,
+      "Brier": 0.115,
+      "Recall@P50": 0.5277
+    },
+    {
+      "model": "Climatology",
+      "PR-AUC": 0.5159,
+      "ROC-AUC": 0.8525,
+      "Brier": 0.1072,
+      "Recall@P50": 0.4829
+    },
+    {
+      "model": "LogisticRegression",
+      "PR-AUC": 0.5458,
+      "ROC-AUC": 0.8285,
+      "Brier": 0.1659,
+      "Recall@P50": 0.5934
+    },
+    {
+      "model": "LightGBM",
+      "PR-AUC": 0.6277,
+      "ROC-AUC": 0.8838,
+      "Brier": 0.1468,
+      "Recall@P50": 0.6685
+    },
+    {
+      "model": "LightGBM (calibrated)",
+      "PR-AUC": 0.3468,
+      "ROC-AUC": 0.7635,
+      "Brier": 0.1844,
+      "Recall@P50": 0.032
+    }
+  ]
+}

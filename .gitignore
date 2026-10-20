@@ -1,0 +1,47 @@
+# Data - keep only samples
+data/raw/
+data/processed/
+!data/sample/
+
+# Models
+models/*.pkl
+models/*.txt
+models/lightgbm_calibrated.joblib
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Reports
+# Keep figures for GitHub visualization
+
+# Optuna
+*.db
+
+# Docker
+*.log
+

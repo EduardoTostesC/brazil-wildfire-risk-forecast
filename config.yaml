@@ -1,0 +1,42 @@
+# brazil-wildfire-risk-forecast configuration
+# Change these values to expand the analysis to other regions or adjust parameters.
+
+region:
+  name: "Mato Grosso"
+  state_code: "MT"
+  state_name: "MATO GROSSO"
+  # Bounding box for Mato Grosso (approximate)
+  lat_min: -18.1
+  lat_max: -7.3
+  lon_min: -61.7
+  lon_max: -50.2
+
+grid:
+  resolution_deg: 0.5  # Grid cell size in degrees (~56 km at equator)
+
+data:
+  # Period for data collection
+  start_year: 2016
+  end_year: 2025
+  # INPE fire data - reference satellite
+  satellite: "AQUA_M-T"
+  fire_base_url: "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref"
+  # NASA POWER API
+  power_base_url: "https://power.larc.nasa.gov/api/temporal/daily/point"
+  power_params:
+    - "T2M_MAX"
+    - "T2M_MIN"
+    - "RH2M"
+    - "PRECTOTCORR"
+    - "WS10M"
+
+model:
+  forecast_horizon_days: 7
+  train_end_year: 2023
+  test_start_year: 2024
+  seed: 42
+  optuna_trials: 30
+
+target:
+  # Binary: at least one fire hotspot in the cell in the next N days
+  threshold: 1
