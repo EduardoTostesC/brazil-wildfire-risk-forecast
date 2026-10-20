@@ -32,8 +32,12 @@ st.set_page_config(
 def load_data():
     """Load the features dataset with predictions."""
     feat_path = _PROJECT_ROOT / "data" / "processed" / "features.parquet"
+    is_sample = False
     if not feat_path.exists():
-        return None
+        feat_path = _PROJECT_ROOT / "data" / "sample" / "features_sample.parquet"
+        is_sample = True
+    if not feat_path.exists():
+        return None, False
 
     df = pd.read_parquet(feat_path)
     df["date"] = pd.to_datetime(df["date"])
@@ -53,7 +57,7 @@ def load_data():
         df["risk_level"] = df["probability"].apply(
             lambda p: "High" if p >= 0.6 else ("Medium" if p >= 0.3 else "Low")
         )
-    return df
+    return df, is_sample
 
 
 @st.cache_data
@@ -111,10 +115,13 @@ def main():
         "Predictions use a LightGBM model trained on INPE fire data and NASA POWER climate data."
     )
 
-    df = load_data()
+    df, is_sample = load_data()
     if df is None:
         st.error("No data found. Please run the data pipeline first (`make all`).")
         return
+
+    if is_sample:
+        st.info("💡 Running in demo mode with sample data (`data/sample/`). For the full 10-year dataset, execute `make all`.")
 
     # Sidebar
     st.sidebar.header("Filters")

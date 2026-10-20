@@ -139,6 +139,10 @@ A tabela abaixo reflete a **execução real** do pipeline no conjunto de teste e
 2. **Baselines Fortes Revelam o Valor Real do ML**: A climatologia obteve ROC-AUC respeitável de 0,8525 puramente memorizando a estação seca, mas seu PR-AUC (0,5159) e Recall@P50 (48,29%) são sensivelmente inferiores ao LightGBM. Isso demonstra que o modelo não está apenas repetindo o calendário anual, mas aprendendo anomalias climáticas dinâmicas de seca e vento.
 3. **O Fenômeno da Calibração Isotônica**: A calibração isotônica pós-treino com classes fortemente desbalanceadas achatou as probabilidades perto da base rate, degradando o ranking de precisão/recall. Portanto, o modelo final em produção adota o **LightGBM uncalibrated otimizado**, cujas saídas de probabilidade rankeiam perfeitamente os limiares operacionais.
 
+<p align="center">
+  <img src="reports/figures/calibration_curve.png" width="70%" alt="Curva de Calibração de Probabilidades" />
+</p>
+
 ---
 
 ## 🔍 Explicabilidade com SHAP
@@ -158,7 +162,10 @@ Utilizando o `shap.TreeExplainer`, computamos as importâncias relativas globais
 | 9 | `T2M_MIN_mean_14d` | 0.108 | Noites quentes associadas a massas de ar seco persistentes que impedem a recuperação de umidade da biomassa. |
 | 10 | `PRECTOTCORR` | 0.102 | A presença de chuva atua como inibidor direto e imediato da ignição. |
 
-*(Gráficos completos gerados em `reports/figures/shap_summary.png` e `reports/figures/shap_bar.png`)*.
+<p align="center">
+  <img src="reports/figures/shap_summary.png" width="48%" alt="SHAP Beeswarm Summary Plot" />
+  <img src="reports/figures/shap_bar.png" width="48%" alt="SHAP Mean Importance Plot" />
+</p>
 
 ---
 
@@ -169,6 +176,10 @@ Avaliando o desempenho mês a mês no conjunto de teste cego (2024–2025):
 - **Meses de Alta Acurácia (>81%)**: Janeiro a Abril (período chuvoso no Centro-Oeste). O modelo quase não emite falsos alarmes quando o solo e a atmosfera estão saturados de umidade.
 - **Meses Mais Desafiadores (Acurácia entre 67% e 72%)**: Julho a Outubro (seca extrema). Nesses meses, a taxa base de fogo sobe vertiginosamente. Em outubro, o início das primeiras chuvas esparsas cria microclimas que desafiam previsões em escala de 50 km.
 - **Falsos Negativos**: Concentrados no início da estação seca (maio/junho), quando queimas agrícolas pontuais começam antes que o estresse hídrico regional atinja níveis críticos nos sensores atmosféricos.
+
+<p align="center">
+  <img src="reports/figures/accuracy_by_month.png" width="70%" alt="Acurácia por Mês ao Longo do Ano" />
+</p>
 
 ---
 
@@ -405,3 +416,4 @@ Estudante de Sistemas de Informação | Entusiasta de Inteligência Artificial e
 
 ---
 *Projeto sob licença [MIT](LICENSE).*
+

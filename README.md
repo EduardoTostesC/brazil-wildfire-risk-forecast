@@ -139,6 +139,10 @@ The metrics below reflect the **actual execution** on the out-of-time test set (
 2. **Strong Baselines Prove Machine Learning Value**: Climatology alone yielded a solid ROC-AUC (0.8525) by tracking the dry season calendar, but its PR-AUC (0.5159) and Recall@P50 (48.29%) lagged significantly behind LightGBM. This demonstrates that LightGBM is not merely memorizing seasonal dates, but learning dynamic interactions between dry spells, winds, and regional fire spread.
 3. **The Isotonic Calibration Trade-off**: Post-hoc isotonic regression with extreme class imbalance compressed probabilities towards the base rate, disrupting the optimal ranking threshold. As a result, production serving relies on the **uncalibrated LightGBM model**, which preserves sharp ranking fidelity.
 
+<p align="center">
+  <img src="reports/figures/calibration_curve.png" width="70%" alt="Probability Calibration Curve" />
+</p>
+
 ---
 
 ## 🔍 Explainability with SHAP
@@ -158,7 +162,10 @@ Using `shap.TreeExplainer`, we computed game-theoretic feature contributions acr
 | 9 | `T2M_MIN_mean_14d` | 0.108 | Elevated nighttime temperatures signify warm, dry atmospheric blocks preventing biomass moisture recovery. |
 | 10 | `PRECTOTCORR` | 0.102 | Daily precipitation acts as a direct inhibitor of ignition. |
 
-*(Generated plots: `reports/figures/shap_summary.png` and `reports/figures/shap_bar.png`)*.
+<p align="center">
+  <img src="reports/figures/shap_summary.png" width="48%" alt="SHAP Beeswarm Summary Plot" />
+  <img src="reports/figures/shap_bar.png" width="48%" alt="SHAP Mean Importance Plot" />
+</p>
 
 ---
 
@@ -169,6 +176,10 @@ Evaluating month-by-month predictive accuracy across the out-of-time test set (2
 - **High Accuracy Months (>81%)**: January through April (rainy season). The model produces negligible false alarms when soil moisture and humidity are saturated.
 - **Challenging Months (Accuracy 67%–72%)**: July through October (intense dry season). Wildfire base rates soar. In October, initial erratic convective rains generate microclimate variations across 50 km cells.
 - **False Negatives**: Concentrated during early dry season transitions (May/June), when isolated farm burns occur before regional humidity metrics drop to critical thresholds.
+
+<p align="center">
+  <img src="reports/figures/accuracy_by_month.png" width="70%" alt="Accuracy by Month Across Year" />
+</p>
 
 ---
 
@@ -404,3 +415,4 @@ Information Systems Undergraduate | Machine Learning & Climate AI Enthusiast
 
 ---
 *Distributed under the [MIT](LICENSE) License.*
+
