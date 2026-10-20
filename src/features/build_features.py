@@ -79,8 +79,29 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
                     .transform(lambda s: s.rolling(window, min_periods=1).sum())
                 )
 
-    # --- 4. Dry spell (consecutive days without rain) ---
-    print("  [4/5] Dry spell...")
+    # --- 4. Biophysical & Fire Weather Indices ---
+    print("  [4/6] Biophysical & Fire Weather Indices (VPD, DTR, FWI proxy)...")
+    if "T2M_MAX" in df.columns and "T2M_MIN" in df.columns and "RH2M" in df.columns:
+        t_mean = (df["T2M_MAX"] + df["T2M_MIN"]) / 2.0
+        # Tetens formulation for saturation vapor pressure (kPa)
+        es = 0.61078 * np.exp((17.27 * t_mean) / (t_mean + 237.3))
+        df["vpd"] = es * np.clip(1.0 - (df["RH2M"] / 100.0), 0.0, None)
+        df["dtr"] = df["T2M_MAX"] - df["T2M_MIN"]
+        df["fwi_proxy"] = np.clip(
+            (df["T2M_MAX"] - 15.0) * (1.0 + df["WS10M"]) / (df["RH2M"] + 1.0),
+            0.0,
+            None,
+        )
+
+        for col in ["vpd", "dtr", "fwi_proxy"]:
+            for window in [7, 14]:
+                df[f"{col}_mean_{window}d"] = (
+                    df.groupby("grid_id")[col]
+                    .transform(lambda s: s.rolling(window, min_periods=1).mean())
+                )
+
+    # --- 5. Dry spell (consecutive days without rain) ---
+    print("  [5/6] Dry spell...")
     if "PRECTOTCORR" in df.columns:
         df["is_dry"] = (df["PRECTOTCORR"].fillna(0) < 1.0).astype(int)
         df["dry_days"] = (
@@ -91,8 +112,8 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
     else:
         df["dry_days"] = 0
 
-    # --- 5. Seasonality and position ---
-    print("  [5/5] Seasonality and position...")
+    # --- 6. Seasonality and position ---
+    print("  [6/6] Seasonality and position...")
     df["month"] = df["date"].dt.month
     df["day_of_year"] = df["date"].dt.dayofyear
 
@@ -115,7 +136,10 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
     out_path = root / "data" / "processed" / "features.parquet"
     df.to_parquet(out_path, index=False)
 
-    feature_cols = [c for c in df.columns if c not in ("grid_id", "date", "target", "grid_row", "grid_col")]
+    feature_cols = [
+        c for c in df.columns
+        if not c.startswith("target") and c not in ("grid_id", "date", "grid_row", "grid_col")
+    ]
     print(f"\nFeatures saved: {out_path}")
     print(f"  Shape: {df.shape}")
     print(f"  Feature count: {len(feature_cols)}")

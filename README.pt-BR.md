@@ -105,18 +105,22 @@ Todas as bases utilizadas são públicas, oficiais e gratuitas:
 
 ## 🧪 Engenharia de Atributos e Garantia Anti-Vazamento
 
-Foram geradas **30 features preditivas**, estritamente retrospectivas:
+Foram geradas **39 features preditivas**, estritamente retrospectivas:
 
 1. **Histórico Local de Fogo**: Contagem de focos na própria célula em janelas de 7, 14 e 30 dias passados (`fire_count_7d`, `fire_count_14d`, `fire_count_30d`).
 2. **Memória Anual**: Focos no mesmo período de 14 dias do ano anterior (`fire_count_lastyear`), capturando o ciclo de queima anual daquela área.
 3. **Dispersão Espacial (Vizinhança)**: Soma dos focos nos últimos 7 dias nas **8 células vizinhas imediatas** (`neighbor_fire_7d`), modelando o contágio espacial do fogo.
-4. **Métricas Climáticas Acumuladas**: Médias móveis de 7 e 14 dias para temperatura máxima, mínima, umidade e vento (`T2M_MAX_mean_7d`, `RH2M_mean_14d`, etc.).
-5. **Estresse Hídrico / Dias Secos**: Precipitação acumulada em 7, 14 e 30 dias (`precip_sum_7d`, `precip_sum_30d`) e contador de dias consecutivos sem chuva significativa (`dry_days` com chuva < 1,0 mm).
-6. **Sazonalidade Cíclica**: Codificação trigonométrica seno/cosseno do mês (`month_sin`, `month_cos`) e do dia do ano (`doy_sin`, `doy_cos`), garantindo continuidade entre 31 de dezembro e 1º de janeiro.
-7. **Posicionamento Geográfico**: Coordenadas de latitude e longitude do centróide (`lat_center`, `lon_center`).
+4. **Métricas Climáticas Acumuladas**: Médias móveis de 7 e 14 dias para temperatura máxima, mínima, umidade, chuva e vento (`T2M_MAX_mean_7d`, `RH2M_mean_14d`, etc.).
+5. **Índices Biofísicos & Termodinâmicos de Aridez**:
+   - **Vapor Pressure Deficit (VPD)**: Déficit de pressão de vapor atmosférico pela equação de Tetens ($e_s(T) \cdot (1 - RH/100)$), padrão ouro na medição de dessecação de combustível fino florestal (`vpd`, `vpd_mean_7d`, `vpd_mean_14d`).
+   - **Amplitude Térmica Diária (DTR)**: $T2M\_MAX - T2M\_MIN$, identificador de dias límpidos e solo com baixa inércia hídrica (`dtr`, `dtr_mean_7d`, `dtr_mean_14d`).
+   - **Índice Termodinâmico de Risco (FWI Proxy)**: Combinação direta de calor, seca e vento: $\max\left(0, \frac{(T_{max} - 15) \times (1 + WS)}{RH + 1}\right)$ (`fwi_proxy`, `fwi_proxy_mean_7d`, `fwi_proxy_mean_14d`).
+6. **Estresse Hídrico / Dias Secos**: Precipitação acumulada em 7, 14 e 30 dias (`precip_sum_7d`, `precip_sum_30d`) e contador de dias consecutivos sem chuva significativa (`dry_days` com chuva < 1,0 mm).
+7. **Sazonalidade Cíclica**: Codificação trigonométrica seno/cosseno do mês (`month_sin`, `month_cos`) e do dia do ano (`doy_sin`, `doy_cos`), garantindo continuidade entre 31 de dezembro e 1º de janeiro.
+8. **Posicionamento Geográfico**: Coordenadas de latitude e longitude do centróide (`lat_center`, `lon_center`).
 
 ### 🛡️ Como o Data Leakage Foi Eliminado
-- O cálculo do alvo para o dia $D$ avalia se houve fogo entre $[D+1, D+7]$.
+- O cálculo do alvo para o dia $D$ avalia se houve fogo estritamente na janela futura $[D+1, D+H]$.
 - Toda e qualquer feature calculada no dia $D$ consulta **exclusivamente informações do dia $D$ e dias anteriores ($D, D-1, \dots$)**.
 - O teste unitário formal `test_no_future_leak_in_fire_features` em `tests/test_pipeline.py` injeta dados sintéticos futuros e comprova que nenhuma variável registra valor positivo antes da data de ocorrência do evento.
 
@@ -130,18 +134,49 @@ A tabela abaixo reflete a **execução real** do pipeline no conjunto de teste e
 |:---|:---:|:---:|:---:|:---:|
 | **Baseline 1: Persistência (Empírica)** | 0.4293 (0.4181, 0.4406) | 0.7260 (0.7203, 0.7318) | 0.1074 (0.1054, 0.1093) | 52.81% |
 | **Baseline 2: Climatologia** (frequência histórica local/mês) | 0.5169 (0.5051, 0.5281) | 0.8521 (0.8483, 0.8561) | 0.1079 (0.1061, 0.1094) | 48.55% |
-| **Regressão Logística** (linear, com `StandardScaler` e pesos balanceados) | 0.5464 (0.5353, 0.5589) | 0.8277 (0.8228, 0.8327) | 0.1666 (0.1650, 0.1681) | 59.41% |
-| **LightGBM (Sem Calibração)** | 0.6205 (0.6100, 0.6316) | 0.8793 (0.8760, 0.8833) | 0.1474 (0.1456, 0.1492) | 66.43% |
-| **LightGBM (Calibrado - Platt Scaling)** | **0.6205** (0.6100, 0.6316) | **0.8793** (0.8760, 0.8833) | **0.0941** (0.0924, 0.0955) | **66.43%** |
+| **Regressão Logística** (linear, com `StandardScaler` e pesos balanceados) | 0.5464 (0.5355, 0.5590) | 0.8276 (0.8227, 0.8326) | 0.1658 (0.1642, 0.1673) | 59.35% |
+| **LSTM (Deep Learning Recorrente em PyTorch, T=14 dias)** | 0.5947 | 0.8655 | 0.1630 | 60.15% |
+| **LightGBM (Sem Calibração)** | 0.6274 (0.6172, 0.6387) | 0.8823 (0.8791, 0.8862) | 0.1501 (0.1482, 0.1519) | 67.34% |
+| **LightGBM (Calibrado - Platt Scaling)** | **0.6274** (0.6172, 0.6387) | **0.8823** (0.8791, 0.8862) | **0.0931** (0.0915, 0.0945) | **67.34%** |
 
 ### 💡 Principais Conclusões Técnicas:
-1. **O LightGBM superou todos os concorrentes de forma estatisticamente significativa**: Atingiu **PR-AUC de 0,6205** e **ROC-AUC de 0,8793**, capturando **66,43% de todos os focos** mantendo uma precisão operacional mínima de 50%. Um teste pareado de hipóteses por bootstrap confirma superioridade frente à Climatologia com **$p < 0,001$ ($p = 0,0000$)**.
-2. **Baselines Fortes Revelam o Valor Real do ML**: A climatologia obteve ROC-AUC respeitável de 0,8521 puramente memorizando a sazonalidade seca. Porém, seu PR-AUC (0,5169) e Recall@P50 (48,55%) ficaram muito abaixo do LightGBM. Isso demonstra que o modelo não está apenas repetindo o calendário anual, mas aprendendo anomalias dinâmicas de seca, vento e contágio espacial.
-3. **Platt Scaling Resolve a Distorção de Probabilidades**: Árvores sob forte desbalanceamento geram probabilidades nominais infladas (~33,8% vs. 16,5% real). Implementamos a calibração paramétrica **Platt Scaling (sigmoide logística sobre as log-odds do modelo)** ajustada no split temporal out-of-fold de 2023. O Platt Scaling preserva 100% do poder de ordenação do modelo (PR-AUC 0,6205 e ROC-AUC 0,8793) e derruba o **Brier score de 0,1474 para 0,0941**, batendo a Climatologia (0,1079) e gerando probabilidades confiáveis para operação real.
+1. **O LightGBM superou todos os concorrentes de forma estatisticamente significativa**: Atingiu **PR-AUC de 0,6274** e **ROC-AUC de 0,8823**, capturando **67,34% de todos os focos** mantendo uma precisão operacional mínima de 50%. Um teste pareado de hipóteses por bootstrap confirma superioridade frente à Climatologia com **$p < 0,001$ ($p = 0,0000$)**.
+2. **Baselines Fortes Revelam o Valor Real do ML**: A climatologia obteve ROC-AUC respeitável de 0,8521 puramente memorizando a sazonalidade seca. Porém, seu PR-AUC (0,5169) e Recall@P50 (48,55%) ficaram muito abaixo do LightGBM. Isso demonstra que o modelo aprende anomalias físicas dinâmicas de seca, VPD, vento e contágio de vizinhança.
+3. **Platt Scaling Resolve a Distorção de Probabilidades**: Árvores sob forte desbalanceamento geram probabilidades nominais infladas (~33,8% vs. 16,5% real). Implementamos a calibração paramétrica **Platt Scaling (sigmoide logística sobre as log-odds do modelo)** ajustada no split temporal out-of-fold de 2023. O Platt Scaling preserva 100% do poder de ordenação do modelo (PR-AUC 0,6274 e ROC-AUC 0,8823) e derruba o **Brier score de 0,1501 para 0,0931**, batendo a Climatologia (0,1079) e gerando probabilidades confiáveis para operação real.
 
 <p align="center">
   <img src="reports/figures/calibration_curve.png" width="70%" alt="Curva de Calibração de Probabilidades" />
 </p>
+
+### 🧠 Benchmark de Deep Learning Sequencial: PyTorch LSTM vs LightGBM
+
+Para avaliar se o aprendizado profundo sequencial conseguiria extrair a dinâmica temporal diretamente das séries diárias brutas sem engenharia manual de lags, treinamos uma rede **LSTM em PyTorch** com janelas de 14 dias ($T=14$ dias, 10 variáveis diárias):
+
+<p align="center">
+  <img src="reports/figures/lstm_vs_lgbm.png" width="90%" alt="Benchmark PyTorch LSTM vs LightGBM" />
+</p>
+
+- **Por que o LightGBM superou a rede LSTM (0,6274 vs 0,5947 de PR-AUC)?**
+  1. **Viés Indutivo Tabular e Limiares Críticos**: Árvores de decisão realizam cortes ortogonais exatos em variáveis contínuas (ex.: $RH < 20\%$ E $T > 38^\circ\text{C}$), refletindo de maneira fiel os pontos de inflexão físico-química da combustão de biomassa.
+  2. **Contágio Espacial Explícito**: Features agregadas como `neighbor_fire_7d` modelam a propagação do fogo entre células vizinhas. Uma rede recorrente celular isolada sem camadas de grafos espaciais (GNN) processa cada célula como uma ilha unidimensional.
+  3. **Eficiência e Calibração**: O LightGBM treina em ~15 segundos em CPU, calibra facilmente para Brier de 0,0931 (vs 0,1630 da LSTM) e oferece inferência em sub-milissegundos para a API REST.
+  4. **O Valor de um Resultado Negativo Bem Justificado**: Demonstrar empiricamente por que GBDT supera redes neurais recorrentes em dados climáticos em grade é um dos pontos mais valorizados em entrevistas técnicas de alto nível.
+
+---
+
+### ⏱️ Previsão em Múltiplos Horizontes (1 Dia, 3 Dias, 7 Dias)
+
+Operações de combate a incêndios exigem diferentes horizontes de alerta: despacho tático imediato para o dia seguinte (24h), prontidão de curto prazo (72h) e logística estratégica semanal (7 dias). Treinamos e calibramos modelos dedicados para cada horizonte:
+
+| Horizonte | Janela Futura | Taxa Base Positiva | PR-AUC | ROC-AUC | Brier Score | Recall @ P $\ge$ 50% | Aplicação Prática |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| **1 Dia** | $D+1$ | 4,26% | 0,3666 | **0,8953** | **0,0326** | 29,27% | Despacho imediato de brigadas e aviões-tanque |
+| **3 Dias** | $D+1$ a $D+3$ | 9,67% | 0,5330 | **0,8875** | **0,0625** | 50,13% | Reposicionamento de patrulhas e suspensão de queimas controladas |
+| **7 Dias** | $D+1$ a $D+7$ | 16,48% | **0,6274** | **0,8823** | **0,0931** | **67,34%** | Planejamento estratégico de escalas e cooperação interinstitucional |
+
+*Nota: No horizonte de 1 dia, o PR-AUC de 0,3666 é **8,6 vezes superior à taxa base (4,26%)**, demonstrando altíssima capacidade discriminatória com erro probabilístico mínimo (Brier 0,0326).*
+
+---
 
 ### 🔄 Validação Temporal com Janela Expansiva (Walk-Forward)
 
@@ -149,14 +184,14 @@ Para avaliar a estabilidade do pipeline frente a ciclos climáticos anômalos (c
 
 | Ano de Teste | Período de Treino | Obs. Treino | Obs. Teste | Taxa Base Positiva | PR-AUC | ROC-AUC | Brier Score |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **2021** | 2016–2020 | 924.462 | 184.690 | 17,99% | 0,6308 | 0,8833 | 0,1508 |
-| **2022** | 2016–2021 | 1.109.152 | 184.690 | 18,43% | 0,6411 | 0,8783 | 0,1468 |
-| **2023** | 2016–2022 | 1.293.842 | 184.690 | 18,40% | 0,6322 | 0,8824 | 0,1447 |
-| **2024** | 2016–2023 | 1.478.532 | 185.196 | 21,38% | **0,6866** | 0,8806 | 0,1536 |
-| **2025** | 2016–2024 | 1.663.728 | 181.148 | 11,47% | 0,4866 | 0,8672 | 0,1409 |
+| **2021** | 2016–2020 | 924.462 | 184.690 | 17,99% | 0,6379 | 0,8871 | 0,1522 |
+| **2022** | 2016–2021 | 1.109.152 | 184.690 | 18,43% | 0,6469 | 0,8818 | 0,1485 |
+| **2023** | 2016–2022 | 1.293.842 | 184.690 | 18,40% | 0,6380 | 0,8851 | 0,1470 |
+| **2024** | 2016–2023 | 1.478.532 | 185.196 | 21,38% | **0,6933** | 0,8837 | 0,1542 |
+| **2025** | 2016–2024 | 1.663.728 | 181.148 | 11,47% | 0,4968 | 0,8715 | 0,1461 |
 
-- **Resiliência a Secas Extremas (2024)**: No ano de seca histórica de 2024 (positivos saltaram para 21,38%), o modelo obteve seu melhor rendimento (**PR-AUC de 0,6866**), identificando com precisão os cenários críticos.
-- **Robustez em Anos Úmidos/Menor Fogo (2025)**: Mesmo com a taxa base caindo para 11,47%, o modelo sustentou **ROC-AUC elevado de 0,8672**, comprovando capacidade de discriminação robusta em diferentes regimes.
+- **Resiliência a Secas Extremas (2024)**: No ano de seca histórica de 2024 (positivos saltaram para 21,38%), o modelo obteve seu melhor rendimento (**PR-AUC de 0,6933**), identificando com precisão os cenários críticos.
+- **Robustez em Anos Úmidos/Menor Fogo (2025)**: Mesmo com a taxa base caindo para 11,47%, o modelo sustentou **ROC-AUC elevado de 0,8715**, comprovando capacidade de discriminação robusta em diferentes regimes.
 
 ---
 
@@ -205,14 +240,15 @@ Avaliando o comportamento temporal e espacial das previsões no teste cego (2024
 
 ### 1. API REST com FastAPI (`api/main.py`)
 - Endpoint: `POST /predict`
-- Latência média: **24 ms**
+- Latência média de inferência: **sub-10 ms**
 - Documentação interativa Swagger UI disponível em `http://localhost:8000/docs`
+- Suporte a múltiplos horizontes: Parâmetro `horizon_days` (1, 3 ou 7; padrão = 7).
 
-**Exemplo de Requisição cURL:**
+**Exemplo de Requisição cURL (Alerta Tático de 24h):**
 ```bash
 curl -X POST "http://localhost:8000/predict" \
      -H "Content-Type: application/json" \
-     -d '{"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15"}'
+     -d '{"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15", "horizon_days": 1}'
 ```
 
 **Exemplo de Resposta JSON:**
@@ -221,14 +257,16 @@ curl -X POST "http://localhost:8000/predict" \
   "latitude": -12.5,
   "longitude": -55.0,
   "date": "2024-08-15",
-  "probability": 0.8552,
-  "risk_level": "high",
+  "horizon_days": 1,
+  "probability": 0.4215,
+  "risk_level": "medium",
   "grid_id": "011_013"
 }
 ```
 
 ### 2. App Interativo em Streamlit (`app/streamlit_app.py`)
-- **Mapa Folium dinâmico**: Cores intuitivas (verde = baixo < 30%, laranja = médio 30-60%, vermelho = alto > 60%).
+- **Mapa Folium Dinâmico**: Cores intuitivas (verde = baixo < 30%, laranja = médio 30-60%, vermelho = alto > 60%).
+- **Seletor de Horizonte Temporal**: Botões de rádio para alternar instantaneamente entre alertas de 24h (imediato), 72h (tático) e 7 dias (estratégico semanal).
 - **Filtros Temporais**: Navegação diária pelos anos de teste e análise da distribuição de probabilidade.
 - **Métricas em tempo real**: Células monitoradas, total de células em alto risco e probabilidade média do dia.
 
@@ -237,13 +275,14 @@ curl -X POST "http://localhost:8000/predict" \
 ## 🛠️ Stack Tecnológica e Justificativas
 
 - **Python 3.12**: Tipagem estática avançada, melhor performance de interpretador e suporte a versões recentes de bibliotecas científicas.
-- **LightGBM**: Escolhido por lidar nativamente com valores ausentes, processar datasets tabulares de milhões de linhas com altíssima velocidade e suportar ponderação de classe via `scale_pos_weight`.
-- **Optuna**: Otimizador bayesiano de última geração (TPE sampler), muito superior a buscas exaustivas (GridSearch) ou aleatórias (RandomSearch).
-- **SHAP (TreeExplainer)**: Cálculo exato baseado na teoria dos jogos para interpretar modelos em árvore sem aproximações heurísticas lentas.
+- **LightGBM**: Modelo principal em gradiente boosting de histograma, com suporte nativo a valores ausentes, peso de desbalanceamento (`scale_pos_weight`) e inferência sub-milissegundo em CPU.
+- **PyTorch**: Utilizado para o benchmark sequencial de Deep Learning recorrente (LSTM).
+- **Optuna**: Otimizador bayesiano de última geração (TPE sampler) com validação em blocos espaciais contíguos.
+- **SHAP (TreeExplainer)**: Cálculo exato baseado na teoria dos jogos para interpretar modelos em árvore.
 - **FastAPI + Pydantic v2**: Serialização estrita, validação de tipos em nanossegundos e documentação OpenAPI nativa.
-- **Streamlit + Folium**: Prototipação ágil de interfaces geoespaciais sem necessidade de desenvolvimento front-end complexo em React/Vue.
-- **Pytest**: Validação automatizada de regras de negócio, testes de API e teste de contenção de data leakage.
-- **Parquet / PyArrow**: Armazenamento colunar comprimido e eficiente para milhões de registros.
+- **Streamlit + Folium**: Prototipação ágil de interfaces geoespaciais sem complexidade de front-end.
+- **Pytest**: Validação automatizada de regras de negócio, testes de API, LSTM e testes de contenção de data leakage (17 testes).
+- **Parquet / PyArrow**: Armazenamento colunar comprimido e eficiente para 1,8M+ registros.
 
 ---
 
@@ -264,10 +303,10 @@ brazil-wildfire-risk-forecast/
 ├── requirements.txt              # Dependências com versões exatas
 │
 ├── api/
-│   └── main.py                   # API FastAPI com endpoint /predict e /health
+│   └── main.py                   # API FastAPI com endpoint multi-horizonte /predict e /health
 │
 ├── app/
-│   └── streamlit_app.py          # Dashboard interativo com mapa Folium
+│   └── streamlit_app.py          # Dashboard interativo com mapa Folium e seletor de horizonte
 │
 ├── data/
 │   ├── sample/                   # Amostras leves (<5MB) versionadas no Git
@@ -280,24 +319,32 @@ brazil-wildfire-risk-forecast/
 │
 ├── models/
 │   ├── feature_cols.joblib       # Lista de atributos treinados
-│   ├── lightgbm_model.joblib     # Modelo principal treinado
+│   ├── lightgbm_model.joblib     # Modelo principal de 7 dias treinado
+│   ├── lightgbm_1d.joblib        # Modelo de 1 dia à frente
+│   ├── lightgbm_3d.joblib        # Modelo de 3 dias à frente
 │   ├── logistic_regression.joblib# Baseline linear
-│   ├── platt_calibrator.joblib   # Calibrador ajustado Platt Scaling (sigmoide logística)
+│   ├── lstm_model.pt             # Pesos do benchmark sequencial PyTorch LSTM
+│   ├── platt_calibrator.joblib   # Calibrador Platt Scaling de 7 dias
+│   ├── platt_calibrator_1d.joblib# Calibrador Platt Scaling de 1 dia
+│   ├── platt_calibrator_3d.joblib# Calibrador Platt Scaling de 3 dias
 │   ├── scaler.joblib             # Padronizador de features
-│   └── training_metadata.json    # Metadados e hiperparâmetros
+│   └── training_metadata.json    # Metadados, métricas e hiperparâmetros
 │
 ├── notebooks/
 │   ├── 01_eda.ipynb              # Análise exploratória e sazonalidade narrada
-│   └── 02_modeling.ipynb         # Modelagem, baselines, calibração e erro
+│   └── 02_modeling.ipynb         # Modelagem, baselines, calibração, multi-horizonte e LSTM
 │
 ├── reports/
 │   ├── feature_importance.csv    # Ranking SHAP de variáveis
 │   ├── model_comparison.csv      # Tabela comparativa de métricas reais
+│   ├── multi_horizon_comparison.csv # Métricas nos horizontes de 1d, 3d e 7d
+│   ├── lstm_comparison.csv       # Tabela de benchmark GBDT vs LSTM
 │   ├── walk_forward_metrics.csv  # Avaliação temporal em janela expansiva
 │   └── figures/
 │       ├── accuracy_by_month.png # Acurácia temporal por mês
 │       ├── accuracy_by_region.png# Acurácia por macrorregião de MT
 │       ├── calibration_curve.png # Curva de calibração de probabilidade
+│       ├── lstm_vs_lgbm.png      # Curvas comparativas PR/ROC da LSTM vs LightGBM
 │       ├── shap_bar.png          # Gráfico de barras SHAP
 │       └── shap_summary.png      # Beeswarm plot SHAP
 │
@@ -307,15 +354,16 @@ brazil-wildfire-risk-forecast/
 │   │   ├── build_grid.py         # Construtor da grade geoespacial
 │   │   ├── download_fire.py      # Downloader de focos do INPE
 │   │   ├── download_climate.py   # Downloader multithreaded NASA POWER
-│   │   └── process_data.py       # Agregação espaço-temporal e criação do alvo
+│   │   └── process_data.py       # Agregação espaço-temporal e alvos multi-horizonte
 │   ├── features/
-│   │   └── build_features.py     # Engenharia de variáveis anti-leakage
+│   │   └── build_features.py     # 39 variáveis biofísicas sem vazamento (VPD, DTR, FWI)
 │   └── models/
-│       ├── train.py              # Pipeline de treino, Optuna e avaliação
+│       ├── train.py              # Treino, busca Bayesiana, calibração e multi-horizonte
+│       ├── train_lstm.py         # Benchmark sequencial Deep Learning em PyTorch
 │       └── explain.py            # SHAP TreeExplainer
 │
 └── tests/
-    └── test_pipeline.py          # 14 testes unitários (grade, leak, API, limites, config)
+    └── test_pipeline.py          # 17 testes unitários (grade, leak, API, limites, LSTM, config)
 ```
 
 ---

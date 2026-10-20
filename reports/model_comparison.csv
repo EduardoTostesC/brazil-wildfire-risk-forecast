@@ -1,6 +1,6 @@
 model,PR-AUC,ROC-AUC,Brier,Recall@P50
 Persistence (Empirical),0.4293,0.726,0.1074,0.5281
 Climatology,0.5169,0.8521,0.1079,0.4855
-LogisticRegression,0.5464,0.8277,0.1666,0.5941
-LightGBM (Raw),0.6205,0.8793,0.1474,0.6643
-LightGBM (Platt Calibrated),0.6205,0.8793,0.0941,0.6643
+LogisticRegression,0.5464,0.8276,0.1658,0.5935
+LightGBM (Raw),0.6274,0.8823,0.1501,0.6734
+LightGBM (Platt Calibrated),0.6274,0.8823,0.0931,0.6734

@@ -35,7 +35,7 @@ model:
   train_end_year: 2023
   test_start_year: 2024
   seed: 42
-  optuna_trials: 30
+  optuna_trials: 10
 
 target:
   # Binary: at least one fire hotspot in the cell in the next N days

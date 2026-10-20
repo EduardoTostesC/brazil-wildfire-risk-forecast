@@ -41,7 +41,10 @@ from src.config import get_project_root, load_config
 warnings.filterwarnings("ignore", category=UserWarning)
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-META_COLS = {"grid_id", "date", "target", "grid_row", "grid_col"}
+META_COLS = {
+    "grid_id", "date", "target", "target_1d", "target_3d", "target_7d",
+    "grid_row", "grid_col",
+}
 
 
 def _get_feature_cols(df: pd.DataFrame) -> list[str]:
@@ -123,6 +126,15 @@ def climatology_baseline(
 
 # ── Metrics & Bootstrap Uncertainty ───────────────────────────────────────────
 
+def _recall_at_precision(
+    y_true: np.ndarray, y_prob: np.ndarray, min_precision: float = 0.50
+) -> float:
+    """Calculate maximum recall achievable at precision >= min_precision."""
+    precision, recall, _ = precision_recall_curve(y_true, y_prob)
+    mask = precision >= min_precision
+    return float(recall[mask].max() if mask.any() else 0.0)
+
+
 def compute_metrics(
     y_true: np.ndarray, y_prob: np.ndarray, name: str
 ) -> dict:
@@ -132,10 +144,7 @@ def compute_metrics(
     pr_auc = average_precision_score(y_true, y_prob)
     roc_auc = roc_auc_score(y_true, y_prob)
     brier = brier_score_loss(y_true, y_prob)
-
-    precision, recall, _ = precision_recall_curve(y_true, y_prob)
-    mask = precision >= 0.50
-    recall_at_p50 = float(recall[mask].max() if mask.any() else 0.0)
+    recall_at_p50 = _recall_at_precision(y_true, y_prob, 0.50)
 
     return {
         "model": name,
@@ -497,7 +506,77 @@ def train_all(config: dict | None = None) -> None:
     print("=" * 50)
     _error_analysis(test_df, y_test, y_prob_cal, figures_dir)
 
-    # ── 11. Save Full Metadata ────────────────────────────────────
+    # ── 11. Multi-Horizon Forecasting (1d, 3d, 7d) ────────────────────────
+    print("\n" + "=" * 50)
+    print("11. Multi-Horizon Models Training (1d, 3d, 7d)")
+    print("=" * 50)
+    horizon_results = []
+    # 7-day is the primary target
+    horizon_results.append({
+        "horizon": "7-day",
+        "horizon_desc": "D+1 to D+7",
+        "positive_rate": f"{y_test.mean()*100:.2f}%",
+        "PR-AUC": round(float(average_precision_score(y_test, y_prob_cal)), 4),
+        "ROC-AUC": round(float(roc_auc_score(y_test, y_prob_cal)), 4),
+        "Brier": round(float(brier_score_loss(y_test, y_prob_cal)), 4),
+        "Recall@P50": round(float(_recall_at_precision(y_test, y_prob_cal, 0.50)), 4),
+    })
+
+    val_cal_mask = (train_df["date"].dt.year == 2023).values
+    X_val = X_train[val_cal_mask]
+
+    for h in [1, 3]:
+        target_col = f"target_{h}d"
+        if target_col in train_df.columns and target_col in test_df.columns:
+            y_train_h = train_df[target_col].values
+            y_test_h = test_df[target_col].values
+
+            # Class imbalance weight
+            n_pos = int(np.sum(y_train_h == 1))
+            n_neg = int(np.sum(y_train_h == 0))
+            spw = float(n_neg / max(1, n_pos))
+
+            h_params = best_params.copy()
+            h_params["scale_pos_weight"] = spw
+            h_params["random_state"] = seed
+            h_params["verbose"] = -1
+
+            lgb_h = lgb.LGBMClassifier(**h_params)
+            lgb_h.fit(X_train, y_train_h)
+
+            # Platt calibration on 2023 holdout
+            y_val_h = y_train_h[val_cal_mask]
+            val_probs_h = lgb_h.predict_proba(X_val)[:, 1]
+            val_logodds_h = logit(np.clip(val_probs_h, 1e-6, 1.0 - 1e-6)).reshape(-1, 1)
+            platt_h = LogisticRegression(C=1.0, solver="lbfgs")
+            platt_h.fit(val_logodds_h, y_val_h)
+
+            test_probs_raw = lgb_h.predict_proba(X_test)[:, 1]
+            test_logodds = logit(np.clip(test_probs_raw, 1e-6, 1.0 - 1e-6)).reshape(-1, 1)
+            test_probs_cal = platt_h.predict_proba(test_logodds)[:, 1]
+
+            joblib.dump(lgb_h, models_dir / f"lightgbm_{h}d.joblib")
+            joblib.dump(platt_h, models_dir / f"platt_calibrator_{h}d.joblib")
+
+            h_rec = _recall_at_precision(y_test_h, test_probs_cal, 0.50)
+            horizon_results.append({
+                "horizon": f"{h}-day",
+                "horizon_desc": f"D+1 to D+{h}" if h > 1 else "D+1",
+                "positive_rate": f"{y_test_h.mean()*100:.2f}%",
+                "PR-AUC": round(float(average_precision_score(y_test_h, test_probs_cal)), 4),
+                "ROC-AUC": round(float(roc_auc_score(y_test_h, test_probs_cal)), 4),
+                "Brier": round(float(brier_score_loss(y_test_h, test_probs_cal)), 4),
+                "Recall@P50": round(float(h_rec), 4),
+            })
+            print(f"  {h}-day model: PR-AUC={horizon_results[-1]['PR-AUC']}, ROC-AUC={horizon_results[-1]['ROC-AUC']}, Brier={horizon_results[-1]['Brier']}")
+
+    # Sort by horizon days: 1-day, 3-day, 7-day
+    horizon_df = pd.DataFrame(horizon_results)
+    horizon_df.to_csv(root / "reports" / "multi_horizon_comparison.csv", index=False)
+    print("\nMulti-Horizon Benchmark:")
+    print(horizon_df.to_string(index=False))
+
+    # ── 12. Save Full Metadata ────────────────────────────────────
     meta = {
         "feature_cols": feature_cols,
         "train_period": f"{train_df['date'].min().date()} to {train_df['date'].max().date()}",
@@ -509,6 +588,7 @@ def train_all(config: dict | None = None) -> None:
         "p_value_vs_climatology": p_val_vs_clim,
         "p_value_vs_persistence": p_val_vs_persist,
         "confidence_intervals": ci_dict,
+        "multi_horizon_results": horizon_results,
         "results": results,
     }
     with open(models_dir / "training_metadata.json", "w") as f:

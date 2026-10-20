@@ -18,10 +18,16 @@
     "doy_cos",
     "doy_sin",
     "dry_days",
+    "dtr",
+    "dtr_mean_14d",
+    "dtr_mean_7d",
     "fire_count_14d",
     "fire_count_30d",
     "fire_count_7d",
     "fire_count_lastyear",
+    "fwi_proxy",
+    "fwi_proxy_mean_14d",
+    "fwi_proxy_mean_7d",
     "lat_center",
     "lon_center",
     "month_cos",
@@ -29,7 +35,10 @@
     "neighbor_fire_7d",
     "precip_sum_14d",
     "precip_sum_30d",
-    "precip_sum_7d"
+    "precip_sum_7d",
+    "vpd",
+    "vpd_mean_14d",
+    "vpd_mean_7d"
   ],
   "train_period": "2016-01-01 to 2023-12-31",
   "test_period": "2024-01-01 to 2025-12-24",
@@ -37,15 +46,15 @@
   "test_size": 366344,
   "spatial_block_cv": "Contiguous (North / Central / South MT)",
   "best_params": {
-    "n_estimators": 152,
-    "learning_rate": 0.02446643620431958,
-    "max_depth": 4,
-    "num_leaves": 57,
-    "min_child_samples": 146,
-    "subsample": 0.7272295531223001,
-    "colsample_bytree": 0.8789863837064875,
-    "reg_alpha": 3.5556140650938515,
-    "reg_lambda": 0.004114571754339331
+    "n_estimators": 251,
+    "learning_rate": 0.022711106732108986,
+    "max_depth": 5,
+    "num_leaves": 55,
+    "min_child_samples": 154,
+    "subsample": 0.9062935001654231,
+    "colsample_bytree": 0.8678960396606045,
+    "reg_alpha": 0.1097303965014448,
+    "reg_lambda": 0.009415368595727648
   },
   "p_value_vs_climatology": 0.0,
   "p_value_vs_persistence": 0.0,
@@ -80,33 +89,62 @@
     },
     "LogisticRegression": {
       "PR-AUC_95CI": [
-        0.5353,
-        0.5589
+        0.5355,
+        0.559
       ],
       "ROC-AUC_95CI": [
-        0.8228,
-        0.8327
+        0.8227,
+        0.8326
       ],
       "Brier_95CI": [
-        0.165,
-        0.1681
+        0.1642,
+        0.1673
       ]
     },
     "LightGBM (Platt Calibrated)": {
       "PR-AUC_95CI": [
-        0.61,
-        0.6316
+        0.6172,
+        0.6387
       ],
       "ROC-AUC_95CI": [
-        0.876,
-        0.8833
+        0.8791,
+        0.8862
       ],
       "Brier_95CI": [
-        0.0924,
-        0.0955
+        0.0915,
+        0.0945
       ]
     }
   },
+  "multi_horizon_results": [
+    {
+      "horizon": "7-day",
+      "horizon_desc": "D+1 to D+7",
+      "positive_rate": "16.48%",
+      "PR-AUC": 0.6274,
+      "ROC-AUC": 0.8823,
+      "Brier": 0.0931,
+      "Recall@P50": 0.6734
+    },
+    {
+      "horizon": "1-day",
+      "horizon_desc": "D+1",
+      "positive_rate": "4.26%",
+      "PR-AUC": 0.3666,
+      "ROC-AUC": 0.8953,
+      "Brier": 0.0326,
+      "Recall@P50": 0.2927
+    },
+    {
+      "horizon": "3-day",
+      "horizon_desc": "D+1 to D+3",
+      "positive_rate": "9.67%",
+      "PR-AUC": 0.533,
+      "ROC-AUC": 0.8875,
+      "Brier": 0.0625,
+      "Recall@P50": 0.5013
+    }
+  ],
   "results": [
     {
       "model": "Persistence (Empirical)",
@@ -125,23 +163,23 @@
     {
       "model": "LogisticRegression",
       "PR-AUC": 0.5464,
-      "ROC-AUC": 0.8277,
-      "Brier": 0.1666,
-      "Recall@P50": 0.5941
+      "ROC-AUC": 0.8276,
+      "Brier": 0.1658,
+      "Recall@P50": 0.5935
     },
     {
       "model": "LightGBM (Raw)",
-      "PR-AUC": 0.6205,
-      "ROC-AUC": 0.8793,
-      "Brier": 0.1474,
-      "Recall@P50": 0.6643
+      "PR-AUC": 0.6274,
+      "ROC-AUC": 0.8823,
+      "Brier": 0.1501,
+      "Recall@P50": 0.6734
     },
     {
       "model": "LightGBM (Platt Calibrated)",
-      "PR-AUC": 0.6205,
-      "ROC-AUC": 0.8793,
-      "Brier": 0.0941,
-      "Recall@P50": 0.6643
+      "PR-AUC": 0.6274,
+      "ROC-AUC": 0.8823,
+      "Brier": 0.0931,
+      "Recall@P50": 0.6734
     }
   ]
 }

@@ -29,8 +29,8 @@ st.set_page_config(
 
 
 @st.cache_data
-def load_data():
-    """Load the features dataset with predictions."""
+def load_data(horizon: int = 7):
+    """Load the features dataset with predictions for chosen horizon."""
     feat_path = _PROJECT_ROOT / "data" / "processed" / "features.parquet"
     is_sample = False
     if not feat_path.exists():
@@ -42,9 +42,17 @@ def load_data():
     df = pd.read_parquet(feat_path)
     df["date"] = pd.to_datetime(df["date"])
 
-    # Load model and generate predictions
-    model_path = _PROJECT_ROOT / "models" / "lightgbm_model.joblib"
-    calibrator_path = _PROJECT_ROOT / "models" / "platt_calibrator.joblib"
+    # Load model and calibrator for chosen horizon
+    if horizon == 1 and (_PROJECT_ROOT / "models" / "lightgbm_1d.joblib").exists():
+        model_path = _PROJECT_ROOT / "models" / "lightgbm_1d.joblib"
+        calibrator_path = _PROJECT_ROOT / "models" / "platt_calibrator_1d.joblib"
+    elif horizon == 3 and (_PROJECT_ROOT / "models" / "lightgbm_3d.joblib").exists():
+        model_path = _PROJECT_ROOT / "models" / "lightgbm_3d.joblib"
+        calibrator_path = _PROJECT_ROOT / "models" / "platt_calibrator_3d.joblib"
+    else:
+        model_path = _PROJECT_ROOT / "models" / "lightgbm_model.joblib"
+        calibrator_path = _PROJECT_ROOT / "models" / "platt_calibrator.joblib"
+
     feature_cols_path = _PROJECT_ROOT / "models" / "feature_cols.joblib"
 
     if model_path.exists() and feature_cols_path.exists():
@@ -123,16 +131,23 @@ def main():
         "Predictions use a LightGBM model trained on INPE fire data and NASA POWER climate data."
     )
 
-    df, is_sample = load_data()
+    # Sidebar
+    st.sidebar.header("Forecast Horizon & Filters")
+
+    horizon = st.sidebar.radio(
+        "Forecast Horizon",
+        options=[7, 3, 1],
+        format_func=lambda h: f"{h} days ({'Tactical Weekly' if h==7 else ('72h Short-Term' if h==3 else '24h Immediate')})",
+        index=0,
+    )
+
+    df, is_sample = load_data(horizon=horizon)
     if df is None:
         st.error("No data found. Please run the data pipeline first (`make all`).")
         return
 
     if is_sample:
         st.info("💡 Running in demo mode with sample data (`data/sample/`). For the full 10-year dataset, execute `make all`.")
-
-    # Sidebar
-    st.sidebar.header("Filters")
 
     available_dates = sorted(df["date"].dt.date.unique())
     # Default to a date in fire season

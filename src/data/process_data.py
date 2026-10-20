@@ -99,34 +99,40 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
     dataset = dataset.merge(fire_daily, on=["grid_id", "date"], how="left")
     dataset["fire_count"] = dataset["fire_count"].fillna(0).astype(int)
 
-    # --- 3. Create binary target ---
-    print(f"Step 3: Creating binary target (horizon={horizon} days)...")
-    # For each cell, the target at day D is: any fire in [D+1, D+7]?
-    # We compute a rolling sum over the NEXT 7 days.
-    # Sorting by date ascending, a forward-looking window = shift(-1) then rolling(7).
+    # --- 3. Create binary targets (multi-horizon) ---
+    print(f"Step 3: Creating multi-horizon binary targets (1d, 3d, {horizon}d)...")
     dataset = dataset.sort_values(["grid_id", "date"]).reset_index(drop=True)
 
-    # Use groupby + reversed rolling sum to strictly look horizon days into the future
-    def _compute_target(group: pd.DataFrame) -> pd.Series:
-        # Sum of fire_count strictly in [D+1, D+horizon]
+    def _compute_horizon_target(group: pd.DataFrame, h: int) -> pd.Series:
+        # Sum of fire_count strictly in [D+1, D+h]
         rev = group["fire_count"].iloc[::-1]
-        fwd_sum = rev.shift(1).rolling(window=horizon).sum().iloc[::-1]
+        fwd_sum = rev.shift(1).rolling(window=h).sum().iloc[::-1]
         return pd.Series(
             np.where(fwd_sum.isna(), np.nan, (fwd_sum > 0).astype(float)),
             index=group.index,
         )
 
-    dataset["target"] = (
-        dataset.groupby("grid_id", group_keys=False)
-        .apply(_compute_target)
-    )
+    for h in [1, 3, horizon]:
+        dataset[f"target_{h}d"] = (
+            dataset.groupby("grid_id", group_keys=False)
+            .apply(lambda g, h=h: _compute_horizon_target(g, h))
+        )
+
+    # Primary target is 7-day forward horizon
+    dataset["target"] = dataset[f"target_{horizon}d"]
 
     # Drop rows where future horizon exceeds dataset bounds (last 7 days of dataset)
     initial_len = len(dataset)
     dataset = dataset.dropna(subset=["target"]).copy()
     dataset["target"] = dataset["target"].astype(int)
+    dataset["target_1d"] = dataset["target_1d"].astype(int)
+    dataset["target_3d"] = dataset["target_3d"].astype(int)
+    dataset[f"target_{horizon}d"] = dataset[f"target_{horizon}d"].astype(int)
     dropped = initial_len - len(dataset)
-    print(f"  Target computed: {len(dataset):,} valid records (dropped {dropped:,} boundary records)")
+    print(f"  Targets computed: {len(dataset):,} valid records (dropped {dropped:,} boundary records)")
+    print(f"  Target 1d positive rate: {dataset['target_1d'].mean()*100:.2f}%")
+    print(f"  Target 3d positive rate: {dataset['target_3d'].mean()*100:.2f}%")
+    print(f"  Target 7d positive rate: {dataset['target'].mean()*100:.2f}%")
 
     # --- 4. Merge climate data ---
     print("Step 4: Merging climate data...")

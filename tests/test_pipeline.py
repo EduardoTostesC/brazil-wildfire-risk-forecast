@@ -206,6 +206,46 @@ class TestAPI:
         assert response.status_code == 422
         assert "outside pilot coverage" in response.json()["detail"]
 
+    def test_predict_multi_horizon(self, client):
+        """Test prediction endpoint with 1-day, 3-day, and 7-day forecast horizons."""
+        for h in [1, 3, 7]:
+            response = client.post("/predict", json={
+                "latitude": -12.5,
+                "longitude": -55.0,
+                "date": "2024-08-15",
+                "horizon_days": h,
+            })
+            assert response.status_code == 200
+            data = response.json()
+            assert data["horizon_days"] == h
+            assert 0.0 <= data["probability"] <= 1.0
+            assert data["risk_level"] in ("low", "medium", "high")
+
+    def test_predict_invalid_horizon(self, client):
+        """Test domain validation rejects unsupported forecast horizons."""
+        response = client.post("/predict", json={
+            "latitude": -12.5,
+            "longitude": -55.0,
+            "date": "2024-08-15",
+            "horizon_days": 10,  # Only 1, 3, 7 supported
+        })
+        assert response.status_code == 422
+        assert "Invalid horizon_days" in response.json()["detail"]
+
+
+# ── Sequential Model (LSTM) tests ─────────────────────────────────────────────
+
+class TestSequentialModel:
+    """Tests for PyTorch LSTM sequence model architecture."""
+
+    def test_lstm_forward_shape(self):
+        import torch
+        from src.models.train_lstm import WildfireLSTM
+        model = WildfireLSTM(input_dim=10, hidden_dim=32, num_layers=1)
+        x = torch.randn(4, 14, 10)  # batch=4, seq_len=14, features=10
+        out = model(x)
+        assert out.shape == torch.Size([4])
+
 
 # ── Data processing tests ────────────────────────────────────────────────────
 

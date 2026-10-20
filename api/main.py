@@ -30,24 +30,31 @@ app = FastAPI(
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _MODELS_DIR = _PROJECT_ROOT / "models"
 
-_platt = None
+_models: dict[int, object] = {}
+_calibrators: dict[int, object] = {}
+_feature_cols = []
+_model_loaded = False
 
 try:
-    if (_MODELS_DIR / "lightgbm_model.joblib").exists():
-        _model = joblib.load(_MODELS_DIR / "lightgbm_model.joblib")
-    elif (_MODELS_DIR / "lightgbm_calibrated.joblib").exists():
-        _model = joblib.load(_MODELS_DIR / "lightgbm_calibrated.joblib")
-    else:
-        _model = None
-    if (_MODELS_DIR / "platt_calibrator.joblib").exists():
-        _platt = joblib.load(_MODELS_DIR / "platt_calibrator.joblib")
-    _feature_cols = joblib.load(_MODELS_DIR / "feature_cols.joblib")
-    _scaler = None
-    _model_loaded = True if _model is not None else False
+    for h in [1, 3, 7]:
+        m_file = f"lightgbm_{h}d.joblib" if h != 7 else "lightgbm_model.joblib"
+        c_file = f"platt_calibrator_{h}d.joblib" if h != 7 else "platt_calibrator.joblib"
+        if (_MODELS_DIR / m_file).exists():
+            _models[h] = joblib.load(_MODELS_DIR / m_file)
+        if (_MODELS_DIR / c_file).exists():
+            _calibrators[h] = joblib.load(_MODELS_DIR / c_file)
+
+    if 7 not in _models and (_MODELS_DIR / "lightgbm_calibrated.joblib").exists():
+        _models[7] = joblib.load(_MODELS_DIR / "lightgbm_calibrated.joblib")
+
+    if (_MODELS_DIR / "feature_cols.joblib").exists():
+        _feature_cols = joblib.load(_MODELS_DIR / "feature_cols.joblib")
+
+    _model_loaded = len(_models) > 0
 except Exception:
     _model_loaded = False
-    _model = None
-    _platt = None
+    _models = {}
+    _calibrators = {}
     _feature_cols = []
 
 
@@ -58,9 +65,10 @@ class PredictionRequest(BaseModel):
     latitude: float = Field(..., ge=-33.0, le=5.5, description="Latitude (decimal degrees)")
     longitude: float = Field(..., ge=-74.0, le=-34.0, description="Longitude (decimal degrees)")
     date: dt.date = Field(..., description="Prediction date (YYYY-MM-DD)")
+    horizon_days: int = Field(default=7, description="Forecast horizon in days (1, 3, or 7)")
 
     model_config = {"json_schema_extra": {
-        "examples": [{"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15"}]
+        "examples": [{"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15", "horizon_days": 7}]
     }}
 
 
@@ -69,7 +77,8 @@ class PredictionResponse(BaseModel):
     latitude: float
     longitude: float
     date: str
-    probability: float = Field(..., description="Probability of fire in next 7 days (0-1)")
+    horizon_days: int = Field(default=7, description="Forecast horizon in days")
+    probability: float = Field(..., description="Probability of fire in forecast horizon (0-1)")
     risk_level: str = Field(..., description="Risk level: low, medium, or high")
     grid_id: str = Field(..., description="Grid cell identifier")
 
@@ -236,14 +245,25 @@ def predict(request: PredictionRequest) -> PredictionResponse:
             detail=f"Date year {request.date.year} outside supported operating range [2016, 2030]",
         )
 
+    # Forecast horizon validation
+    if request.horizon_days not in (1, 3, 7):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid horizon_days: {request.horizon_days}. Must be 1, 3, or 7.",
+        )
+
+    # Select model and calibrator for chosen horizon (fallback to 7-day)
+    model = _models.get(request.horizon_days) or _models.get(7)
+    calibrator = _calibrators.get(request.horizon_days) or _calibrators.get(7)
+
     X = _build_features(request.latitude, request.longitude, request.date)
-    raw_prob = float(_model.predict_proba(X)[0, 1])
+    raw_prob = float(model.predict_proba(X)[0, 1])
 
     # Apply Platt scaling calibration if available
-    if _platt is not None:
+    if calibrator is not None:
         from scipy.special import logit
         raw_logit = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-        probability = float(_platt.predict_proba(raw_logit)[0, 1])
+        probability = float(calibrator.predict_proba(raw_logit)[0, 1])
     else:
         probability = raw_prob
 
@@ -253,6 +273,7 @@ def predict(request: PredictionRequest) -> PredictionResponse:
         latitude=request.latitude,
         longitude=request.longitude,
         date=str(request.date),
+        horizon_days=request.horizon_days,
         probability=probability,
         risk_level=_classify_risk(probability),
         grid_id=_get_grid_id(request.latitude, request.longitude),
