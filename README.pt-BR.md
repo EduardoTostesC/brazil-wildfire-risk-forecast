@@ -14,7 +14,7 @@
 
 ---
 
-[🇺🇸 Switch to English Version](README.md)
+[🇺🇸 Switch to English Version](README.md) · [📄 Artigo Técnico Completo (Whitepaper)](reports/technical_report.md) · [📦 Notas de Lançamento v1.0.0](RELEASE_NOTES.md)
 
 ---
 
@@ -30,9 +30,11 @@
 - [Análise de Erros](#-análise-de-erros)
 - [Demonstração: API e Streamlit App](#-demonstração-api-e-streamlit-app)
 - [Stack Tecnológica e Justificativas](#-stack-tecnológica-e-justificativas)
+- [MLOps, Orquestração de Pipeline e Monitoramento](#-mlops-orquestração-de-pipeline-e-monitoramento-bloco-c)
 - [Estrutura do Repositório](#-estrutura-do-repositório)
 - [Como Instalar e Executar](#-como-instalar-e-executar)
 - [Deploy em Nuvem Gratuita](#-deploy-em-nuvem-gratuita)
+- [Artigo Técnico & Notas de Lançamento](#-artigo-técnico--notas-de-lançamento)
 - [Limitações e Vieses Conhecidos](#-limitações-e-vieses-conhecidos)
 - [Uso Responsável](#-uso-responsável)
 - [Próximos Passos e Aprendizados](#-próximos-passos-e-aprendizados)
@@ -623,6 +625,15 @@ curl -X POST http://localhost:8000/explain \
   "shap_values": {"fire_count_30d": 1.795, "PRECTOTCORR": -0.215}
 }
 ```
+
+---
+
+## 📄 Artigo Técnico & Notas de Lançamento
+
+- **Artigo Técnico Completo (Whitepaper)**: [`reports/technical_report.md`](reports/technical_report.md)  
+  *Previsão Operacional de Risco de Queimadas no Ecotono Cerrado-Amazônia: Um Pipeline Calibrado de Machine Learning com Validação Espaço-Temporal Estrita*. Artigo completo em formato de paper científico contendo formulações matemáticas, validação em blocos espaciais, análise de resultados negativos (LightGBM vs PyTorch LSTM) e testes de significância por bootstrap com 1.000 reamostragens ($p < 0,001$).
+- **Notas de Lançamento v1.0.0**: [`RELEASE_NOTES.md`](RELEASE_NOTES.md)  
+  Changelog detalhado da versão, resumo dos benchmarks reais e instruções de início rápido.
 
 ---
 

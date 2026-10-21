@@ -14,7 +14,7 @@
 
 ---
 
-[🇧🇷 Versão em Português](README.pt-BR.md)
+[🇧🇷 Versão em Português](README.pt-BR.md) · [📄 Technical Whitepaper (Paper)](reports/technical_report.md) · [📦 Release Notes v1.0.0](RELEASE_NOTES.md)
 
 ---
 
@@ -30,9 +30,11 @@
 - [Error Analysis](#-error-analysis)
 - [Demo: API & Streamlit Dashboard](#-demo-api--streamlit-dashboard)
 - [Tech Stack & Architecture Decisions](#-tech-stack--architecture-decisions)
+- [MLOps, Pipeline Orchestration & Monitoring](#-mlops-pipeline-orchestration--monitoring-block-c)
 - [Repository Structure](#-repository-structure)
 - [Installation & How to Run](#-installation--how-to-run)
 - [Free Cloud Deployment](#-free-cloud-deployment)
+- [Technical Whitepaper & Release Notes](#-technical-whitepaper--release-notes)
 - [Known Limitations & Biases](#-known-limitations--biases)
 - [Responsible AI & Disclaimer](#-responsible-ai--disclaimer)
 - [Next Steps & Key Learnings](#-next-steps--key-learnings)
@@ -629,6 +631,15 @@ curl -X POST http://localhost:8000/explain \
 docker build -t wildfire-risk-api .
 docker run -p 8000:8000 wildfire-risk-api
 ```
+
+---
+
+## 📄 Technical Whitepaper & Release Notes
+
+- **Full Scientific Whitepaper**: [`reports/technical_report.md`](reports/technical_report.md)  
+  *Operational Wildfire Risk Forecasting in the Brazilian Cerrado-Amazon Ecotone: A Calibrated Machine Learning Pipeline with Strict Temporal and Spatial Validation*. Complete paper containing full problem formulations, spatial block validation, biophysical index derivations (VPD, DTR, FWI), negative deep learning results analysis (LightGBM vs PyTorch LSTM), and 1,000-sample bootstrap significance tests ($p < 0.001$).
+- **Version 1.0.0 Release Notes**: [`RELEASE_NOTES.md`](RELEASE_NOTES.md)  
+  Comprehensive release changelog, verified benchmark summaries, and quickstart instructions.
 
 ---
 
