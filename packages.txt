@@ -1,0 +1,4 @@
+# System packages required by the app (Streamlit Community Cloud / Hugging Face Spaces)
+# libgomp1 is required by LightGBM for OpenMP parallelism on Linux
+libgomp1
+

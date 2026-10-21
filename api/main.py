@@ -60,6 +60,31 @@ except Exception:
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
+class ExplainRequest(BaseModel):
+    """Request schema for local SHAP explanation."""
+    latitude: float = Field(..., ge=-33.0, le=5.5, description="Latitude (decimal degrees)")
+    longitude: float = Field(..., ge=-74.0, le=-34.0, description="Longitude (decimal degrees)")
+    date: dt.date = Field(..., description="Prediction date (YYYY-MM-DD)")
+
+    model_config = {"json_schema_extra": {
+        "examples": [{"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15"}]
+    }}
+
+
+class ExplainResponse(BaseModel):
+    """Response schema for local SHAP explanation."""
+    latitude: float
+    longitude: float
+    date: str
+    probability: float
+    risk_level: str
+    grid_id: str
+    shap_values: dict[str, float]
+    top_positive: list[dict]
+    top_negative: list[dict]
+    baseline_log_odds: float
+
+
 class PredictionRequest(BaseModel):
     """Request schema for wildfire risk prediction."""
     latitude: float = Field(..., ge=-33.0, le=5.5, description="Latitude (decimal degrees)")
@@ -296,6 +321,79 @@ def get_drift_report():
             raise HTTPException(status_code=500, detail=f"Failed to generate drift report: {e}")
 
 
+@app.post("/explain", response_model=ExplainResponse)
+def explain(request: ExplainRequest) -> ExplainResponse:
+    """Return local SHAP feature attributions for a prediction.
+
+    Explains *why* the model gives a particular risk score for the requested
+    location and date — which features are pushing the probability up or down.
+
+    **Example request:**
+    ```json
+    {"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15"}
+    ```
+    """
+    if not _model_loaded:
+        raise HTTPException(status_code=503, detail="Model not loaded. Run training first.")
+
+    if not (-18.2 <= request.latitude <= -7.2):
+        raise HTTPException(status_code=422, detail=f"Latitude {request.latitude} outside Mato Grosso bounds.")
+    if not (-61.8 <= request.longitude <= -50.1):
+        raise HTTPException(status_code=422, detail=f"Longitude {request.longitude} outside Mato Grosso bounds.")
+
+    try:
+        import shap
+        from scipy.special import logit
+    except ImportError:
+        raise HTTPException(status_code=500, detail="shap package not installed. Run: pip install shap")
+
+    model = _models.get(7)
+    calibrator = _calibrators.get(7)
+    if model is None:
+        raise HTTPException(status_code=503, detail="7-day model not available.")
+
+    X = _build_features(request.latitude, request.longitude, request.date)
+
+    # SHAP values
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        explainer = shap.TreeExplainer(model)
+        shap_vals = explainer.shap_values(X)
+        if isinstance(shap_vals, list):
+            shap_vals = shap_vals[1]
+    sv = shap_vals[0].tolist()
+
+    # Calibrated probability
+    raw_prob = float(model.predict_proba(X)[0, 1])
+    if calibrator is not None:
+        logit_val = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
+        probability = float(calibrator.predict_proba(logit_val)[0, 1])
+    else:
+        probability = raw_prob
+    probability = round(min(max(probability, 0.0), 1.0), 4)
+
+    shap_dict = {fc: round(float(v), 5) for fc, v in zip(_feature_cols, sv)}
+
+    # Top 5 positive and negative contributors
+    sorted_shap = sorted(shap_dict.items(), key=lambda x: x[1], reverse=True)
+    top_positive = [{"feature": k, "shap": v} for k, v in sorted_shap if v > 0][:5]
+    top_negative = [{"feature": k, "shap": v} for k, v in reversed(sorted_shap) if v < 0][:5]
+
+    return ExplainResponse(
+        latitude=request.latitude,
+        longitude=request.longitude,
+        date=str(request.date),
+        probability=probability,
+        risk_level=_classify_risk(probability),
+        grid_id=_get_grid_id(request.latitude, request.longitude),
+        shap_values=shap_dict,
+        top_positive=top_positive,
+        top_negative=top_negative,
+        baseline_log_odds=round(float(explainer.expected_value), 4),
+    )
+
+
 @app.get("/")
 def root():
     """API root — redirect to docs."""
@@ -303,6 +401,8 @@ def root():
         "message": "Brazil Wildfire Risk Forecast API",
         "docs": "/docs",
         "health": "/health",
+        "predict": "/predict",
+        "explain": "/explain",
         "drift": "/drift",
     }
 

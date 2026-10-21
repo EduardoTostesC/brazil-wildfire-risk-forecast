@@ -2,10 +2,13 @@
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status: Production-Ready](https://img.shields.io/badge/Status-Complete-brightgreen.svg)]()
-[![Code Style: PEP 8](https://img.shields.io/badge/Code%20Style-PEP%208-blueviolet.svg)]()
+[![CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions)
+[![Testes](https://img.shields.io/badge/testes-21%20passaram-brightgreen)](tests/)
+[![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-blueviolet)](https://github.com/astral-sh/ruff)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
+[![MLflow](https://img.shields.io/badge/MLflow-3.17-0194E2?logo=mlflow&logoColor=white)](https://mlflow.org)
+[![DVC](https://img.shields.io/badge/DVC-3.67-945DD6?logo=dvc&logoColor=white)](https://dvc.org)
 
 > **Pipeline end-to-end de machine learning que prevê a probabilidade de focos de calor nos próximos 7 dias em células regulares de grade, integrando dados do satélite de referência do INPE e variáveis climáticas diárias da NASA POWER, com mapa interativo e API REST de inferência em tempo real.**
 
@@ -546,16 +549,79 @@ python -m src.models.explain
 
 ## ☁️ Deploy em Nuvem Gratuita
 
-### Publicar no Streamlit Community Cloud:
+### Publicar no Streamlit Community Cloud (Bloco D — Demonstração Pública Gratuita):
 1. Faça fork deste repositório para o seu perfil no GitHub.
 2. Acesse [share.streamlit.io](https://share.streamlit.io/) e conecte sua conta GitHub.
 3. Clique em **"New App"**, selecione o repositório, defina o branch como `main` e o arquivo principal como `app/streamlit_app.py`.
-4. Clique em **"Deploy"**. O Streamlit Cloud instalará as dependências do `requirements.txt` e executará o dashboard utilizando os modelos salvos em `models/` e dados de demonstração em `data/sample/`.
+4. Clique em **"Deploy"**. O app utiliza automaticamente os modelos treinados em `models/` e a amostra de demonstração em `data/sample/`.
+
+O repositório já inclui os arquivos de configuração necessários:
+- **`.streamlit/config.toml`** — tema visual vermelho/branco condizente com monitoramento de incêndios.
+- **`packages.txt`** — `libgomp1` (dependência de sistema Linux essencial para aceleração OpenMP do LightGBM).
+
+### Publicar no Hugging Face Spaces:
+1. Crie um novo Space em [huggingface.co/spaces](https://huggingface.co/spaces) (SDK: Streamlit).
+2. Envie o repositório (o arquivo `README.hf.md` já contém os metadados de cabeçalho YAML exigidos pelo Spaces).
+3. Defina o ponto de entrada como `app/streamlit_app.py`.
 
 ### Rodar via Docker Localmente:
 ```bash
 docker build -t wildfire-risk-api .
+# Apenas a API (porta 8000):
 docker run -p 8000:8000 wildfire-risk-api
+# App Streamlit (porta 8501):
+docker run -p 8501:8501 wildfire-risk-api streamlit run app/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+```
+
+---
+
+## 📡 Endpoints da API REST
+
+Todos os endpoints estão documentados interativamente em `http://localhost:8000/docs`.
+
+| Endpoint | Método | Descrição |
+|---|---|---|
+| `GET /health` | GET | Status de integridade do serviço e carregamento dos modelos |
+| `POST /predict` | POST | Predição de probabilidade de foco para lat/lon/data/horizonte |
+| `POST /explain` | POST | Atribuição local de importância de features com SHAP |
+| `GET /drift` | GET | Relatório em tempo real de drift de covariáveis (PSI + KS) |
+| `GET /docs` | GET | Documentação interativa Swagger/OpenAPI |
+
+### Exemplo de requisição em `/predict`:
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"latitude": -12.5, "longitude": -55.0, "date": "2024-09-15", "horizon_days": 7}'
+```
+
+```json
+{
+  "latitude": -12.5, "longitude": -55.0, "date": "2024-09-15",
+  "horizon_days": 7, "probability": 0.6411,
+  "risk_level": "high", "grid_id": "010_023"
+}
+```
+
+### Exemplo de requisição em `/explain` (Explicabilidade SHAP):
+```bash
+curl -X POST http://localhost:8000/explain \
+  -H "Content-Type: application/json" \
+  -d '{"latitude": -12.5, "longitude": -55.0, "date": "2024-09-15"}'
+```
+
+```json
+{
+  "probability": 0.6411, "risk_level": "high",
+  "top_positive": [
+    {"feature": "fire_count_30d", "shap": 1.795},
+    {"feature": "neighbor_fire_7d", "shap": 0.594}
+  ],
+  "top_negative": [
+    {"feature": "fire_count_7d", "shap": -0.349}
+  ],
+  "baseline_log_odds": -1.5407,
+  "shap_values": {"fire_count_30d": 1.795, "PRECTOTCORR": -0.215}
+}
 ```
 
 ---

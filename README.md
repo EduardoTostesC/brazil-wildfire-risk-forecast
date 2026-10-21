@@ -2,10 +2,13 @@
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status: Production-Ready](https://img.shields.io/badge/Status-Complete-brightgreen.svg)]()
-[![Code Style: PEP 8](https://img.shields.io/badge/Code%20Style-PEP%208-blueviolet.svg)]()
+[![CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions)
+[![Tests](https://img.shields.io/badge/tests-21%20passed-brightgreen)](tests/)
+[![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-blueviolet)](https://github.com/astral-sh/ruff)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
+[![MLflow](https://img.shields.io/badge/MLflow-3.17-0194E2?logo=mlflow&logoColor=white)](https://mlflow.org)
+[![DVC](https://img.shields.io/badge/DVC-3.67-945DD6?logo=dvc&logoColor=white)](https://dvc.org)
 
 > **End-to-end machine learning pipeline predicting wildfire hotspot probability for the next 7 days in geographic grid cells, integrating INPE reference satellite observations and NASA POWER daily climate reanalysis, with an interactive web dashboard and real-time REST API.**
 
@@ -546,11 +549,80 @@ python -m src.models.explain
 
 ## ☁️ Free Cloud Deployment
 
-### Deploy on Streamlit Community Cloud:
+### Deploy on Streamlit Community Cloud (Block D — Free Public Demo):
 1. Fork this repository to your GitHub profile.
 2. Sign in to [share.streamlit.io](https://share.streamlit.io/) with GitHub.
-3. Click **"New App"**, choose your repository, set the branch to `main`, and main file path to `app/streamlit_app.py`.
-4. Click **"Deploy"**. The app runs with the pre-trained weights in `models/` and sample data in `data/sample/`.
+3. Click **"New App"**, choose your repository, set branch to `main`, and main file to `app/streamlit_app.py`.
+4. Click **"Deploy"**. The app uses pre-trained model weights from `models/` and sample data from `data/sample/`.
+
+The repository includes the required deployment configuration:
+- **`.streamlit/config.toml`** — red/white theme matching fire risk context.
+- **`packages.txt`** — `libgomp1` (Linux system dependency for LightGBM OpenMP acceleration).
+
+### Deploy on Hugging Face Spaces:
+1. Create a new Space at [huggingface.co/spaces](https://huggingface.co/spaces) (SDK: Streamlit).
+2. Push the repository content (the `README.hf.md` contains the required Space metadata header).
+3. Set the entry point to `app/streamlit_app.py`.
+
+### Run via Docker Locally:
+```bash
+docker build -t wildfire-risk-api .
+# API only (port 8000):
+docker run -p 8000:8000 wildfire-risk-api
+# Streamlit app (port 8501):
+docker run -p 8501:8501 wildfire-risk-api streamlit run app/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+```
+
+---
+
+## 📡 API Endpoints
+
+All endpoints are documented interactively at `http://localhost:8000/docs`.
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `GET /health` | GET | Service liveness and model load status |
+| `POST /predict` | POST | Fire probability prediction for a lat/lon/date/horizon |
+| `POST /explain` | POST | Local SHAP feature attribution for a prediction |
+| `GET /drift` | GET | Real-time PSI + KS feature distribution drift report |
+| `GET /docs` | GET | Interactive Swagger/OpenAPI documentation |
+
+### `/predict` example:
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"latitude": -12.5, "longitude": -55.0, "date": "2024-09-15", "horizon_days": 7}'
+```
+
+```json
+{
+  "latitude": -12.5, "longitude": -55.0, "date": "2024-09-15",
+  "horizon_days": 7, "probability": 0.6411,
+  "risk_level": "high", "grid_id": "010_023"
+}
+```
+
+### `/explain` example (SHAP attribution):
+```bash
+curl -X POST http://localhost:8000/explain \
+  -H "Content-Type: application/json" \
+  -d '{"latitude": -12.5, "longitude": -55.0, "date": "2024-09-15"}'
+```
+
+```json
+{
+  "probability": 0.6411, "risk_level": "high",
+  "top_positive": [
+    {"feature": "fire_count_30d", "shap": 1.795},
+    {"feature": "neighbor_fire_7d", "shap": 0.594}
+  ],
+  "top_negative": [
+    {"feature": "fire_count_7d", "shap": -0.349}
+  ],
+  "baseline_log_odds": -1.5407,
+  "shap_values": {"fire_count_30d": 1.795, "PRECTOTCORR": -0.215, ...}
+}
+```
 
 ### Run via Docker Locally:
 ```bash

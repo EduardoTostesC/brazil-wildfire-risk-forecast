@@ -238,6 +238,26 @@ class TestAPI:
         assert response.status_code == 422
         assert "Invalid horizon_days" in response.json()["detail"]
 
+    def test_explain_endpoint_schema(self, client):
+        """Test /explain returns a valid SHAP explanation response."""
+        response = client.post("/explain", json={
+            "latitude": -12.5,
+            "longitude": -55.0,
+            "date": "2024-08-15",
+        })
+        assert response.status_code == 200
+        data = response.json()
+        assert "probability" in data
+        assert "risk_level" in data
+        assert "shap_values" in data
+        assert "top_positive" in data
+        assert "top_negative" in data
+        assert "baseline_log_odds" in data
+        assert 0.0 <= data["probability"] <= 1.0
+        assert data["risk_level"] in ("low", "medium", "high")
+        assert isinstance(data["shap_values"], dict)
+        assert len(data["shap_values"]) > 0
+
 
 # ── Drift Monitoring tests ───────────────────────────────────────────────────
 

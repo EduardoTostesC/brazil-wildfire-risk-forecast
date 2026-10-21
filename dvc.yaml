@@ -62,3 +62,4 @@ stages:
     metrics:
       - reports/drift_report.json:
           cache: false
+
