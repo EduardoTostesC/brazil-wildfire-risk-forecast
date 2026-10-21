@@ -280,6 +280,22 @@ def predict(request: PredictionRequest) -> PredictionResponse:
     )
 
 
+@app.get("/drift")
+def get_drift_report():
+    """Return data and feature drift report (PSI and KS test)."""
+    report_path = _PROJECT_ROOT / "reports" / "drift_report.json"
+    if report_path.exists():
+        import json
+        with open(report_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    else:
+        try:
+            from src.monitoring.drift_detector import run_drift_analysis
+            return run_drift_analysis()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to generate drift report: {e}")
+
+
 @app.get("/")
 def root():
     """API root — redirect to docs."""
@@ -287,5 +303,6 @@ def root():
         "message": "Brazil Wildfire Risk Forecast API",
         "docs": "/docs",
         "health": "/health",
+        "drift": "/drift",
     }
 

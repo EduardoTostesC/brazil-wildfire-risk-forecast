@@ -5,7 +5,6 @@ from typing import Any
 
 import yaml
 
-
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _CONFIG_PATH = _PROJECT_ROOT / "config.yaml"
 

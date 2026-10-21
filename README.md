@@ -278,11 +278,102 @@ curl -X POST "http://localhost:8000/predict" \
 - **LightGBM**: Primary model chosen for histogram-based gradient boosting, handling class imbalance via `scale_pos_weight`, native NaN handling, and sub-millisecond CPU inference.
 - **PyTorch**: Used for sequential recurrent deep learning (LSTM) benchmark comparison.
 - **Optuna**: Bayesian hyperparameter optimization with Contiguous Spatial Block Cross-Validation.
+- **Platt Scaling**: Smooth 1D logistic calibration preserving tree ranking while slashing probability calibration error (Brier score from 0.1498 to 0.0927).
 - **SHAP**: Exact TreeExplainer algorithm providing mathematically rigorous feature attributions.
-- **FastAPI + Pydantic v2**: High-performance asynchronous API framework with automatic validation and documentation.
-- **Streamlit + Folium**: Rapid geospatial prototyping without frontend overhead.
-- **Pytest**: Automated test suite (17 tests) guarding against data leakage, boundary faults, and domain regression.
+- **MLflow**: Centralized experiment tracking, metric history across baselines, models, multi-horizons, and artifact store (`sqlite:///mlflow.db`).
+- **DVC (Data Version Control)**: Pipeline DAG orchestration (`dvc.yaml`), stage caching, and data versioning.
+- **Statistical Drift Detection**: Population Stability Index (PSI) and 2-sample Kolmogorov-Smirnov (KS) monitoring for covariate shift.
+- **FastAPI + Pydantic v2**: High-performance asynchronous API framework with automatic validation, OpenAPI docs, and `/drift` endpoint.
+- **Streamlit + Folium**: Rapid geospatial prototyping with interactive horizon toggle and dynamic color scales.
+- **Pytest**: Automated test suite (20 tests) guarding against data leakage, boundary faults, drift metrics, and domain regression.
+- **Ruff**: Lightning-fast linter enforcing clean PEP-8 code standards.
 - **Parquet / PyArrow**: Columnar storage format for 1.8M+ record datasets.
+
+---
+
+## 🔄 MLOps, Pipeline Orchestration & Monitoring (Block C)
+
+A production-grade ML system requires end-to-end reproducibility, continuous performance tracking, automated data quality validation, and early detection of distribution shift.
+
+### 1. Reproducible Pipeline DAG with DVC (`dvc.yaml`)
+
+The entire data and modeling lifecycle is managed through a Directed Acyclic Graph (DAG) defined in [`dvc.yaml`](dvc.yaml). Each stage specifies exact inputs, code dependencies, and output artifacts:
+
+```text
+      +------------+          
+      | build_grid |          
+      +------------+          
+              *               
+      +--------------+        
+      | process_data |        
+      +--------------+        
+              *               
+    +----------------+        
+    | build_features |        
+    +----------------+        
+         *        *           
+       **          **         
+      *              *        
++-------+         +-------+   
+| drift |         | train |   
++-------+         +-------+   
+                      *       
+                 +---------+  
+                 | explain |  
+                 +---------+  
+```
+
+To reproduce or inspect the pipeline:
+```bash
+# Verify the stage dependency graph
+dvc dag
+
+# Reproduce the entire DAG (or only stale stages)
+dvc repro
+```
+
+### 2. Experiment Tracking with MLflow
+
+All model runs, Bayesian search parameters, multi-horizon metrics, and visualization artifacts are automatically tracked in a centralized MLflow database (`sqlite:///mlflow.db`):
+
+- **Logged Parameters**: Best Optuna hyperparameter set (`n_estimators`, `learning_rate`, `num_leaves`, `reg_alpha`, etc.), spatial validation strategy, seed, and dataset sizes.
+- **Logged Metrics**: Multi-horizon evaluations (1d, 3d, 7d), PR-AUC, ROC-AUC, Brier score, and Recall@P50 for both raw and Platt-calibrated models, plus baseline benchmarks (Persistence, Climatology, Logistic Regression).
+- **Logged Artifacts**: Serialized model metadata (`training_metadata.json`), comparative CSV reports, and high-resolution evaluation figures.
+
+To launch the MLflow dashboard locally:
+```bash
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+# Opens at http://localhost:5000
+```
+
+### 3. Data & Concept Drift Monitoring (`src/monitoring/drift_detector.py`)
+
+Environmental and climatological regimes shift over time (e.g., severe droughts and heatwaves during El Niño events). To prevent silent model degradation in production, the system computes:
+
+1. **Population Stability Index (PSI)**:
+   - $\text{PSI} < 0.10$: Stable distribution (No action needed).
+   - $0.10 \le \text{PSI} < 0.25$: Moderate drift (Warning alert, flag for monitoring).
+   - $\text{PSI} \ge 0.25$: Critical drift (Action required, automated retraining trigger).
+2. **Two-Sample Kolmogorov-Smirnov (KS) Test**: Non-parametric test assessing whether baseline and operational samples originate from identical continuous distributions.
+
+#### Real Drift Benchmark Results (Baseline 2016–2023 vs Operational 2024–2025):
+- **Monitored Features**: 11 core climatological and biophysical variables.
+- **Stable Features (9/11)**: `PRECTOTCORR` ($\text{PSI} = 0.0094$), `WS10M` ($\text{PSI} = 0.0084$), `fire_count_7d` ($\text{PSI} = 0.0526$), `neighbor_fire_7d` ($\text{PSI} = 0.0381$), `dtr` ($\text{PSI} = 0.0560$), etc.
+- **Moderate Drift Detected (2/11)**:
+  - `T2M_MAX` ($\text{PSI} = 0.1503$, $p < 0.001$): Mean maximum temperature surged from **32.0°C** in 2016–2023 to **33.4°C** in 2024–2025, accurately capturing the historic 2024 central Brazil heatwave.
+  - `vpd` ($\text{PSI} = 0.1067$, $p < 0.001$): Mean Vapor Pressure Deficit increased from **1.17 kPa** to **1.46 kPa**, indicating significantly drier atmospheric fuel drying conditions.
+  - `dry_days`: Mean consecutive rainless days increased from **10.0 days** to **13.0 days**.
+- **Critical Drift (0/11)**: No feature crossed the $\text{PSI} \ge 0.25$ threshold.
+
+The drift analysis automatically generates [`reports/drift_report.json`](reports/drift_report.json) and visual summary plots in [`reports/figures/drift_summary.png`](reports/figures/drift_summary.png). It is also exposed live via the API endpoint:
+```bash
+curl http://localhost:8000/drift
+```
+
+### 4. Continuous Integration & Production Docker
+
+- **GitHub Actions CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): Matrix testing across Python 3.11 and 3.12, running `ruff check .` and all 20 automated unit/integration tests on every push and pull request.
+- **Production Container** ([`Dockerfile`](Dockerfile)): Based on `python:3.12-slim`, includes system OpenMP runtime (`libgomp1`) required for LightGBM, `curl` for container health monitoring, exposes ports 8000 (FastAPI) and 8501 (Streamlit), and includes an automated `HEALTHCHECK` pinging `http://localhost:8000/health`.
 
 ---
 
@@ -291,19 +382,22 @@ curl -X POST "http://localhost:8000/predict" \
 ```text
 brazil-wildfire-risk-forecast/
 ├── .github/
-│   └── workflows/ci.yml          # GitHub Actions CI (lint, types, pytest)
-├── .gitignore                    # Excludes heavy raw data and virtual environments
+│   └── workflows/ci.yml          # GitHub Actions CI (ruff lint, multi-python, pytest)
+├── .dvc/                         # DVC internal configuration
+├── .gitignore                    # Excludes heavy raw data, virtualenvs, mlruns
 ├── config.yaml                   # Global pipeline configurations (grid, region, dates)
-├── Dockerfile                    # Containerization for API and Streamlit
+├── Dockerfile                    # Production containerization with OpenMP & healthcheck
+├── dvc.yaml                      # DVC multi-stage pipeline DAG definition
 ├── LICENSE                       # MIT License
-├── Makefile                      # Command shortcuts (Linux/macOS)
+├── Makefile                      # Standard CLI shortcuts (make dvc-repro, make drift, etc.)
+├── pyproject.toml                # Project build metadata, ruff & pytest configurations
 ├── run_pipeline.ps1              # Single-command automated pipeline (Windows PowerShell)
 ├── README.md                     # English documentation (this file)
 ├── README.pt-BR.md               # Brazilian Portuguese documentation
 ├── requirements.txt              # Pinned production dependencies
 │
 ├── api/
-│   └── main.py                   # FastAPI application with multi-horizon /predict and /health
+│   └── main.py                   # FastAPI service with /predict, /health, and /drift endpoints
 │
 ├── app/
 │   └── streamlit_app.py          # Interactive web map dashboard with horizon toggle
@@ -335,6 +429,7 @@ brazil-wildfire-risk-forecast/
 │   └── 02_modeling.ipynb         # Full model benchmarking, multi-horizon & LSTM comparison
 │
 ├── reports/
+│   ├── drift_report.json         # Automated PSI and KS feature drift report
 │   ├── feature_importance.csv    # Full SHAP importance table
 │   ├── model_comparison.csv      # Primary benchmark metrics
 │   ├── multi_horizon_comparison.csv # 1d, 3d, 7d comparison metrics
@@ -344,6 +439,7 @@ brazil-wildfire-risk-forecast/
 │       ├── accuracy_by_month.png # Monthly accuracy chart
 │       ├── accuracy_by_region.png# Accuracy across MT spatial subregions
 │       ├── calibration_curve.png # Probability calibration plot
+│       ├── drift_summary.png     # Feature distribution drift summary
 │       ├── lstm_vs_lgbm.png      # PyTorch LSTM vs LightGBM PR/ROC curves
 │       ├── shap_bar.png          # SHAP feature importance bar plot
 │       └── shap_summary.png      # SHAP beeswarm summary plot
@@ -357,13 +453,15 @@ brazil-wildfire-risk-forecast/
 │   │   └── process_data.py       # Spatiotemporal aggregation & multi-horizon targets
 │   ├── features/
 │   │   └── build_features.py     # 39 leakage-free engineered features (VPD, DTR, FWI)
-│   └── models/
-│       ├── train.py              # Training pipeline, Optuna, Platt & multi-horizon models
-│       ├── train_lstm.py         # PyTorch LSTM sequential benchmark
-│       └── explain.py            # SHAP TreeExplainer generation
+│   ├── models/
+│   │   ├── train.py              # Training pipeline, Optuna, Platt, MLflow tracking
+│   │   ├── train_lstm.py         # PyTorch LSTM sequential benchmark
+│   │   └── explain.py            # SHAP TreeExplainer generation
+│   └── monitoring/
+│       └── drift_detector.py     # PSI & Kolmogorov-Smirnov drift detector
 │
 └── tests/
-    └── test_pipeline.py          # 17 automated tests (grid, leak, API, bounds, LSTM, config)
+    └── test_pipeline.py          # 20 automated tests (grid, leak, API, bounds, drift, LSTM)
 ```
 
 ---

@@ -5,11 +5,11 @@ Uses TreeExplainer for LightGBM (exact, fast computation).
 """
 
 import joblib
+import matplotlib
 import numpy as np
 import pandas as pd
 import shap
 
-import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 

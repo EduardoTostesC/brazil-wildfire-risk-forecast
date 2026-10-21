@@ -1,4 +1,4 @@
-.PHONY: install data features train evaluate explain api app test all clean
+.PHONY: install data features train evaluate explain drift dvc-repro mlflow-ui lint api app test all clean
 
 install:
 	pip install -r requirements.txt
@@ -18,6 +18,18 @@ train:
 explain:
 	python -m src.models.explain
 
+drift:
+	python -m src.monitoring.drift_detector
+
+dvc-repro:
+	dvc repro
+
+mlflow-ui:
+	mlflow ui
+
+lint:
+	ruff check .
+
 api:
 	uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 
@@ -27,8 +39,7 @@ app:
 test:
 	pytest tests/ -v
 
-all: data features train explain
+all: data features train explain drift
 
 clean:
 	rm -rf data/raw/ data/processed/ models/*.pkl models/*.joblib reports/figures/*.png
-

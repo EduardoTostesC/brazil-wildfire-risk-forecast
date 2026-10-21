@@ -12,12 +12,12 @@ clear. The target for day D uses fire data from days D+1 to D+7, which is
 information from the future that the model must predict, NOT use as input.
 """
 
-import pandas as pd
+
 import numpy as np
-from pathlib import Path
+import pandas as pd
 
 from src.config import get_project_root, load_config
-from src.data.build_grid import build_grid, assign_to_grid
+from src.data.build_grid import assign_to_grid, build_grid
 
 
 def process_data(config: dict | None = None) -> pd.DataFrame:

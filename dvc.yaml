@@ -1,0 +1,64 @@
+stages:
+  build_grid:
+    cmd: python -m src.data.build_grid
+    deps:
+      - config.yaml
+      - src/data/build_grid.py
+    outs:
+      - data/processed/grid.csv:
+          cache: false
+
+  process_data:
+    cmd: python -m src.data.process_data
+    deps:
+      - data/processed/grid.csv
+      - src/data/process_data.py
+    outs:
+      - data/processed/dataset.parquet:
+          cache: false
+
+  build_features:
+    cmd: python -m src.features.build_features
+    deps:
+      - data/processed/dataset.parquet
+      - src/features/build_features.py
+    outs:
+      - data/processed/features.parquet:
+          cache: false
+
+  train:
+    cmd: python -m src.models.train
+    deps:
+      - data/processed/features.parquet
+      - src/models/train.py
+    outs:
+      - models/lightgbm_model.joblib:
+          cache: false
+      - models/platt_calibrator.joblib:
+          cache: false
+    metrics:
+      - reports/model_comparison.csv:
+          cache: false
+      - reports/multi_horizon_comparison.csv:
+          cache: false
+
+  explain:
+    cmd: python -m src.models.explain
+    deps:
+      - models/lightgbm_model.joblib
+      - src/models/explain.py
+    outs:
+      - reports/figures/shap_summary.png:
+          cache: false
+
+  drift:
+    cmd: python -m src.monitoring.drift_detector
+    deps:
+      - data/processed/features.parquet
+      - src/monitoring/drift_detector.py
+    outs:
+      - reports/figures/drift_summary.png:
+          cache: false
+    metrics:
+      - reports/drift_report.json:
+          cache: false

@@ -42,6 +42,12 @@ Thumbs.db
 # Optuna
 *.db
 
+# MLflow & DVC
+mlruns/
+.dvc/cache/
+.dvc/tmp/
+.dvc/*.local
+
 # Docker
 *.log
 

@@ -4,7 +4,6 @@ Includes a leak detection test that verifies no future data leaks into features.
 """
 
 import sys
-from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -146,22 +145,29 @@ class TestLeakDetection:
         # Day 10 itself: target looks at days 11-17, all zero -> target=0
         # So target=1 for days 3,4,5,6,7,8,9 (indices 2-8)
         horizon = 7
+        targets = []
         for i in range(len(df)):
             future_fires = df["fire_count"].iloc[i+1:i+1+horizon].sum()
-            expected = 1 if future_fires > 0 else 0
-            # This is what the target should be
+            targets.append(1 if future_fires > 0 else 0)
+        assert sum(targets) == 7
+        assert targets[2:9] == [1] * 7
+        assert targets[9] == 0
+
+
+# ── API Fixture ───────────────────────────────────────────────────────────────
+
+@pytest.fixture
+def client():
+    from fastapi.testclient import TestClient
+
+    from api.main import app
+    return TestClient(app)
 
 
 # ── API tests ─────────────────────────────────────────────────────────────────
 
 class TestAPI:
     """Tests for the FastAPI endpoints."""
-
-    @pytest.fixture
-    def client(self):
-        from fastapi.testclient import TestClient
-        from api.main import app
-        return TestClient(app)
 
     def test_root_endpoint(self, client):
         response = client.get("/")
@@ -233,6 +239,40 @@ class TestAPI:
         assert "Invalid horizon_days" in response.json()["detail"]
 
 
+# ── Drift Monitoring tests ───────────────────────────────────────────────────
+
+class TestDriftDetector:
+    """Tests for drift detection calculations and API endpoint."""
+
+    def test_psi_identical_distributions(self):
+        from src.monitoring.drift_detector import calculate_psi
+        rng = np.random.default_rng(42)
+        base = rng.normal(loc=25.0, scale=5.0, size=2000)
+        curr = rng.normal(loc=25.0, scale=5.0, size=2000)
+        psi = calculate_psi(base, curr)
+        # Identical distributions should have negligible PSI (< 0.05)
+        assert psi < 0.05
+
+    def test_psi_shifted_distributions(self):
+        from src.monitoring.drift_detector import calculate_psi
+        rng = np.random.default_rng(42)
+        base = rng.normal(loc=20.0, scale=3.0, size=2000)
+        curr = rng.normal(loc=35.0, scale=3.0, size=2000)
+        psi = calculate_psi(base, curr)
+        # Severely shifted distribution should trigger critical PSI (> 0.25)
+        assert psi > 0.25
+
+    def test_drift_api_endpoint(self, client):
+        """Test GET /drift endpoint returns status 200 and schema."""
+        response = client.get("/drift")
+        assert response.status_code == 200
+        data = response.json()
+        assert "summary" in data
+        assert "features" in data
+        assert data["summary"]["total_monitored"] > 0
+        assert len(data["features"]) > 0
+
+
 # ── Sequential Model (LSTM) tests ─────────────────────────────────────────────
 
 class TestSequentialModel:
@@ -240,6 +280,7 @@ class TestSequentialModel:
 
     def test_lstm_forward_shape(self):
         import torch
+
         from src.models.train_lstm import WildfireLSTM
         model = WildfireLSTM(input_dim=10, hidden_dim=32, num_layers=1)
         x = torch.randn(4, 14, 10)  # batch=4, seq_len=14, features=10

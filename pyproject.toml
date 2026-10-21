@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brazil-wildfire-risk-forecast"
+version = "1.0.0"
+description = "Production ML pipeline predicting 1-day, 3-day, and 7-day wildfire risk across regular geographic grid cells in Mato Grosso, Brazil."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Eduardo Tostes" }
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [
+    ".git",
+    ".dvc",
+    "mlruns",
+    "notebooks",
+    "venv",
+    ".venv",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E501",  # line too long
+    "E402",  # module level import not at top of file
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]

@@ -17,6 +17,7 @@ from pathlib import Path
 
 import joblib
 import lightgbm as lgb
+import matplotlib
 import numpy as np
 import optuna
 import pandas as pd
@@ -32,7 +33,6 @@ from sklearn.metrics import (
 from sklearn.model_selection import GroupKFold
 from sklearn.preprocessing import StandardScaler
 
-import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -593,6 +593,47 @@ def train_all(config: dict | None = None) -> None:
     }
     with open(models_dir / "training_metadata.json", "w") as f:
         json.dump(meta, f, indent=2, default=str)
+
+    # ── 13. MLflow Tracking ───────────────────────────────────────
+    try:
+        import mlflow
+        db_path = (root / "mlflow.db").resolve()
+        mlflow.set_tracking_uri(f"sqlite:///{db_path}")
+        mlflow.set_experiment("brazil-wildfire-risk-forecast")
+        with mlflow.start_run(run_name="lightgbm-calibrated-production") as run:
+            mlflow.log_params(study.best_params)
+            mlflow.log_params({
+                "model_type": "LightGBM + Platt Scaling",
+                "spatial_blocks": "North_Central_South_MT",
+                "seed": seed,
+                "train_size": len(train_df),
+                "test_size": len(test_df),
+                "n_features": len(feature_cols),
+                "p_value_vs_climatology": p_val_vs_clim,
+            })
+            for r in results:
+                m_name = r["Model"].lower().replace(" ", "_").replace("(", "").replace(")", "")
+                for metric_key in ["PR-AUC", "ROC-AUC", "Brier", "Recall@P50"]:
+                    if metric_key in r:
+                        metric_val = float(r[metric_key])
+                        sanitized_key = metric_key.lower().replace("-", "_").replace("@", "_")
+                        mlflow.log_metric(f"{m_name}_{sanitized_key}", metric_val)
+            for h_row in horizon_results:
+                h_name = h_row["horizon"].replace("-", "_")
+                for metric_key in ["PR-AUC", "ROC-AUC", "Brier", "Recall@P50"]:
+                    if metric_key in h_row:
+                        sanitized_key = metric_key.lower().replace("-", "_").replace("@", "_")
+                        mlflow.log_metric(f"{h_name}_{sanitized_key}", float(h_row[metric_key]))
+            mlflow.log_artifact(str(models_dir / "training_metadata.json"))
+            if (root / "reports" / "model_comparison.csv").exists():
+                mlflow.log_artifact(str(root / "reports" / "model_comparison.csv"))
+            if (root / "reports" / "multi_horizon_comparison.csv").exists():
+                mlflow.log_artifact(str(root / "reports" / "multi_horizon_comparison.csv"))
+            for fig_path in figures_dir.glob("*.png"):
+                mlflow.log_artifact(str(fig_path), artifact_path="figures")
+            print(f"\n[MLflow] Experiment run logged successfully! (Run ID: {run.info.run_id})")
+    except Exception as e:
+        print(f"\n[MLflow] Warning: Could not log to MLflow: {e}")
 
     print("\nTraining and validation pipeline complete!")
     return results_df

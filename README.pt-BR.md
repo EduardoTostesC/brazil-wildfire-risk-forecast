@@ -278,11 +278,102 @@ curl -X POST "http://localhost:8000/predict" \
 - **LightGBM**: Modelo principal em gradiente boosting de histograma, com suporte nativo a valores ausentes, peso de desbalanceamento (`scale_pos_weight`) e inferência sub-milissegundo em CPU.
 - **PyTorch**: Utilizado para o benchmark sequencial de Deep Learning recorrente (LSTM).
 - **Optuna**: Otimizador bayesiano de última geração (TPE sampler) com validação em blocos espaciais contíguos.
+- **Platt Scaling**: Calibração logística unidimensional suave que preserva o ranking e reduz o erro de calibração (Brier score de 0.1498 para 0.0927).
 - **SHAP (TreeExplainer)**: Cálculo exato baseado na teoria dos jogos para interpretar modelos em árvore.
-- **FastAPI + Pydantic v2**: Serialização estrita, validação de tipos em nanossegundos e documentação OpenAPI nativa.
-- **Streamlit + Folium**: Prototipação ágil de interfaces geoespaciais sem complexidade de front-end.
-- **Pytest**: Validação automatizada de regras de negócio, testes de API, LSTM e testes de contenção de data leakage (17 testes).
+- **MLflow**: Rastreamento centralizado de experimentos, métricas históricas de baselines, modelos, múltiplos horizontes e registro de artefatos (`sqlite:///mlflow.db`).
+- **DVC (Data Version Control)**: Orquestração de DAG reproduzível (`dvc.yaml`), cache de etapas intermediárias e versionamento de dados.
+- **Detecção Estatística de Drift**: Monitoramento de Population Stability Index (PSI) e teste bicaudal Kolmogorov-Smirnov (KS) para detectar desvio de covariáveis.
+- **FastAPI + Pydantic v2**: Serialização estrita, validação de tipos em nanossegundos, documentação OpenAPI nativa e endpoint `/drift`.
+- **Streamlit + Folium**: Prototipação ágil de interfaces geoespaciais com seletor de horizonte e escala cromática dinâmica.
+- **Pytest**: Validação automatizada com 20 testes unitários e de integração prevenindo vazamento de dados, falhas de limites, métricas de drift e regressões de API.
+- **Ruff**: Linter de altíssima performance garantindo aderência rigorosa à PEP-8 e clean architecture.
 - **Parquet / PyArrow**: Armazenamento colunar comprimido e eficiente para 1,8M+ registros.
+
+---
+
+## 🔄 MLOps, Orquestração de Pipeline e Monitoramento (Bloco C)
+
+Um sistema de Machine Learning em produção exige reprodutibilidade ponta a ponta, rastreamento contínuo de experimentos, validação automatizada de qualidade e detecção precoce de desvio de distribuição.
+
+### 1. Grafo Acíclico Dirigido (DAG) com DVC (`dvc.yaml`)
+
+Todo o ciclo de vida dos dados e modelagem é estruturado em um DAG gerenciado via DVC em [`dvc.yaml`](dvc.yaml). Cada etapa especifica suas dependências exatas de código, entradas de dados e artefatos de saída:
+
+```text
+      +------------+          
+      | build_grid |          
+      +------------+          
+              *               
+      +--------------+        
+      | process_data |        
+      +--------------+        
+              *               
+    +----------------+        
+    | build_features |        
+    +----------------+        
+         *        *           
+       **          **         
+      *              *        
++-------+         +-------+   
+| drift |         | train |   
++-------+         +-------+   
+                      *       
+                 +---------+  
+                 | explain |  
+                 +---------+  
+```
+
+Para inspecionar ou reproduzir o pipeline:
+```bash
+# Visualizar o grafo de dependências no terminal
+dvc dag
+
+# Reproduzir o pipeline completo (ou apenas etapas desatualizadas)
+dvc repro
+```
+
+### 2. Rastreamento de Experimentos com MLflow
+
+Todos os ciclos de treino, hiperparâmetros da busca Bayesiana com Optuna, métricas multi-horizonte e gráficos são automaticamente persistidos em banco de dados SQLite local (`sqlite:///mlflow.db`):
+
+- **Parâmetros Rastreados**: Melhores hiperparâmetros (`n_estimators`, `learning_rate`, `num_leaves`, `reg_alpha`, etc.), estratégia de blocos espaciais, semente pseudoaleatória e dimensões amostrais.
+- **Métricas Registradas**: PR-AUC, ROC-AUC, Brier score e Recall@P50 para horizontes de 1d, 3d e 7d (modelos brutos e calibrados por Platt), além dos baselines (Persistência, Climatologia e Regressão Logística).
+- **Artefatos Armazenados**: Metadados completos do modelo (`training_metadata.json`), relatórios comparativos em CSV e figuras em alta resolução.
+
+Para abrir a interface visual do MLflow:
+```bash
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+# Acesse no navegador em http://localhost:5000
+```
+
+### 3. Monitoramento de Data Drift e Desvio de Conceito (`src/monitoring/drift_detector.py`)
+
+Regimes climáticos e ambientais variam expressivamente ao longo dos anos (como secas históricas e ondas de calor associadas a eventos intensos de El Niño). Para evitar degradação silenciosa em produção, o sistema calcula:
+
+1. **Population Stability Index (PSI)**:
+   - $\text{PSI} < 0.10$: Distribuição estável (Nenhuma ação requerida).
+   - $0.10 \le \text{PSI} < 0.25$: Desvio moderado (Alerta de aviso, manter sob vigilância).
+   - $\text{PSI} \ge 0.25$: Desvio crítico (Ação necessária, acionar pipeline de retreino).
+2. **Teste Kolmogorov-Smirnov (KS) Bicaudal**: Teste não-paramétrico contínuo avaliando se a base histórica de treino e os dados operacionais recentes pertencem à mesma distribuição subjacente.
+
+#### Resultados Reais de Drift (Base Histórica 2016–2023 vs Operação 2024–2025):
+- **Features Monitoradas**: 11 variáveis climáticas e biofísicas centrais.
+- **Variáveis Estáveis (9/11)**: `PRECTOTCORR` ($\text{PSI} = 0.0094$), `WS10M` ($\text{PSI} = 0.0084$), `fire_count_7d` ($\text{PSI} = 0.0526$), `neighbor_fire_7d` ($\text{PSI} = 0.0381$), `dtr` ($\text{PSI} = 0.0560$), etc.
+- **Desvio Moderado Detectado (2/11)**:
+  - `T2M_MAX` ($\text{PSI} = 0.1503$, $p < 0.001$): A temperatura máxima média saltou de **32.0°C** no período base para **33.4°C** em 2024–2025, capturando com exatidão a onda extrema de calor no Centro-Oeste durante o El Niño de 2024.
+  - `vpd` ($\text{PSI} = 0.1067$, $p < 0.001$): O Déficit de Pressão de Vapor médio subiu de **1.17 kPa** para **1.46 kPa**, refletindo condições atmosféricas significativamente mais secas e propensas à propagação de fogo.
+  - `dry_days`: A média de dias consecutivos sem chuva aumentou de **10.0 dias** para **13.0 dias**.
+- **Desvio Crítico (0/11)**: Nenhuma variável ultrapassou o limiar de $\text{PSI} \ge 0.25$.
+
+O módulo exporta automaticamente [`reports/drift_report.json`](reports/drift_report.json) e o gráfico [`reports/figures/drift_summary.png`](reports/figures/drift_summary.png), disponibilizando os dados em tempo real no endpoint da API:
+```bash
+curl http://localhost:8000/drift
+```
+
+### 4. Integração Contínua e Container Docker de Produção
+
+- **GitHub Actions CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): Matriz automatizada de testes no Ubuntu (Python 3.11 e 3.12), executando `ruff check .` e a suíte completa de 20 testes em cada push e pull request.
+- **Container de Produção** ([`Dockerfile`](Dockerfile)): Construído sobre `python:3.12-slim`, inclui a biblioteca OpenMP do Linux (`libgomp1`) necessária para o LightGBM, `curl` para healthcheck automatizado, expõe portas 8000 (FastAPI) e 8501 (Streamlit), com diretiva `HEALTHCHECK` consultando periodicamente `http://localhost:8000/health`.
 
 ---
 
@@ -291,19 +382,22 @@ curl -X POST "http://localhost:8000/predict" \
 ```text
 brazil-wildfire-risk-forecast/
 ├── .github/
-│   └── workflows/ci.yml          # CI no GitHub Actions (lint, tipos, pytest)
-├── .gitignore                    # Exclusão de arquivos pesados e temporários
+│   └── workflows/ci.yml          # CI no GitHub Actions (ruff lint, multi-python, pytest)
+├── .dvc/                         # Configuração interna do DVC
+├── .gitignore                    # Exclusão de arquivos pesados, virtualenvs e mlruns
 ├── config.yaml                   # Configurações globais (grade, região, períodos)
-├── Dockerfile                    # Container Docker para API e App
+├── Dockerfile                    # Container Docker com OpenMP e healthcheck
+├── dvc.yaml                      # Definição do grafo DAG de etapas do DVC
 ├── LICENSE                       # Licença MIT
-├── Makefile                      # Automação de tarefas (Linux/macOS)
+├── Makefile                      # Automação de tarefas (make dvc-repro, make drift, etc.)
+├── pyproject.toml                # Metadados de empacotamento, configs de ruff e pytest
 ├── run_pipeline.ps1              # Pipeline automatizado em comando único (Windows PowerShell)
 ├── README.md                     # Versão em inglês
 ├── README.pt-BR.md               # Versão em português (esta página)
-├── requirements.txt              # Dependências com versões exatas
+├── requirements.txt              # Dependências de produção fixadas
 │
 ├── api/
-│   └── main.py                   # API FastAPI com endpoint multi-horizonte /predict e /health
+│   └── main.py                   # API FastAPI com endpoints /predict, /health e /drift
 │
 ├── app/
 │   └── streamlit_app.py          # Dashboard interativo com mapa Folium e seletor de horizonte
@@ -332,9 +426,10 @@ brazil-wildfire-risk-forecast/
 │
 ├── notebooks/
 │   ├── 01_eda.ipynb              # Análise exploratória e sazonalidade narrada
-│   └── 02_modeling.ipynb         # Modelagem, baselines, calibração, multi-horizonte e LSTM
+│   └── 02_modeling.ipynb         # Full model benchmarking, multi-horizon & LSTM comparison
 │
 ├── reports/
+│   ├── drift_report.json         # Relatório automatizado de drift de features (PSI e KS)
 │   ├── feature_importance.csv    # Ranking SHAP de variáveis
 │   ├── model_comparison.csv      # Tabela comparativa de métricas reais
 │   ├── multi_horizon_comparison.csv # Métricas nos horizontes de 1d, 3d e 7d
@@ -344,6 +439,7 @@ brazil-wildfire-risk-forecast/
 │       ├── accuracy_by_month.png # Acurácia temporal por mês
 │       ├── accuracy_by_region.png# Acurácia por macrorregião de MT
 │       ├── calibration_curve.png # Curva de calibração de probabilidade
+│       ├── drift_summary.png     # Gráfico comparativo de distribuição e drift
 │       ├── lstm_vs_lgbm.png      # Curvas comparativas PR/ROC da LSTM vs LightGBM
 │       ├── shap_bar.png          # Gráfico de barras SHAP
 │       └── shap_summary.png      # Beeswarm plot SHAP
@@ -357,13 +453,15 @@ brazil-wildfire-risk-forecast/
 │   │   └── process_data.py       # Agregação espaço-temporal e alvos multi-horizonte
 │   ├── features/
 │   │   └── build_features.py     # 39 variáveis biofísicas sem vazamento (VPD, DTR, FWI)
-│   └── models/
-│       ├── train.py              # Treino, busca Bayesiana, calibração e multi-horizonte
-│       ├── train_lstm.py         # Benchmark sequencial Deep Learning em PyTorch
-│       └── explain.py            # SHAP TreeExplainer
+│   ├── models/
+│   │   ├── train.py              # Treino, busca Bayesiana, Platt e rastreamento MLflow
+│   │   ├── train_lstm.py         # Benchmark sequencial Deep Learning em PyTorch
+│   │   └── explain.py            # SHAP TreeExplainer
+│   └── monitoring/
+│       └── drift_detector.py     # Monitor de drift estatístico com PSI e teste KS
 │
 └── tests/
-    └── test_pipeline.py          # 17 testes unitários (grade, leak, API, limites, LSTM, config)
+    └── test_pipeline.py          # 20 testes unitários (grade, leak, API, limites, drift, LSTM)
 ```
 
 ---

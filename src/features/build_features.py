@@ -206,7 +206,6 @@ def _add_neighbor_features(df: pd.DataFrame, cfg: dict) -> None:
     neighbor_melted["date"] = pd.to_datetime(neighbor_melted["date"])
 
     # Merge into main dataframe
-    df_idx = df.set_index(["grid_id", "date"]).index
     neighbor_melted = neighbor_melted.set_index(["grid_id", "date"])
     df["neighbor_fire_7d"] = df.set_index(["grid_id", "date"]).join(
         neighbor_melted, how="left"

@@ -46,15 +46,15 @@
   "test_size": 366344,
   "spatial_block_cv": "Contiguous (North / Central / South MT)",
   "best_params": {
-    "n_estimators": 251,
-    "learning_rate": 0.022711106732108986,
-    "max_depth": 5,
-    "num_leaves": 55,
-    "min_child_samples": 154,
-    "subsample": 0.9062935001654231,
-    "colsample_bytree": 0.8678960396606045,
-    "reg_alpha": 0.1097303965014448,
-    "reg_lambda": 0.009415368595727648
+    "n_estimators": 203,
+    "learning_rate": 0.02801895126690664,
+    "max_depth": 6,
+    "num_leaves": 57,
+    "min_child_samples": 175,
+    "subsample": 0.9041689133187472,
+    "colsample_bytree": 0.8600897137634251,
+    "reg_alpha": 3.1818822659182637,
+    "reg_lambda": 0.16511270409815212
   },
   "p_value_vs_climatology": 0.0,
   "p_value_vs_persistence": 0.0,
@@ -103,16 +103,16 @@
     },
     "LightGBM (Platt Calibrated)": {
       "PR-AUC_95CI": [
-        0.6172,
-        0.6387
+        0.6197,
+        0.6416
       ],
       "ROC-AUC_95CI": [
-        0.8791,
-        0.8862
+        0.8802,
+        0.8871
       ],
       "Brier_95CI": [
-        0.0915,
-        0.0945
+        0.0911,
+        0.0942
       ]
     }
   },
@@ -121,28 +121,28 @@
       "horizon": "7-day",
       "horizon_desc": "D+1 to D+7",
       "positive_rate": "16.48%",
-      "PR-AUC": 0.6274,
-      "ROC-AUC": 0.8823,
-      "Brier": 0.0931,
-      "Recall@P50": 0.6734
+      "PR-AUC": 0.6301,
+      "ROC-AUC": 0.8833,
+      "Brier": 0.0927,
+      "Recall@P50": 0.6753
     },
     {
       "horizon": "1-day",
       "horizon_desc": "D+1",
       "positive_rate": "4.26%",
-      "PR-AUC": 0.3666,
-      "ROC-AUC": 0.8953,
-      "Brier": 0.0326,
-      "Recall@P50": 0.2927
+      "PR-AUC": 0.368,
+      "ROC-AUC": 0.896,
+      "Brier": 0.0325,
+      "Recall@P50": 0.2958
     },
     {
       "horizon": "3-day",
       "horizon_desc": "D+1 to D+3",
       "positive_rate": "9.67%",
-      "PR-AUC": 0.533,
-      "ROC-AUC": 0.8875,
-      "Brier": 0.0625,
-      "Recall@P50": 0.5013
+      "PR-AUC": 0.5341,
+      "ROC-AUC": 0.8882,
+      "Brier": 0.0624,
+      "Recall@P50": 0.5018
     }
   ],
   "results": [
@@ -169,17 +169,17 @@
     },
     {
       "model": "LightGBM (Raw)",
-      "PR-AUC": 0.6274,
-      "ROC-AUC": 0.8823,
-      "Brier": 0.1501,
-      "Recall@P50": 0.6734
+      "PR-AUC": 0.6301,
+      "ROC-AUC": 0.8833,
+      "Brier": 0.1498,
+      "Recall@P50": 0.6753
     },
     {
       "model": "LightGBM (Platt Calibrated)",
-      "PR-AUC": 0.6274,
-      "ROC-AUC": 0.8823,
-      "Brier": 0.0931,
-      "Recall@P50": 0.6734
+      "PR-AUC": 0.6301,
+      "ROC-AUC": 0.8833,
+      "Brier": 0.0927,
+      "Recall@P50": 0.6753
     }
   ]
 }

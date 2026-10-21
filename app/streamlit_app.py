@@ -13,12 +13,12 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_PROJECT_ROOT))
 
+import folium
 import joblib
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-import folium
 from streamlit_folium import st_folium
 
 st.set_page_config(
