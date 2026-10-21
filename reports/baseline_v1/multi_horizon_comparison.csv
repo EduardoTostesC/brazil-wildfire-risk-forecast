@@ -1,0 +1,4 @@
+horizon,horizon_desc,positive_rate,PR-AUC,ROC-AUC,Brier,Recall@P50
+7-day,D+1 to D+7,16.48%,0.6301,0.8833,0.0927,0.6753
+1-day,D+1,4.26%,0.368,0.896,0.0325,0.2958
+3-day,D+1 to D+3,9.67%,0.5341,0.8882,0.0624,0.5018
