@@ -97,6 +97,17 @@ def download_fire_data(config: dict | None = None) -> Path:
         elif "state" in df.columns:
             df = df[df["state"].str.upper().str.strip() == state_name].copy()
 
+        # Enforce reference satellite filtering if multiple sensors present
+        if "satelite" in df.columns:
+            ref_mask = df["satelite"].astype(str).str.upper().str.contains("AQUA|REF")
+            if ref_mask.any():
+                df = df[ref_mask].copy()
+
+        # Deduplicate identical transmission packets
+        dedup_keys = [c for c in ["lat", "lon", "data_hora_gmt"] if c in df.columns]
+        if dedup_keys:
+            df = df.drop_duplicates(subset=dedup_keys).copy()
+
         df.to_csv(out_file, index=False)
         all_frames.append(df)
         print(f"  [saved] {out_file.name} — {len(df):,} hotspots")

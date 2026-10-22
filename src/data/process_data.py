@@ -43,7 +43,20 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
 
     fire_df = pd.read_csv(fire_file)
 
-    # Parse date from the datetime column
+    # 1.1 Hotspot Deduplication & Telemetry Validation
+    dedup_cols = ["lat", "lon"]
+    if "data_hora_gmt" in fire_df.columns:
+        dedup_cols.append("data_hora_gmt")
+    elif "datahora" in fire_df.columns:
+        dedup_cols.append("datahora")
+
+    init_count = len(fire_df)
+    fire_df = fire_df.drop_duplicates(subset=dedup_cols).copy()
+    print(f"  Hotspot deduplication: {init_count:,} -> {len(fire_df):,} records (removed {init_count - len(fire_df):,} duplicate packets)")
+
+    # 1.2 Timezone & Date Resolution:
+    # AQUA M-T reference satellite overpasses at ~13:30 local solar time (afternoon pass, ~17:30 UTC).
+    # GMT/UTC dates are mapped directly to corresponding local operational observation days.
     if "data_hora_gmt" in fire_df.columns:
         fire_df["date"] = pd.to_datetime(
             fire_df["data_hora_gmt"], errors="coerce"

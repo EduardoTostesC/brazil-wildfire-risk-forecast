@@ -463,6 +463,145 @@ class TestTerritorialMasking:
         assert (grid["state_status"] == "inside").sum() > 200
 
 
+# ── Feature Engineering Unit Tests ───────────────────────────────────────────
+
+class TestFeatureEngineeringUnitFunctions:
+    """Unit tests for standalone biophysical and feature engineering routines."""
+
+    def test_compute_vpd(self):
+        from src.features.build_features import compute_vpd
+        # At 100% relative humidity, vapor pressure deficit must be identically 0.0
+        vpd_sat = compute_vpd([30.0], [20.0], [100.0])
+        assert vpd_sat[0] == pytest.approx(0.0, abs=1e-5)
+
+        # At 50% relative humidity and warm temp, VPD should be positive (~1.5 to 2.5 kPa)
+        vpd_dry = compute_vpd([35.0], [25.0], [40.0])
+        assert vpd_dry[0] > 1.0
+
+    def test_compute_dtr(self):
+        from src.features.build_features import compute_dtr
+        dtr = compute_dtr([34.5], [22.0])
+        assert dtr[0] == pytest.approx(12.5, abs=1e-5)
+
+    def test_compute_fwi_proxy(self):
+        from src.features.build_features import compute_fwi_proxy
+        # High fire weather condition: 38C, 5 m/s wind, 20% RH
+        fwi_high = compute_fwi_proxy([38.0], [5.0], [20.0])
+        # Low fire weather condition: 18C, 1 m/s wind, 85% RH
+        fwi_low = compute_fwi_proxy([18.0], [1.0], [85.0])
+        assert fwi_high[0] > fwi_low[0]
+
+    def test_validate_meteorological_variables(self):
+        from src.features.build_features import validate_meteorological_variables
+        df_raw = pd.DataFrame({
+            "RH2M": [-10.0, 115.0, 65.0],
+            "WS10M": [-3.0, 4.0, 0.0],
+            "PRECTOTCORR": [-1.0, 12.0, 0.0],
+            "T2M_MAX": [20.0, 30.0, 32.0],
+            "T2M_MIN": [25.0, 18.0, 20.0],  # First row inverted
+        })
+        cleaned = validate_meteorological_variables(df_raw)
+        assert (cleaned["RH2M"] >= 0.0).all() and (cleaned["RH2M"] <= 100.0).all()
+        assert (cleaned["WS10M"] >= 0.0).all()
+        assert (cleaned["PRECTOTCORR"] >= 0.0).all()
+        # Inverted temperatures should be corrected so T_MAX >= T_MIN
+        assert (cleaned["T2M_MAX"] >= cleaned["T2M_MIN"]).all()
+
+
+# ── Risk Tiers Consistency Tests ──────────────────────────────────────────────
+
+class TestRiskTiersConsistency:
+    """Tests ensuring API and Dashboard share centralized risk definitions."""
+
+    def test_risk_classification_ranges(self):
+        from src.models.risk_tiers import DEFAULT_RISK_CONFIG, classify_risk
+        assert classify_risk(0.10) == "low"
+        assert classify_risk(DEFAULT_RISK_CONFIG.low_cutoff - 0.01) == "low"
+        assert classify_risk(DEFAULT_RISK_CONFIG.low_cutoff) == "medium"
+        assert classify_risk(0.40) == "medium"
+        assert classify_risk(DEFAULT_RISK_CONFIG.high_cutoff - 0.01) == "medium"
+        assert classify_risk(DEFAULT_RISK_CONFIG.high_cutoff) == "high"
+        assert classify_risk(0.95) == "high"
+
+    def test_risk_metadata_matches_config(self):
+        from src.models.risk_tiers import DEFAULT_RISK_CONFIG, get_risk_color, get_risk_metadata
+        meta = get_risk_metadata()
+        assert "tiers" in meta
+        assert meta["thresholds"]["low_cutoff"] == DEFAULT_RISK_CONFIG.low_cutoff
+        assert meta["thresholds"]["high_cutoff"] == DEFAULT_RISK_CONFIG.high_cutoff
+        assert get_risk_color("low") == DEFAULT_RISK_CONFIG.color_low
+        assert get_risk_color("high") == DEFAULT_RISK_CONFIG.color_high
+
+
+# ── Operational Threshold & Out-of-Sample Tests ───────────────────────────────
+
+class TestOutOfSampleThresholds:
+    """Verify that operational decision thresholds are calibrated out-of-sample."""
+
+    def test_threshold_selection_and_application(self):
+        from src.models.train import evaluate_fixed_thresholds, select_operational_thresholds
+        rng = np.random.default_rng(42)
+
+        # Simulated calibration holdout (1000 samples)
+        y_cal = rng.binomial(1, 0.25, size=1000)
+        p_cal = np.clip(y_cal * 0.5 + rng.uniform(0.1, 0.4, size=1000), 0.0, 1.0)
+        thresholds = select_operational_thresholds(y_cal, p_cal)
+
+        assert "T_P50" in thresholds
+        assert "T_F1" in thresholds
+        assert 0.0 < thresholds["T_P50"] < 1.0
+        assert 0.0 < thresholds["T_F1"] < 1.0
+
+        # Apply frozen thresholds to unseen test set
+        y_test = rng.binomial(1, 0.25, size=1000)
+        p_test = np.clip(y_test * 0.5 + rng.uniform(0.1, 0.4, size=1000), 0.0, 1.0)
+        metrics = evaluate_fixed_thresholds(y_test, p_test, thresholds)
+
+        assert "Precision@T_P50" in metrics
+        assert "Recall@T_P50" in metrics
+        assert "F1@T_F1" in metrics
+        assert 0.0 <= metrics["Precision@T_P50"] <= 1.0
+        assert 0.0 <= metrics["Recall@T_P50"] <= 1.0
+
+
+# ── Artifact Compatibility & Serialization Tests ──────────────────────────────
+
+class TestArtifactCompatibility:
+    """Verify model and calibrator artifacts load cleanly without sklearn multi_class errors."""
+
+    def test_platt_calibrator_serialization(self):
+        import io
+
+        import joblib
+
+        from src.models.calibration import PlattCalibrator
+        cal = PlattCalibrator(coef_=1.8542, intercept_=-0.4123, is_fitted_=True)
+        buf = io.BytesIO()
+        joblib.dump(cal, buf)
+        buf.seek(0)
+        loaded = joblib.load(buf)
+
+        assert loaded.coef_ == pytest.approx(1.8542)
+        assert loaded.intercept_ == pytest.approx(-0.4123)
+        assert loaded.is_fitted_ is True
+        # Verify no sklearn LogisticRegression internal state leakage
+        assert not hasattr(loaded, "multi_class")
+
+    def test_loaded_artifacts_predict_successfully(self):
+        import joblib
+        root = Path(__file__).resolve().parents[1]
+        model_path = root / "models" / "lightgbm_model.joblib"
+        cal_path = root / "models" / "platt_calibrator.joblib"
+        if model_path.exists() and cal_path.exists():
+            model = joblib.load(model_path)
+            cal = joblib.load(cal_path)
+            # Create synthetic feature row
+            X_dummy = np.zeros((1, model.n_features_), dtype=np.float32)
+            raw_p = float(model.predict_proba(X_dummy)[0, 1])
+            cal_p = float(cal.calibrate(np.array([raw_p]))[0])
+            assert 0.0 <= cal_p <= 1.0
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
 

@@ -135,7 +135,7 @@ class PredictionResponse(BaseModel):
     date: str
     horizon_days: int
     probability: float = Field(..., description="Calibrated probability of fire in forecast horizon [0, 1]")
-    risk_level: str = Field(..., description="Risk tier: low (<0.3), medium (0.3-0.6), or high (>=0.6)")
+    risk_level: str = Field(..., description="Risk tier: low (<0.25), medium (0.25-0.55), or high (>=0.55)")
     grid_id: str = Field(..., description="Assigned geographic grid cell identifier")
 
     # Explicit temporal contract
@@ -208,15 +208,7 @@ class HealthResponse(BaseModel):
     supported_inference_modes: dict[str, str]
 
 
-# ── Helper functions ──────────────────────────────────────────────────────────
-
-def _classify_risk(probability: float) -> str:
-    """Classify calibrated probability into operational risk tiers."""
-    if probability < 0.3:
-        return "low"
-    elif probability < 0.6:
-        return "medium"
-    return "high"
+from src.models.risk_tiers import classify_risk
 
 
 def _resolve_grid_cell(lat: float, lon: float) -> tuple[str, dict]:
@@ -318,19 +310,29 @@ def _get_feature_vector(
 
 
 def _calibrate_probability(raw_prob: float, calibrator: object | None) -> float:
-    """Apply probability calibrator returning a calibrated float in [0, 1]."""
+    """Apply probability calibrator returning a calibrated float in [0, 1].
+
+    Raises HTTPException(500) if a loaded calibrator fails, strictly preventing
+    silent degradation to uncalibrated outputs.
+    """
     if calibrator is None:
         return round(float(np.clip(raw_prob, 0.0, 1.0)), 4)
 
     try:
+        if hasattr(calibrator, "calibrate"):
+            cal_val = float(calibrator.calibrate(np.array([raw_prob]))[0])
+            return round(float(np.clip(cal_val, 0.0, 1.0)), 4)
+
         from scipy.special import logit
         raw_logit = logit(np.clip(raw_prob, 1e-6, 1.0 - 1e-6)).reshape(-1, 1)
-        # PlattCalibrator or scikit-learn LogisticRegression
         cal_probs = calibrator.predict_proba(raw_logit)
         prob = float(cal_probs[0, 1]) if cal_probs.ndim == 2 else float(cal_probs[1])
         return round(float(np.clip(prob, 0.0, 1.0)), 4)
-    except Exception:
-        return round(float(np.clip(raw_prob, 0.0, 1.0)), 4)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Probability calibration failed on model output: {e}",
+        )
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
@@ -403,7 +405,7 @@ def predict(request: PredictionRequest) -> PredictionResponse:
         date=issue_date,
         horizon_days=request.horizon_days,
         probability=cal_prob,
-        risk_level=_classify_risk(cal_prob),
+        risk_level=classify_risk(cal_prob),
         grid_id=grid_id,
         issue_date=issue_date,
         observation_cutoff=obs_cutoff,
@@ -481,7 +483,7 @@ def explain(request: ExplainRequest) -> ExplainResponse:
         date=issue_date,
         horizon_days=request.horizon_days,
         probability=cal_prob,
-        risk_level=_classify_risk(cal_prob),
+        risk_level=classify_risk(cal_prob),
         grid_id=grid_id,
         shap_values=shap_dict,
         top_positive=top_positive,

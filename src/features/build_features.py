@@ -21,6 +21,45 @@ import pandas as pd
 from src.config import get_project_root, load_config
 
 
+def validate_meteorological_variables(df: pd.DataFrame) -> pd.DataFrame:
+    """Validate and enforce physical atmospheric boundaries on meteorological inputs."""
+    df = df.copy()
+    if "RH2M" in df.columns:
+        df["RH2M"] = np.clip(df["RH2M"], 0.0, 100.0)
+    if "WS10M" in df.columns:
+        df["WS10M"] = np.clip(df["WS10M"], 0.0, None)
+    if "PRECTOTCORR" in df.columns:
+        df["PRECTOTCORR"] = np.clip(df["PRECTOTCORR"], 0.0, None)
+    if "T2M_MAX" in df.columns and "T2M_MIN" in df.columns:
+        inverted = df["T2M_MAX"] < df["T2M_MIN"]
+        if inverted.any():
+            t_max_orig = df.loc[inverted, "T2M_MAX"].copy()
+            df.loc[inverted, "T2M_MAX"] = df.loc[inverted, "T2M_MIN"]
+            df.loc[inverted, "T2M_MIN"] = t_max_orig
+    return df
+
+
+def compute_vpd(t_max: np.ndarray, t_min: np.ndarray, rh: np.ndarray) -> np.ndarray:
+    """Compute Vapor Pressure Deficit (kPa) using Tetens formulation."""
+    t_mean = (np.asarray(t_max) + np.asarray(t_min)) / 2.0
+    es = 0.61078 * np.exp((17.27 * t_mean) / (t_mean + 237.3))
+    return es * np.clip(1.0 - (np.asarray(rh) / 100.0), 0.0, None)
+
+
+def compute_dtr(t_max: np.ndarray, t_min: np.ndarray) -> np.ndarray:
+    """Compute Diurnal Temperature Range (°C)."""
+    return np.asarray(t_max) - np.asarray(t_min)
+
+
+def compute_fwi_proxy(t_max: np.ndarray, ws: np.ndarray, rh: np.ndarray) -> np.ndarray:
+    """Compute Fire Weather Index proxy combining thermal, wind, and humidity forcings."""
+    return np.clip(
+        (np.asarray(t_max) - 15.0) * (1.0 + np.asarray(ws)) / (np.asarray(rh) + 1.0),
+        0.0,
+        None,
+    )
+
+
 def build_features(config: dict | None = None) -> pd.DataFrame:
     """Load the processed dataset and add engineered features.
 
@@ -37,6 +76,7 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
     ds_path = root / "data" / "processed" / "dataset.parquet"
     df = pd.read_parquet(ds_path)
     df = df.sort_values(["grid_id", "date"]).reset_index(drop=True)
+    df = validate_meteorological_variables(df)
 
     print(f"Loaded dataset: {df.shape}")
     print("Building features (backward-looking only)...")
@@ -82,15 +122,12 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
     # --- 4. Biophysical & Fire Weather Indices ---
     print("  [4/6] Biophysical & Fire Weather Indices (VPD, DTR, FWI proxy)...")
     if "T2M_MAX" in df.columns and "T2M_MIN" in df.columns and "RH2M" in df.columns:
-        t_mean = (df["T2M_MAX"] + df["T2M_MIN"]) / 2.0
-        # Tetens formulation for saturation vapor pressure (kPa)
-        es = 0.61078 * np.exp((17.27 * t_mean) / (t_mean + 237.3))
-        df["vpd"] = es * np.clip(1.0 - (df["RH2M"] / 100.0), 0.0, None)
-        df["dtr"] = df["T2M_MAX"] - df["T2M_MIN"]
-        df["fwi_proxy"] = np.clip(
-            (df["T2M_MAX"] - 15.0) * (1.0 + df["WS10M"]) / (df["RH2M"] + 1.0),
-            0.0,
-            None,
+        df["vpd"] = compute_vpd(df["T2M_MAX"].values, df["T2M_MIN"].values, df["RH2M"].values)
+        df["dtr"] = compute_dtr(df["T2M_MAX"].values, df["T2M_MIN"].values)
+        df["fwi_proxy"] = compute_fwi_proxy(
+            df["T2M_MAX"].values,
+            df["WS10M"].values if "WS10M" in df.columns else np.zeros(len(df)),
+            df["RH2M"].values,
         )
 
         for col in ["vpd", "dtr", "fwi_proxy"]:
@@ -101,9 +138,11 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
                 )
 
     # --- 5. Dry spell (consecutive days without rain) ---
-    print("  [5/6] Dry spell...")
+    print("  [5/6] Dry spell (missing precipitation separated from 0mm)...")
     if "PRECTOTCORR" in df.columns:
-        df["is_dry"] = (df["PRECTOTCORR"].fillna(0) < 1.0).astype(int)
+        precip_valid = df["PRECTOTCORR"].notna()
+        # Strictly positive rain test: dry day requires valid observation < 1.0mm
+        df["is_dry"] = np.where(precip_valid, (df["PRECTOTCORR"] < 1.0).astype(int), 0)
         df["dry_days"] = (
             df.groupby("grid_id")["is_dry"]
             .transform(_consecutive_count)

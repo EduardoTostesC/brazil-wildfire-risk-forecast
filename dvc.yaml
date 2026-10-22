@@ -4,6 +4,7 @@ stages:
     deps:
       - config.yaml
       - src/data/build_grid.py
+      - data/geo/mato_grosso_ibge.geojson
     outs:
       - data/processed/grid.csv:
           cache: false
@@ -11,6 +12,7 @@ stages:
   process_data:
     cmd: python -m src.data.process_data
     deps:
+      - config.yaml
       - data/processed/grid.csv
       - src/data/process_data.py
     outs:
@@ -20,6 +22,7 @@ stages:
   build_features:
     cmd: python -m src.features.build_features
     deps:
+      - config.yaml
       - data/processed/dataset.parquet
       - src/features/build_features.py
     outs:
@@ -29,13 +32,27 @@ stages:
   train:
     cmd: python -m src.models.train
     deps:
+      - config.yaml
       - data/processed/features.parquet
       - src/models/train.py
       - src/models/calibration.py
+      - src/models/risk_tiers.py
     outs:
       - models/lightgbm_model.joblib:
           cache: false
       - models/platt_calibrator.joblib:
+          cache: false
+      - models/lightgbm_1d.joblib:
+          cache: false
+      - models/lightgbm_3d.joblib:
+          cache: false
+      - models/platt_calibrator_1d.joblib:
+          cache: false
+      - models/platt_calibrator_3d.joblib:
+          cache: false
+      - models/feature_cols.joblib:
+          cache: false
+      - models/training_metadata.json:
           cache: false
     metrics:
       - reports/model_comparison.csv:
@@ -47,6 +64,20 @@ stages:
       - reports/ablation_study.csv:
           cache: false
       - reports/walk_forward_metrics.csv:
+          cache: false
+
+  train_lstm:
+    cmd: python -m src.models.train_lstm
+    deps:
+      - data/processed/dataset.parquet
+      - data/processed/grid.csv
+      - reports/model_comparison.csv
+      - src/models/train_lstm.py
+    outs:
+      - models/lstm_model.pt:
+          cache: false
+    metrics:
+      - reports/lstm_comparison.csv:
           cache: false
 
   explain:
@@ -69,4 +100,3 @@ stages:
     metrics:
       - reports/drift_report.json:
           cache: false
-

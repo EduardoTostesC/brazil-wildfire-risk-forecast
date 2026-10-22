@@ -26,6 +26,7 @@ import pandas as pd
 from sklearn.calibration import calibration_curve
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
+    auc,
     average_precision_score,
     brier_score_loss,
     precision_recall_curve,
@@ -130,7 +131,7 @@ def climatology_baseline(
 def _recall_at_precision(
     y_true: np.ndarray, y_prob: np.ndarray, min_precision: float = 0.50
 ) -> float:
-    """Calculate maximum recall achievable at precision >= min_precision."""
+    """Calculate maximum recall achievable at precision >= min_precision (unconstrained search)."""
     precision, recall, _ = precision_recall_curve(y_true, y_prob)
     mask = precision >= min_precision
     return float(recall[mask].max() if mask.any() else 0.0)
@@ -139,10 +140,16 @@ def _recall_at_precision(
 def compute_metrics(
     y_true: np.ndarray, y_prob: np.ndarray, name: str
 ) -> dict:
-    """Compute comprehensive point evaluation metrics."""
+    """Compute comprehensive point evaluation metrics.
+
+    Differentiates Average Precision (AP) from trapezoidal PR-AUC to prevent
+    optimistic interpolation bias over non-monotonic PR trajectories.
+    """
     y_prob = np.clip(y_prob, 1e-7, 1.0 - 1e-7)
 
-    pr_auc = average_precision_score(y_true, y_prob)
+    ap = average_precision_score(y_true, y_prob)
+    prec, rec, _ = precision_recall_curve(y_true, y_prob)
+    pr_auc_trap = auc(rec, prec)
     roc_auc = roc_auc_score(y_true, y_prob)
     brier = brier_score_loss(y_true, y_prob)
     ece = compute_ece(y_true, y_prob, n_bins=10)
@@ -150,7 +157,9 @@ def compute_metrics(
 
     return {
         "model": name,
-        "PR-AUC": round(float(pr_auc), 4),
+        "PR-AUC": round(float(ap), 4),
+        "AP": round(float(ap), 4),
+        "PR-AUC_Trap": round(float(pr_auc_trap), 4),
         "ROC-AUC": round(float(roc_auc), 4),
         "Brier": round(float(brier), 4),
         "ECE": round(float(ece), 4),
@@ -158,14 +167,57 @@ def compute_metrics(
     }
 
 
+def select_operational_thresholds(y_cal: np.ndarray, y_prob_cal: np.ndarray) -> dict[str, float]:
+    """Select decision thresholds strictly on the independent validation holdout (2023).
+
+    Enforces zero test-set threshold snooping:
+    - T_P50: lowest threshold achieving >= 50% precision on validation holdout.
+    - T_F1: threshold maximizing F1 score on validation holdout.
+    - T_30 and T_50: fixed probabilistic thresholds (30% and 50% fire risk).
+    """
+    prec, rec, thresholds = precision_recall_curve(y_cal, y_prob_cal)
+    # Thresholds has length len(prec) - 1
+    valid_p50 = np.where(prec[:-1] >= 0.50)[0]
+    t_p50 = float(thresholds[valid_p50[0]]) if len(valid_p50) > 0 else 0.50
+
+    f1_scores = 2 * (prec[:-1] * rec[:-1]) / np.maximum(prec[:-1] + rec[:-1], 1e-8)
+    best_f1_idx = int(np.argmax(f1_scores))
+    t_f1 = float(thresholds[best_f1_idx]) if len(thresholds) > 0 else 0.50
+
+    return {
+        "T_P50": round(t_p50, 4),
+        "T_F1": round(t_f1, 4),
+        "T_30": 0.30,
+        "T_50": 0.50,
+    }
+
+
+def evaluate_fixed_thresholds(y_true: np.ndarray, y_prob: np.ndarray, thresholds: dict[str, float]) -> dict:
+    """Evaluate frozen validation-selected thresholds out-of-sample on unseen test set."""
+    out = {}
+    for name, t_val in thresholds.items():
+        y_pred = (y_prob >= t_val).astype(int)
+        tp = int(np.sum((y_true == 1) & (y_pred == 1)))
+        fp = int(np.sum((y_true == 0) & (y_pred == 1)))
+        fn = int(np.sum((y_true == 1) & (y_pred == 0)))
+        prec = float(tp / max(1, tp + fp))
+        rec = float(tp / max(1, tp + fn))
+        f1 = float(2 * prec * rec / max(1e-8, prec + rec))
+        out[f"Precision@{name}"] = round(prec, 4)
+        out[f"Recall@{name}"] = round(rec, 4)
+        out[f"F1@{name}"] = round(f1, 4)
+    return out
+
+
 def compute_operational_decision_metrics(
-    y_true: np.ndarray, y_prob: np.ndarray, model_name: str
+    y_true: np.ndarray, y_prob: np.ndarray, model_name: str, cal_thresholds: dict[str, float] | None = None
 ) -> dict:
     """Compute surveillance decision metrics:
 
     - Recall@Top5% and Recall@Top10%: fraction of all fires captured within top inspection tiers.
     - Precision@Top5% and Precision@Top10%: accuracy when inspecting prioritized cells.
     - Number Needed to Screen (NNS): inspections required per verified fire event.
+    - Out-of-sample evaluated fixed thresholds (T_P50, T_F1, T_30, T_50) from calibration set.
     """
     n = len(y_true)
     total_pos = int(np.sum(y_true))
@@ -184,7 +236,7 @@ def compute_operational_decision_metrics(
     prec10 = pos10 / k10
     nns10 = k10 / max(1, pos10)
 
-    return {
+    res = {
         "model": model_name,
         "Recall@Top5%": round(float(rec5), 4),
         "Recall@Top10%": round(float(rec10), 4),
@@ -192,6 +244,12 @@ def compute_operational_decision_metrics(
         "Precision@Top10%": round(float(prec10), 4),
         "NNS@Top10%": round(float(nns10), 2),
     }
+
+    if cal_thresholds is not None:
+        fixed_eval = evaluate_fixed_thresholds(y_true, y_prob, cal_thresholds)
+        res.update(fixed_eval)
+
+    return res
 
 
 # ── Temporal Block Bootstrap Uncertainty ──────────────────────────────────────
@@ -300,12 +358,16 @@ def paired_temporal_block_bootstrap_test(
 def run_walk_forward(
     df: pd.DataFrame,
     feature_cols: list[str],
-    params: dict,
     start_test_year: int = 2021,
     end_test_year: int = 2025,
     horizon_days: int = 7,
+    seed: int = 42,
 ) -> pd.DataFrame:
-    """Execute walk-forward expanding window evaluation with temporal purging."""
+    """Execute walk-forward expanding window evaluation with strict temporal purging.
+
+    Hyperparameter selection is strictly restricted to training data available
+    prior to each test fold, eliminating any lookahead leakage across years.
+    """
     print("\n" + "=" * 50)
     print("WALK-FORWARD EXPANDING WINDOW VALIDATION")
     print("=" * 50)
@@ -313,8 +375,8 @@ def run_walk_forward(
     rows = []
     for test_year in range(start_test_year, end_test_year + 1):
         test_start_dt = pd.Timestamp(f"{test_year}-01-01")
-        # Apply embargo of H days before test_start_dt
-        train_cutoff = test_start_dt - pd.Timedelta(days=horizon_days)
+        # Apply embargo of H+1 days before test_start_dt
+        train_cutoff = test_start_dt - pd.Timedelta(days=horizon_days + 1)
 
         train_mask = df["date"] <= train_cutoff
         test_mask = df["date"].dt.year == test_year
@@ -324,27 +386,52 @@ def run_walk_forward(
         X_te = np.nan_to_num(df.loc[test_mask, feature_cols].values.astype(np.float32))
         y_te = df.loc[test_mask, "target"].values
 
-        model = lgb.LGBMClassifier(**params)
+        # Fold-specific class weight derived strictly from available training samples
+        neg_count = int(np.sum(y_tr == 0))
+        pos_count = int(np.sum(y_tr == 1))
+        spw = neg_count / max(pos_count, 1)
+
+        fold_params = {
+            "objective": "binary",
+            "metric": "average_precision",
+            "verbosity": -1,
+            "seed": seed,
+            "scale_pos_weight": round(spw, 2),
+            "n_estimators": 250,
+            "learning_rate": 0.05,
+            "max_depth": 6,
+            "num_leaves": 31,
+            "min_child_samples": 100,
+            "subsample": 0.85,
+            "colsample_bytree": 0.85,
+        }
+
+        model = lgb.LGBMClassifier(**fold_params)
         model.fit(X_tr, y_tr)
         preds = model.predict_proba(X_te)[:, 1]
 
-        pr = average_precision_score(y_te, preds)
+        ap = average_precision_score(y_te, preds)
+        prec, rec, _ = precision_recall_curve(y_te, preds)
+        pr_trap = auc(rec, prec)
         roc = roc_auc_score(y_te, preds)
         brier = brier_score_loss(y_te, preds)
         ece = compute_ece(y_te, preds, n_bins=10)
         pos_rate = float(np.mean(y_te))
 
-        print(f"  Test Year {test_year}: PR-AUC={pr:.4f}, ROC-AUC={roc:.4f}, Brier={brier:.4f}, ECE={ece:.4f}, PosRate={pos_rate:.1%}")
+        print(f"  Test Year {test_year}: AP={ap:.4f}, PR-Trap={pr_trap:.4f}, ROC-AUC={roc:.4f}, Brier={brier:.4f}, ECE={ece:.4f}, PosRate={pos_rate:.1%}")
         rows.append({
             "test_year": test_year,
             "train_period": f"2016 to {train_cutoff.date()}",
             "train_size": len(X_tr),
             "test_size": len(X_te),
             "positive_rate": round(pos_rate, 4),
-            "PR-AUC": round(float(pr), 4),
+            "PR-AUC": round(float(ap), 4),
+            "AP": round(float(ap), 4),
+            "PR-AUC_Trap": round(float(pr_trap), 4),
             "ROC-AUC": round(float(roc), 4),
             "Brier": round(float(brier), 4),
             "ECE": round(float(ece), 4),
+            "scale_pos_weight": round(spw, 2),
         })
 
     return pd.DataFrame(rows)
@@ -359,11 +446,16 @@ def run_feature_ablation(
     best_params: dict,
     root: Path,
 ) -> pd.DataFrame:
-    """Evaluate marginal impact of feature groups on test set."""
+    """Evaluate marginal impact of feature groups on test set, including coordinate ablation."""
     print("\n" + "=" * 50)
     print("FEATURE ABLATION STUDY")
     print("=" * 50)
 
+    coords_feats = [f for f in all_features if f in ["lat_center", "lon_center"]]
+    spatial_feats = [
+        f for f in all_features
+        if any(c in f for c in ["lat_center", "lon_center", "month_sin", "month_cos", "doy_sin", "doy_cos"])
+    ]
     climate_feats = [
         f for f in all_features
         if any(c in f for c in ["T2M", "RH2M", "PREC", "WS10M", "vpd", "dtr", "fwi_proxy", "dry_days"])
@@ -372,18 +464,16 @@ def run_feature_ablation(
         f for f in all_features
         if any(c in f for c in ["fire_count", "neighbor_fire"])
     ]
-    spatial_feats = [
-        f for f in all_features
-        if any(c in f for c in ["lat_center", "lon_center", "month_sin", "month_cos", "doy_sin", "doy_cos"])
-    ]
 
     ablation_groups = {
         "Full Model (All Features)": all_features,
-        "Climate Features Only": climate_feats,
-        "Fire History Features Only": fire_feats,
-        "Seasonality & Geography Only": spatial_feats,
+        "No Coordinates (Ablate Lat/Lon)": [f for f in all_features if f not in coords_feats],
+        "No Spatial & Seasonality": [f for f in all_features if f not in spatial_feats],
         "No Climate (Fire + Geo)": [f for f in all_features if f not in climate_feats],
         "No Fire History (Climate + Geo)": [f for f in all_features if f not in fire_feats],
+        "Fire History Features Only": fire_feats,
+        "Seasonality & Geography Only": spatial_feats,
+        "Climate Features Only": climate_feats,
     }
 
     y_train = train_df["target"].values
@@ -400,16 +490,20 @@ def run_feature_ablation(
         m.fit(X_tr, y_train)
         probs = m.predict_proba(X_te)[:, 1]
 
-        pr = average_precision_score(y_test, probs)
+        ap = average_precision_score(y_test, probs)
+        prec, rec, _ = precision_recall_curve(y_test, probs)
+        pr_trap = auc(rec, prec)
         roc = roc_auc_score(y_test, probs)
         brier = brier_score_loss(y_test, probs)
         ece = compute_ece(y_test, probs, n_bins=10)
 
-        print(f"  {grp_name} (n={len(feat_subset)}): PR-AUC={pr:.4f}, ROC-AUC={roc:.4f}, Brier={brier:.4f}")
+        print(f"  {grp_name:32s} (n={len(feat_subset):2d}): AP={ap:.4f}, PR-Trap={pr_trap:.4f}, ROC={roc:.4f}, Brier={brier:.4f}")
         ablation_rows.append({
             "feature_group": grp_name,
             "feature_count": len(feat_subset),
-            "PR-AUC": round(float(pr), 4),
+            "PR-AUC": round(float(ap), 4),
+            "AP": round(float(ap), 4),
+            "PR-AUC_Trap": round(float(pr_trap), 4),
             "ROC-AUC": round(float(roc), 4),
             "Brier": round(float(brier), 4),
             "ECE": round(float(ece), 4),
@@ -609,10 +703,15 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     platt = PlattCalibrator()
     platt.fit(val_probs, y_cal, is_logit=False)
     y_prob_platt = platt.calibrate(y_prob_lgb)
+    cal_val_probs = platt.calibrate(val_probs)
+
+    # Operational threshold selection strictly on independent 2023 holdout
+    cal_thresholds = select_operational_thresholds(y_cal, cal_val_probs)
+    print(f"  Selected Operational Thresholds (on 2023 Holdout): {cal_thresholds}")
 
     m_platt = compute_metrics(y_test, y_prob_platt, "LightGBM (Platt Calibrated)")
     results.append(m_platt)
-    decision_results.append(compute_operational_decision_metrics(y_test, y_prob_platt, "LightGBM (Platt Calibrated)"))
+    decision_results.append(compute_operational_decision_metrics(y_test, y_prob_platt, "LightGBM (Platt Calibrated)", cal_thresholds=cal_thresholds))
     print(f"  Platt Scaling Calibrated metrics: {m_platt}")
     print(f"  Platt Parameters: coef={platt.coef_:.4f}, intercept={platt.intercept_:.4f}")
 
@@ -696,7 +795,7 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     run_feature_ablation(train_df, test_df, feature_cols, best_params, root)
 
     # ── 10. Walk-Forward Expanding Window Evaluation ───────────────────────
-    wf_df = run_walk_forward(df, feature_cols, best_params, horizon_days=horizon_days)
+    wf_df = run_walk_forward(df, feature_cols, horizon_days=horizon_days, seed=seed)
     wf_df.to_csv(root / "reports" / "walk_forward_metrics.csv", index=False)
     print(wf_df.to_string(index=False))
 

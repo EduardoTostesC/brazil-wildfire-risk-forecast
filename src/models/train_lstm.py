@@ -194,7 +194,7 @@ def train_and_evaluate_lstm(
     print("Extracting sequential windows (T=14 days)...")
     t0 = time.time()
     X_train, y_train = build_sequences(train_df, seq_feature_cols, seq_len=seq_len, sample_stride=3)
-    X_test, y_test = build_sequences(test_df, seq_feature_cols, seq_len=seq_len, sample_stride=2)
+    X_test, y_test = build_sequences(test_df, seq_feature_cols, seq_len=seq_len, sample_stride=1)
     print(f"Sequences extracted in {time.time() - t0:.1f}s:")
     print(f"  Train: X={X_train.shape}, positive={np.mean(y_train)*100:.2f}%")
     print(f"  Test:  X={X_test.shape}, positive={np.mean(y_test)*100:.2f}%")
@@ -234,13 +234,17 @@ def train_and_evaluate_lstm(
     lstm_train_time = time.time() - train_start
     print(f"LSTM training completed in {lstm_train_time:.1f}s")
 
-    # Inference on Test Set
+    # Inference on Test Set (evaluated in memory-efficient batches across all test samples)
     model.eval()
     t_inf_start = time.time()
+    test_dataset = TensorDataset(torch.from_numpy(X_test))
+    test_eval_loader = DataLoader(test_dataset, batch_size=4096, shuffle=False)
+    probs_list = []
     with torch.no_grad():
-        test_tensors = torch.from_numpy(X_test).to(device)
-        test_logits = model(test_tensors)
-        lstm_probs = torch.sigmoid(test_logits).numpy()
+        for (bx,) in test_eval_loader:
+            logits = model(bx.to(device))
+            probs_list.append(torch.sigmoid(logits).cpu().numpy())
+    lstm_probs = np.concatenate(probs_list)
     lstm_inf_time = (time.time() - t_inf_start) / len(X_test) * 1000.0  # ms per sample
 
     # Compute metrics for LSTM

@@ -140,6 +140,14 @@ def run_drift_analysis(
         })
 
     report = {
+        "report_type": "historical_drift_analysis",
+        "description": (
+            "Retrospective distribution drift comparing historical training baseline (2016-2023) "
+            "against out-of-time test period (2024-2025). Operational streaming drift monitoring "
+            "operates on near-real-time telemetry sliding windows and is marked standby while "
+            "operational ingestion is disconnected."
+        ),
+        "monitoring_mode": "retrospective_evaluation",
         "baseline_period": f"<= {baseline_end_year}",
         "current_period": f">= {test_start_year}",
         "baseline_samples": len(baseline_df),

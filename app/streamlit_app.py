@@ -41,10 +41,19 @@ st.set_page_config(
     },
 )
 
+from src.models.risk_tiers import DEFAULT_RISK_CONFIG
+
 # ── Theme constants ───────────────────────────────────────────────────────────
 
-RISK_COLORS = {"Low": "#27ae60", "Medium": "#f39c12", "High": "#e74c3c"}
-RISK_THRESHOLDS = {"Low": 0.2, "Medium": 0.5}  # < low → Low; < medium → Medium; else → High
+RISK_COLORS = {
+    "Low": DEFAULT_RISK_CONFIG.color_low,
+    "Medium": DEFAULT_RISK_CONFIG.color_medium,
+    "High": DEFAULT_RISK_CONFIG.color_high,
+}
+RISK_THRESHOLDS = {
+    "Low": DEFAULT_RISK_CONFIG.low_cutoff,
+    "Medium": DEFAULT_RISK_CONFIG.high_cutoff,
+}
 
 # ── Cached loaders ────────────────────────────────────────────────────────────
 
@@ -85,8 +94,8 @@ def _add_predictions(df: pd.DataFrame, models, calibrators, feature_cols, horizo
     """Add probability and risk_level columns for a given forecast horizon."""
     from scipy.special import logit
 
-    model = models.get(horizon) or models.get(7)
-    calibrator = calibrators.get(horizon) or calibrators.get(7)
+    model = models.get(horizon)
+    calibrator = calibrators.get(horizon)
     if model is None or not feature_cols:
         return df
 
@@ -95,23 +104,20 @@ def _add_predictions(df: pd.DataFrame, models, calibrators, feature_cols, horizo
     raw = model.predict_proba(X)[:, 1]
 
     if calibrator is not None:
-        try:
-            if hasattr(calibrator, "calibrate"):
-                prob = calibrator.calibrate(raw)
-            else:
-                logits = logit(np.clip(raw, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-                res = calibrator.predict_proba(logits)
-                prob = res[:, 1] if res.ndim == 2 else res.ravel()
-        except Exception:
-            prob = raw
+        if hasattr(calibrator, "calibrate"):
+            prob = calibrator.calibrate(raw)
+        else:
+            logits = logit(np.clip(raw, 1e-6, 1 - 1e-6)).reshape(-1, 1)
+            res = calibrator.predict_proba(logits)
+            prob = res[:, 1] if res.ndim == 2 else res.ravel()
     else:
         prob = raw
 
     df = df.copy()
     df["probability"] = prob
     df["risk_level"] = np.where(
-        prob >= RISK_THRESHOLDS["Medium"], "High",
-        np.where(prob >= RISK_THRESHOLDS["Low"], "Medium", "Low"),
+        prob >= DEFAULT_RISK_CONFIG.high_cutoff, "High",
+        np.where(prob >= DEFAULT_RISK_CONFIG.low_cutoff, "Medium", "Low"),
     )
     return df
 

@@ -135,7 +135,7 @@ Antes de executar o pipeline, comprove a higidez do código:
 # Linting sem erros
 ruff check .
 
-# Suíte completa de testes automatizados (29 testes)
+# Suíte completa de testes automatizados (38 testes)
 pytest tests/ -v
 ```
 
@@ -224,3 +224,4 @@ Todas as corridas de experimentação foram registradas no banco local SQLite `m
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 Abra `http://localhost:5000` no navegador para visualizar o histórico de corridas e gráficos de convergência.
+

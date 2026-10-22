@@ -48,15 +48,15 @@
   "test_size": 254848,
   "spatial_block_cv": "Contiguous (North / Central / South MT)",
   "best_params": {
-    "n_estimators": 382,
-    "learning_rate": 0.023990923235313686,
-    "max_depth": 8,
-    "num_leaves": 44,
-    "min_child_samples": 124,
-    "subsample": 0.7238180502449714,
-    "colsample_bytree": 0.8329028392637395,
-    "reg_alpha": 0.014845752892781132,
-    "reg_lambda": 4.0952437890611355
+    "n_estimators": 214,
+    "learning_rate": 0.031457616535088426,
+    "max_depth": 6,
+    "num_leaves": 28,
+    "min_child_samples": 192,
+    "subsample": 0.8528897367531791,
+    "colsample_bytree": 0.8237435965194778,
+    "reg_alpha": 0.027170490168578153,
+    "reg_lambda": 0.035379706253696484
   },
   "p_value_vs_climatology": 0.0,
   "p_value_vs_persistence": 0.0,
@@ -117,20 +117,20 @@
     },
     "LightGBM (Platt Calibrated)": {
       "PR-AUC_95CI": [
-        0.5701,
-        0.6942
+        0.5659,
+        0.6918
       ],
       "ROC-AUC_95CI": [
-        0.802,
-        0.8351
+        0.7995,
+        0.8333
       ],
       "Brier_95CI": [
-        0.1234,
-        0.1425
+        0.124,
+        0.1432
       ],
       "ECE_95CI": [
-        0.013,
-        0.0399
+        0.0139,
+        0.0405
       ]
     }
   },
@@ -138,6 +138,8 @@
     {
       "model": "Persistence (Empirical)",
       "PR-AUC": 0.4633,
+      "AP": 0.4633,
+      "PR-AUC_Trap": 0.5758,
       "ROC-AUC": 0.7042,
       "Brier": 0.1488,
       "ECE": 0.0311,
@@ -146,6 +148,8 @@
     {
       "model": "Climatology",
       "PR-AUC": 0.5131,
+      "AP": 0.5131,
+      "PR-AUC_Trap": 0.5142,
       "ROC-AUC": 0.7687,
       "Brier": 0.1568,
       "ECE": 0.0664,
@@ -154,6 +158,8 @@
     {
       "model": "LogisticRegression",
       "PR-AUC": 0.5588,
+      "AP": 0.5588,
+      "PR-AUC_Trap": 0.5593,
       "ROC-AUC": 0.7602,
       "Brier": 0.1936,
       "ECE": 0.2174,
@@ -161,27 +167,33 @@
     },
     {
       "model": "LightGBM (Raw)",
-      "PR-AUC": 0.6329,
-      "ROC-AUC": 0.8193,
-      "Brier": 0.1715,
-      "ECE": 0.1791,
-      "Recall@P50": 0.6792
+      "PR-AUC": 0.63,
+      "AP": 0.63,
+      "PR-AUC_Trap": 0.63,
+      "ROC-AUC": 0.8172,
+      "Brier": 0.1721,
+      "ECE": 0.181,
+      "Recall@P50": 0.6758
     },
     {
       "model": "LightGBM (Platt Calibrated)",
-      "PR-AUC": 0.6329,
-      "ROC-AUC": 0.8193,
-      "Brier": 0.1324,
-      "ECE": 0.0234,
-      "Recall@P50": 0.6792
+      "PR-AUC": 0.63,
+      "AP": 0.63,
+      "PR-AUC_Trap": 0.63,
+      "ROC-AUC": 0.8172,
+      "Brier": 0.133,
+      "ECE": 0.0237,
+      "Recall@P50": 0.6758
     },
     {
       "model": "LightGBM (Isotonic Calibrated)",
-      "PR-AUC": 0.6252,
-      "ROC-AUC": 0.8192,
-      "Brier": 0.1325,
-      "ECE": 0.0269,
-      "Recall@P50": 0.6678
+      "PR-AUC": 0.622,
+      "AP": 0.622,
+      "PR-AUC_Trap": 0.63,
+      "ROC-AUC": 0.817,
+      "Brier": 0.1331,
+      "ECE": 0.0264,
+      "Recall@P50": 0.6683
     }
   ],
   "operational_decision_metrics": [
@@ -211,19 +223,31 @@
     },
     {
       "model": "LightGBM (Raw)",
-      "Recall@Top5%": 0.1822,
-      "Recall@Top10%": 0.3189,
-      "Precision@Top5%": 0.863,
-      "Precision@Top10%": 0.7555,
-      "NNS@Top10%": 1.32
+      "Recall@Top5%": 0.1814,
+      "Recall@Top10%": 0.3175,
+      "Precision@Top5%": 0.8596,
+      "Precision@Top10%": 0.7522,
+      "NNS@Top10%": 1.33
     },
     {
       "model": "LightGBM (Platt Calibrated)",
-      "Recall@Top5%": 0.1822,
-      "Recall@Top10%": 0.3189,
-      "Precision@Top5%": 0.863,
-      "Precision@Top10%": 0.7555,
-      "NNS@Top10%": 1.32
+      "Recall@Top5%": 0.1814,
+      "Recall@Top10%": 0.3175,
+      "Precision@Top5%": 0.8596,
+      "Precision@Top10%": 0.7522,
+      "NNS@Top10%": 1.33,
+      "Precision@T_P50": 0.4642,
+      "Recall@T_P50": 0.7257,
+      "F1@T_P50": 0.5662,
+      "Precision@T_F1": 0.4723,
+      "Recall@T_F1": 0.7137,
+      "F1@T_F1": 0.5684,
+      "Precision@T_30": 0.4914,
+      "Recall@T_30": 0.6868,
+      "F1@T_30": 0.5729,
+      "Precision@T_50": 0.6596,
+      "Recall@T_50": 0.4537,
+      "F1@T_50": 0.5377
     }
   ],
   "multi_horizon": [
@@ -231,31 +255,31 @@
       "horizon": "7-day",
       "horizon_desc": "D+1 to D+7",
       "positive_rate": "23.69%",
-      "PR-AUC": 0.6329,
-      "ROC-AUC": 0.8193,
-      "Brier": 0.1324,
-      "ECE": 0.0234,
-      "Recall@P50": 0.6792
+      "PR-AUC": 0.63,
+      "ROC-AUC": 0.8172,
+      "Brier": 0.133,
+      "ECE": 0.0237,
+      "Recall@P50": 0.6758
     },
     {
       "horizon": "1-day",
       "horizon_desc": "D+1",
       "positive_rate": "6.13%",
-      "PR-AUC": 0.3698,
-      "ROC-AUC": 0.8494,
-      "Brier": 0.0467,
+      "PR-AUC": 0.3676,
+      "ROC-AUC": 0.8482,
+      "Brier": 0.0468,
       "ECE": 0.0046,
-      "Recall@P50": 0.2945
+      "Recall@P50": 0.2933
     },
     {
       "horizon": "3-day",
       "horizon_desc": "D+1 to D+3",
       "positive_rate": "13.91%",
-      "PR-AUC": 0.5366,
-      "ROC-AUC": 0.8334,
-      "Brier": 0.0893,
-      "ECE": 0.013,
-      "Recall@P50": 0.5108
+      "PR-AUC": 0.5344,
+      "ROC-AUC": 0.832,
+      "Brier": 0.0896,
+      "ECE": 0.0132,
+      "Recall@P50": 0.5035
     }
   ]
 }
