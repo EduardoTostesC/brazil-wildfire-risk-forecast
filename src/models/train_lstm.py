@@ -34,6 +34,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 
 from src.config import get_project_root
+from src.models.calibration import compute_ece
 
 warnings.filterwarnings("ignore")
 
@@ -149,6 +150,17 @@ def train_and_evaluate_lstm(
         raise FileNotFoundError(f"Processed dataset not found: {ds_path}")
 
     df = pd.read_parquet(ds_path)
+    df["date"] = pd.to_datetime(df["date"])
+
+    # Territorial filtering: align with official IBGE Mato Grosso cells
+    grid_csv = root / "data" / "processed" / "grid.csv"
+    if grid_csv.exists():
+        gdf = pd.read_csv(grid_csv)
+        valid_cells = set(gdf[gdf["state_status"] != "outside"]["grid_id"])
+        init_len = len(df)
+        df = df[df["grid_id"].isin(valid_cells)].copy()
+        print(f"[Territorial Masking] Retained {len(valid_cells)} inside/partial cells. Records: {len(df):,} (filtered {init_len - len(df):,} outside cells)")
+
     df = df.sort_values(["grid_id", "date"]).reset_index(drop=True)
 
     # Compute basic physical features if missing
@@ -165,9 +177,9 @@ def train_and_evaluate_lstm(
     ]
     print(f"Sequence Features ({len(seq_feature_cols)}): {seq_feature_cols}")
 
-    # Split into train (2016-2023) and test (2024-2025)
-    train_mask = df["date"].dt.year <= 2023
-    test_mask = df["date"].dt.year >= 2024
+    # Split into train (purged at 2023-12-24 to prevent boundary leak) and test (2024-2025)
+    train_mask = df["date"] <= pd.Timestamp("2023-12-24")
+    test_mask = df["date"] >= pd.Timestamp("2024-01-01")
 
     train_df = df[train_mask].copy()
     test_df = df[test_mask].copy()
@@ -235,12 +247,14 @@ def train_and_evaluate_lstm(
     lstm_pr_auc = float(average_precision_score(y_test, lstm_probs))
     lstm_roc_auc = float(roc_auc_score(y_test, lstm_probs))
     lstm_brier = float(brier_score_loss(y_test, lstm_probs))
+    lstm_ece = float(compute_ece(y_test, lstm_probs, 10))
     lstm_rec_p50 = float(_recall_at_precision(y_test, lstm_probs, 0.50))
 
     print("\nLSTM Test Metrics:")
     print(f"  PR-AUC:     {lstm_pr_auc:.4f}")
     print(f"  ROC-AUC:    {lstm_roc_auc:.4f}")
     print(f"  Brier:      {lstm_brier:.4f}")
+    print(f"  ECE:        {lstm_ece:.4f}")
     print(f"  Recall@P50: {lstm_rec_p50*100:.2f}%")
     print(f"  Latency:    {lstm_inf_time:.3f} ms/sample")
 
@@ -259,6 +273,7 @@ def train_and_evaluate_lstm(
         "PR-AUC": round(lstm_pr_auc, 4),
         "ROC-AUC": round(lstm_roc_auc, 4),
         "Brier": round(lstm_brier, 4),
+        "ECE": round(lstm_ece, 4),
         "Recall@P50": round(lstm_rec_p50, 4),
     }
 

@@ -1,0 +1,6 @@
+model,Recall@Top5%,Recall@Top10%,Precision@Top5%,Precision@Top10%,NNS@Top10%
+Persistence (Empirical),0.17,0.2863,0.8055,0.6783,1.47
+Climatology,0.1481,0.2656,0.7019,0.6291,1.59
+LogisticRegression,0.1674,0.2916,0.793,0.6907,1.45
+LightGBM (Raw),0.1822,0.3189,0.863,0.7555,1.32
+LightGBM (Platt Calibrated),0.1822,0.3189,0.863,0.7555,1.32

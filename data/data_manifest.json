@@ -1,0 +1,155 @@
+{
+  "generated_at": "2026-10-21T23:28:59.346936+00:00",
+  "project": "brazil-wildfire-risk-forecast",
+  "entries": [
+    {
+      "source": "IBGE - Malha Municipal e Estadual (SIRGAS 2000)",
+      "file": "data/geo/mato_grosso_ibge.geojson",
+      "sha256": "ffc4789c7518d5ff10882c18e1e1671a2a7de9187718e4b305f7735d04bcc554",
+      "size_bytes": 57267,
+      "url": "https://servicodados.ibge.gov.br/api/v3/malhas/estados/51?formato=application/vnd.geo+json",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-21T23:27:35.303137+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2016.csv",
+      "sha256": "c5bad0154d02ab1bb97b470c26e624a42ce5d4d50ca942c0b3900597b6edd651",
+      "size_bytes": 3496253,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:04.044251+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2017.csv",
+      "sha256": "eb4cd3bfcfa93252702309e91ca940fb448dc4da0033b2ec02e22fdc5b735ae6",
+      "size_bytes": 3958415,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:04.962565+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2018.csv",
+      "sha256": "34876081259b0c97f5ff124fc701b7c1e1d1d76b98d352a6b86aa8ec7bbe6aea",
+      "size_bytes": 2309481,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:05.712571+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2019.csv",
+      "sha256": "f807678e6c047f6f4435016e119a91852ebdc36042588726370dc20ff21db2c2",
+      "size_bytes": 4014993,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:06.696008+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2020.csv",
+      "sha256": "dd068dae201cb16c60ed87933f088af5fcc8734bcd7f22eb13fed920f97a4031",
+      "size_bytes": 6145013,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:07.728238+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2021.csv",
+      "sha256": "18c1b571f377ae298e38de6d0806da356b2ea2e1dff73b117e3ab60af2ce0997",
+      "size_bytes": 2958226,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:08.622158+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2022.csv",
+      "sha256": "1576ba1c59fd2c476a4b98c4e94f3538eb811544985a3a842137582cfee4a959",
+      "size_bytes": 3859585,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:09.780187+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2023.csv",
+      "sha256": "21d78fdfc0c55fb2adc9784540a49469dc9488d28b46433b51e05a0b8a4eb55a",
+      "size_bytes": 2879294,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:10.734481+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2024.csv",
+      "sha256": "16910016826aa1740fccf6068f596f4f165b7bda44d6c7169f2d6503fb839e08",
+      "size_bytes": 6706390,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:11.972479+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_2025.csv",
+      "sha256": "02ea90a6034da8a4e0df43055a3bbc0c4bd556e92814ba757dba4a0655f1f530",
+      "size_bytes": 1468840,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:12.762339+00:00"
+    },
+    {
+      "source": "INPE BDQueimadas (Sat\u00e9lite de Refer\u00eancia AQUA_M-T)",
+      "file": "data/raw/fire/focos_MT_all.csv",
+      "sha256": "11550f8ab271c28717367284b8de36767daa877bf63cdcbf48cc2fcb56e5a33f",
+      "size_bytes": 37795896,
+      "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref",
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:12:13.595932+00:00"
+    },
+    {
+      "source": "NASA POWER (MERRA-2 Daily Gridded Reanalysis)",
+      "file_count": 506,
+      "directory": "data/raw/climate",
+      "total_size_bytes": 87592806,
+      "sample_sha256": "3a5f2dd7547e90475ac5878c7fbaef74de964d866c1bf130127437d26b3b95d6",
+      "sample_file": "data/raw/climate/climate_000_000.csv",
+      "parameters": [
+        "T2M_MAX",
+        "T2M_MIN",
+        "RH2M",
+        "PRECTOTCORR",
+        "WS10M"
+      ],
+      "url": "https://power.larc.nasa.gov/api/temporal/daily/point",
+      "validation_status": "VALID"
+    },
+    {
+      "source": "Processed Pipeline Dataset",
+      "file": "data/processed/dataset.parquet",
+      "sha256": "459ddf3fac3c94723ec40efa5c84dc706a246ed3049694991cafb5ba769baa30",
+      "size_bytes": 14448186,
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T16:35:57.997951+00:00"
+    },
+    {
+      "source": "Processed Pipeline Dataset",
+      "file": "data/processed/features.parquet",
+      "sha256": "40108c063bfc5d8c163bbc4a797c2eb66cddc1b246899ad8faac47715ee48db4",
+      "size_bytes": 179285283,
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T16:36:15.728084+00:00"
+    },
+    {
+      "source": "Processed Pipeline Dataset",
+      "file": "data/processed/grid.csv",
+      "sha256": "3c06fd66d399e957c5e858cb09e2b50c7f4ec84bb47c53cf20448e4e21f3e065",
+      "size_bytes": 26058,
+      "validation_status": "VALID",
+      "last_modified": "2026-10-20T14:13:54.561825+00:00"
+    }
+  ]
+}

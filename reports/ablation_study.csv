@@ -1,0 +1,7 @@
+feature_group,feature_count,PR-AUC,ROC-AUC,Brier,ECE
+Full Model (All Features),39,0.6329,0.8193,0.1715,0.1791
+Climate Features Only,25,0.36,0.6427,0.2501,0.2609
+Fire History Features Only,5,0.6074,0.8043,0.1747,0.1811
+Seasonality & Geography Only,6,0.4842,0.7607,0.2048,0.2071
+No Climate (Fire + Geo),14,0.632,0.8188,0.1727,0.1813
+No Fire History (Climate + Geo),34,0.4816,0.7591,0.2136,0.2259

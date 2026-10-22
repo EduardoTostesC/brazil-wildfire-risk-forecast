@@ -3,7 +3,7 @@
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions)
-[![Tests](https://img.shields.io/badge/tests-21%20passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-29%20passed-brightgreen)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-blueviolet)](https://github.com/astral-sh/ruff)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
@@ -75,11 +75,11 @@ Suppressing canopy fires once they have spread across thousands of hectares is d
 
 | Dimension | Engineering Decision | Technical Justification |
 |---|---|---|
-| **Spatial Unit** | Regular 0.5° grid (~56 km at equator) | Aligns with the native resolution of NASA's MERRA-2 global atmospheric reanalysis. Provides 506 cells covering 100% of Mato Grosso without interpolation artifacts. Configurable via `config.yaml`. |
-| **Temporal Unit** | Daily time-step, 7-day forward horizon | Matches tactical response timelines: gives wildfire response crews adequate mobilization time while maintaining high meteorological predictability. |
-| **Binary Target** | $y \in \{0, 1\}$ ($\ge 1$ hotspot in $[D+1, D+7]$) | Robust formulation mitigating counting noise and isolated false-positive single-pixel sensor detections. The last 7 days of the historical series are excluded as their forward window is incomplete. |
+| **Spatial Unit** | Regular 0.5° grid (~56 km at equator) | Aligns with the native resolution of NASA's MERRA-2 global atmospheric reanalysis. Masked with official IBGE SIRGAS 2000 state boundary, yielding 352 active territorial cells (154 external cells excluded to eliminate artificial zeros). |
+| **Temporal Unit** | Daily time-step, multi-horizon (1d, 3d, 7d) | Matches tactical response timelines: gives wildfire response crews adequate mobilization time while maintaining high meteorological predictability. |
+| **Binary Target** | $y \in \{0, 1\}$ ($\ge 1$ hotspot in $[D+1, D+H]$) | Robust formulation mitigating counting noise and isolated false-positive single-pixel sensor detections. A strict embargo of $H+1$ days is applied at all split boundaries. |
 | **Pilot Region** | Mato Grosso (MT), Brazil | Historic leader in Brazilian fire hotspots, encompassing three critical biomes: Cerrado, Amazonia, and Pantanal. |
-| **Historical Period**| 2016 to 2025 (10 full years) | 8 years for training (2016–2023: 1,478,532 records) and 2 full years for temporal testing (2024–2025: 366,344 records). |
+| **Historical Period**| 2016 to 2025 (10 full years) | 7 years for training (2016–2022: 897,600 records), 1 year holdout for out-of-sample calibration (2023: 126,016 records), and 2 full years for temporal testing (2024–2025: 254,848 records). |
 
 ---
 
@@ -133,25 +133,52 @@ A total of **39 predictive features** were engineered, strictly looking backward
 
 ## 📈 Real Results & Model Comparison
 
-The metrics below reflect the **actual execution** on the out-of-time test set (**2024–2025, 366,344 records**), trained strictly on historical data (**2016–2023, 1,478,532 records**). All confidence intervals are computed via **1,000 bootstrap resamples** at the 95% level:
+The metrics below reflect the **actual execution** on the out-of-time test set (**2024–2025, 254,848 records** across 352 masked Mato Grosso cells), trained on historical data (**2016–2022, 897,600 records** with strict 8-day embargo) and calibrated out-of-sample (**2023 holdout, 126,016 records**). All confidence intervals are computed via **Temporal Block Bootstrap (14-day blocks, 500 resamples)** at the 95% level:
 
-| Model | PR-AUC (Primary, 95% CI) | ROC-AUC (95% CI) | Brier Score (95% CI, Lower is Better) | Recall @ Precision $\ge$ 50% |
-|:---|:---:|:---:|:---:|:---:|
-| **Baseline 1: Persistence (Empirical)** | 0.4293 (0.4181, 0.4406) | 0.7260 (0.7203, 0.7318) | 0.1074 (0.1054, 0.1093) | 52.81% |
-| **Baseline 2: Climatology** (historical cell-month fire rate) | 0.5169 (0.5051, 0.5281) | 0.8521 (0.8483, 0.8561) | 0.1079 (0.1061, 0.1094) | 48.55% |
-| **Logistic Regression** (linear, balanced weights, scaled) | 0.5464 (0.5355, 0.5590) | 0.8276 (0.8227, 0.8326) | 0.1658 (0.1642, 0.1673) | 59.35% |
-| **LSTM (PyTorch Recurrent, T=14 days)** | 0.5947 | 0.8655 | 0.1630 | 60.15% |
-| **LightGBM (Raw)** | 0.6274 (0.6172, 0.6387) | 0.8823 (0.8791, 0.8862) | 0.1501 (0.1482, 0.1519) | 67.34% |
-| **LightGBM (Platt Calibrated)** | **0.6274** (0.6172, 0.6387) | **0.8823** (0.8791, 0.8862) | **0.0931** (0.0915, 0.0945) | **67.34%** |
+| Model | PR-AUC (Primary, 95% CI) | ROC-AUC (95% CI) | Brier Score (95% CI, Lower is Better) | ECE (10 Bins) | Recall @ Precision $\ge$ 50% |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| **Baseline 1: Persistence (Empirical)** | 0.4633 (0.3993, 0.5296) | 0.7042 (0.6793, 0.7284) | 0.1488 (0.1386, 0.1593) | 0.0311 | 52.81% |
+| **Baseline 2: Climatology** (historical cell-month fire rate) | 0.5131 (0.4568, 0.5738) | 0.7687 (0.7527, 0.7826) | 0.1568 (0.1447, 0.1708) | 0.0664 | 48.36% |
+| **Logistic Regression** (linear, balanced weights, scaled) | 0.5588 (0.4809, 0.6271) | 0.7602 (0.7331, 0.7848) | 0.1936 (0.1840, 0.2064) | 0.2174 | 55.63% |
+| **LSTM (PyTorch Recurrent, T=14 days)** | 0.5947 | 0.7890 | 0.1893 | 0.2019 | 59.49% |
+| **LightGBM (Raw)** | 0.6329 | 0.8193 | 0.1715 | 0.1791 | 67.92% |
+| **LightGBM (Isotonic Calibrated)** | 0.6252 | 0.8192 | 0.1325 | 0.0269 | 66.78% |
+| **LightGBM (Platt Calibrated - Final)** | **0.6329** (0.5701, 0.6942) | **0.8193** (0.8020, 0.8351) | **0.1324** (0.1234, 0.1425) | **0.0234** | **67.92%** |
 
 ### 💡 Key Technical Insights:
-1. **LightGBM Outperformed All Benchmarks Significantly**: Reaching a **PR-AUC of 0.6274** and **ROC-AUC of 0.8823**, capturing **67.34% of all wildfires** while maintaining an operational precision threshold of at least 50%. A paired bootstrap hypothesis test confirms that LightGBM's superiority over Climatology is statistically significant with **$p < 0.001$ ($p = 0.0000$)**.
+1. **LightGBM Outperformed All Benchmarks Significantly**: Reaching a **PR-AUC of 0.6329** and **ROC-AUC of 0.8193**, capturing **67.92% of all wildfires** while maintaining an operational precision threshold of at least 50%. A paired bootstrap hypothesis test confirms that LightGBM's superiority over Climatology is statistically significant with **$p < 0.001$ ($p = 0.0000$)**.
 2. **Strong Baselines Prove Machine Learning Value**: Climatology achieves a high ROC-AUC (0.8521) purely by tracking the historical seasonal cycle. However, its PR-AUC (0.5169) and Recall@P50 (48.55%) lag far behind LightGBM. This demonstrates that LightGBM is learning dynamic physical interactions between drought, VPD, wind, and active fire propagation.
-3. **Platt Scaling Solves Probability Distortion**: Under severe class imbalance, uncalibrated tree models produce inflated mean probabilities (~33.8% vs. true 16.5% base rate). We applied parametric **Platt Scaling (logistic sigmoid on model log-odds)** fitted on an out-of-fold temporal validation split (2023). Platt scaling preserves 100% of the raw model's discriminative power (PR-AUC 0.6274, ROC-AUC 0.8823) while reducing the **Brier score from 0.1501 down to 0.0931**, beating Climatology's 0.1079 and producing well-calibrated risk probabilities for operational decision-making.
+3. **Platt Scaling Solves Probability Distortion**: Under severe class imbalance, uncalibrated tree models produce inflated mean probabilities (~33.8% vs. true 16.5% base rate). We applied parametric **Platt Scaling (logistic sigmoid on model log-odds)** fitted on an out-of-fold temporal validation split (2023). Platt scaling preserves 100% of the raw model's discriminative power (PR-AUC 0.6274, ROC-AUC 0.8823) while reducing the **Brier score from 0.1715 down to 0.1324 and ECE from 0.1791 down to 0.0234 (an 87% reduction in probabilistic calibration error)**, beating Climatology's 0.1079 and producing well-calibrated risk probabilities for operational decision-making.
 
 <p align="center">
   <img src="reports/figures/calibration_curve.png" width="70%" alt="Probability Calibration Curve" />
 </p>
+
+### 🚨 Operational Surveillance & Field Inspection Metrics
+
+Wildfire brigades cannot patrol entire territories; tactical inspection is constrained to a small percentage of critical sectors:
+
+| Model | Recall @ Top-5% | Recall @ Top-10% | Precision @ Top-5% | Precision @ Top-10% | NNS @ Top-10% (Inspections / Fire) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Persistence (Empirical)** | 17.00% | 28.63% | 80.55% | 67.83% | 1.47 |
+| **Climatology** | 14.81% | 26.56% | 70.19% | 62.91% | 1.59 |
+| **Logistic Regression** | 16.74% | 29.16% | 79.30% | 69.07% | 1.45 |
+| **LightGBM (Platt Calibrated)** | **18.22%** | **31.89%** | **86.30%** | **75.55%** | **1.32** |
+
+*Prioritizing surveillance on the top-10% highest-risk cells captures **31.89% of all fires** with a precision of **75.55%**, requiring only **1.32 inspections per verified fire**.*
+
+### 🔬 Feature Ablation Study
+
+Quantifying the predictive impact of each feature family on the holdout test set:
+
+| Feature Subset | Feature Count | PR-AUC | ROC-AUC | Brier Score | ECE |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Full Model (All Features)** | **39** | **0.6329** | **0.8193** | **0.1715** | **0.1791** |
+| No Climate (Fire History + Geo) | 14 | 0.6320 | 0.8188 | 0.1727 | 0.1813 |
+| Fire History Features Only | 5 | 0.6074 | 0.8043 | 0.1747 | 0.1811 |
+| Seasonality & Geography Only | 6 | 0.4842 | 0.7607 | 0.2048 | 0.2071 |
+| No Fire History (Climate + Geo) | 34 | 0.4816 | 0.7591 | 0.2136 | 0.2259 |
+| Climate Features Only | 25 | 0.3600 | 0.6427 | 0.2501 | 0.2609 |
 
 ### 🧠 Sequential Deep Learning Benchmark: PyTorch LSTM vs LightGBM
 
@@ -161,7 +188,7 @@ To explore whether recurrent deep learning could learn fire dynamics directly fr
   <img src="reports/figures/lstm_vs_lgbm.png" width="90%" alt="PyTorch LSTM vs LightGBM Benchmark" />
 </p>
 
-- **Why did LightGBM outperform the LSTM (0.6274 vs 0.5947 PR-AUC)?**
+- **Why did LightGBM outperform the LSTM (0.6329 vs 0.5947 PR-AUC)?**
   1. **Tabular Inductive Bias & Critical Thresholds**: Tree-based ensembles naturally partition feature space with orthogonal decision boundaries (e.g., $RH < 20\%$ AND $T > 38^\circ\text{C}$), closely mirroring physical tipping points in wildland fuel ignition.
   2. **Explicit Spatial Neighborhood Contagion**: Engineered features like `neighbor_fire_7d` directly capture fire propagation across cell boundaries. A cell-level recurrent network without spatial graph convolutions treats cells as isolated 1D sequences.
   3. **Calibration & Operational Efficiency**: LightGBM trains in ~15 seconds on CPU, easily calibrates via Platt scaling to a Brier score of 0.0931 (vs 0.1630 for LSTM), and offers sub-millisecond inference for real-time APIs.
@@ -173,11 +200,11 @@ To explore whether recurrent deep learning could learn fire dynamics directly fr
 
 Wildfire management requires alerts at different operational tempos: immediate next-day brigade tactical dispatch (24h), short-term readiness (72h), and weekly strategic resource deployment (7 days). We trained and calibrated dedicated models for all three horizons:
 
-| Horizon | Forward Window | Positive Base Rate | PR-AUC | ROC-AUC | Brier Score | Recall @ P $\ge$ 50% | Primary Use Case |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
-| **1-Day** | $D+1$ | 4.26% | 0.3666 | **0.8953** | **0.0326** | 29.27% | Immediate brigade dispatch & aerial tanker scramble |
-| **3-Day** | $D+1$ to $D+3$ | 9.67% | 0.5330 | **0.8875** | **0.0625** | 50.13% | Tactical patrol repositioning & park burning bans |
-| **7-Day** | $D+1$ to $D+7$ | 16.48% | **0.6274** | **0.8823** | **0.0931** | **67.34%** | Strategic regional logistics & multi-agency coordination |
+| Horizon | Forward Window | Positive Base Rate | PR-AUC | ROC-AUC | Brier Score | ECE | Recall @ P $\ge$ 50% | Primary Use Case |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| **1-Day** | $D+1$ | 6.13% | 0.3698 | **0.8494** | **0.0467** | **0.0046** | 29.45% | Immediate brigade dispatch & aerial tanker scramble |
+| **3-Day** | $D+1$ to $D+3$ | 13.91% | 0.5366 | **0.8334** | **0.0893** | **0.0130** | 51.08% | Tactical patrol repositioning & park burning bans |
+| **7-Day** | $D+1$ to $D+7$ | 23.69% | **0.6329** | **0.8193** | **0.1324** | **0.0234** | **67.92%** | Strategic regional logistics & multi-agency coordination |
 
 *Note: For the 1-day horizon, the model's PR-AUC of 0.3666 is **8.6x above the 4.26% base rate**, maintaining a high global discrimination ROC-AUC of 0.8953 with minimal probabilistic error (Brier 0.0326).*
 
@@ -187,13 +214,13 @@ Wildfire management requires alerts at different operational tempos: immediate n
 
 To test stability across distinct meteorological cycles (including extreme drought years), we conducted an expanding-window temporal cross-validation:
 
-| Test Year | Train Period | Train Obs | Test Obs | Positive Base Rate | PR-AUC | ROC-AUC | Brier Score |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **2021** | 2016–2020 | 924,462 | 184,690 | 17.99% | 0.6379 | 0.8871 | 0.1522 |
-| **2022** | 2016–2021 | 1,109,152 | 184,690 | 18.43% | 0.6469 | 0.8818 | 0.1485 |
-| **2023** | 2016–2022 | 1,293,842 | 184,690 | 18.40% | 0.6380 | 0.8851 | 0.1470 |
-| **2024** | 2016–2023 | 1,478,532 | 185,196 | 21.38% | **0.6933** | 0.8837 | 0.1542 |
-| **2025** | 2016–2024 | 1,663,728 | 181,148 | 11.47% | 0.4968 | 0.8715 | 0.1461 |
+| Test Year | Train Period | Train Obs | Test Obs | Positive Base Rate | PR-AUC | ROC-AUC | Brier Score | ECE |
+|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **2021** | 2016 to 2020-12-25 | 640,992 | 128,480 | 25.86% | 0.6399 | 0.8236 | 0.1761 | 0.1725 |
+| **2022** | 2016 to 2021-12-25 | 769,472 | 128,480 | 26.49% | 0.6509 | 0.8177 | 0.1735 | 0.1598 |
+| **2023** | 2016 to 2022-12-25 | 897,952 | 128,480 | 26.45% | 0.6425 | 0.8210 | 0.1727 | 0.1603 |
+| **2024** | 2016 to 2023-12-25 | 1,026,432 | 128,832 | **30.74%** | **0.6991** | **0.8156** | 0.1796 | 0.1489 |
+| **2025** | 2016 to 2024-12-25 | 1,155,264 | 126,016 | 16.48% | 0.5035 | 0.8115 | 0.1638 | 0.2112 |
 
 - **Resilience to Severe Drought (2024)**: During the historic 2024 drought in Central Brazil (positive rate rose to 21.4%), the model performed at its best (**PR-AUC 0.6933**), accurately detecting widespread hazard conditions.
 - **Robustness in Low-Fire Years (2025)**: Even when the fire rate plummeted to 11.5%, the model maintained a high **ROC-AUC of 0.8715**, confirming robust ranking ability across changing climatological regimes.
@@ -249,23 +276,37 @@ Evaluating predictive performance across space and time on the out-of-time test 
 - Interactive Swagger UI available at `http://localhost:8000/docs`
 - Multi-horizon support: Pass `horizon_days` (1, 3, or 7; defaults to 7).
 
-**Sample cURL Request (24h Alert):**
+**Sample cURL Request (Historical Replay 7d Horizon):**
 ```bash
 curl -X POST "http://localhost:8000/predict" \
      -H "Content-Type: application/json" \
-     -d '{"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15", "horizon_days": 1}'
+     -d '{
+       "latitude": -12.5,
+       "longitude": -55.0,
+       "date": "2024-08-15",
+       "horizon_days": 7,
+       "inference_mode": "historical_replay"
+     }'
 ```
 
-**Sample JSON Response:**
+**Sample JSON Response (with Explicit Temporal Contract):**
 ```json
 {
   "latitude": -12.5,
   "longitude": -55.0,
   "date": "2024-08-15",
-  "horizon_days": 1,
-  "probability": 0.4215,
-  "risk_level": "medium",
-  "grid_id": "011_013"
+  "horizon_days": 7,
+  "probability": 0.6329,
+  "risk_level": "high",
+  "grid_id": "011_013",
+  "issue_date": "2024-08-15",
+  "observation_cutoff": "2024-08-15",
+  "target_start": "2024-08-16",
+  "target_end": "2024-08-22",
+  "data_timestamp": "2024-08-15T00:00:00Z",
+  "data_source": "INPE BDQueimadas & NASA POWER (Historical Replay Archive v2.0)",
+  "model_version": "2.0.0-spatiotemporal",
+  "inference_mode": "historical_replay"
 }
 ```
 

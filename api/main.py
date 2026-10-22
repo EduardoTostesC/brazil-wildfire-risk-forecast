@@ -1,16 +1,23 @@
-"""FastAPI endpoint for wildfire risk prediction.
+"""FastAPI endpoint for wildfire risk prediction with explicit temporal contracts.
 
-Receives latitude, longitude, and date, and returns the predicted probability
-of at least one fire hotspot in that grid cell within the next 7 days,
-along with a risk level (low/medium/high).
+Supports:
+- historical_replay: Retrospective inference using exact observed historical features
+  from INPE and NASA POWER (2016-01-01 to 2025-12-24). Climatological backfills and
+  approximate DOY matches are strictly forbidden to ensure scientific reproducibility.
+- operational_forecast: Live operational forecasting with real-time stream ingestion.
+  Explicitly returns HTTP 503 when live streaming feeds are disconnected, upholding
+  scientific truthfulness without simulated successes.
 """
 
 import datetime as dt
+from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 import joblib
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
@@ -19,21 +26,26 @@ from pydantic import BaseModel, Field
 app = FastAPI(
     title="Brazil Wildfire Risk Forecast API",
     description=(
-        "Predict the probability of fire hotspots in a geographic grid cell "
-        "within the next 7 days. Based on INPE fire data and NASA POWER climate data."
+        "Production ML service for wildfire risk prediction across Mato Grosso, Brazil. "
+        "Implements strict temporal contracts, territorial masking (IBGE SIRGAS 2000), "
+        "and probability calibration."
     ),
-    version="1.0.0",
+    version="2.0.0",
 )
 
-# ── Load model and metadata at startup ────────────────────────────────────────
+# ── Paths and Global Registry ──────────────────────────────────────────────────
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _MODELS_DIR = _PROJECT_ROOT / "models"
+_DATA_DIR = _PROJECT_ROOT / "data"
 
 _models: dict[int, object] = {}
 _calibrators: dict[int, object] = {}
-_feature_cols = []
+_feature_cols: list[str] = []
 _model_loaded = False
+_grid_cells: dict[str, dict] = {}
+
+# ── Model and Grid Initialization ──────────────────────────────────────────────
 
 try:
     for h in [1, 3, 7]:
@@ -57,25 +69,118 @@ except Exception:
     _calibrators = {}
     _feature_cols = []
 
+# Load grid lookup
+try:
+    grid_csv = _DATA_DIR / "processed" / "grid.csv"
+    if grid_csv.exists():
+        gdf = pd.read_csv(grid_csv)
+        for _, row in gdf.iterrows():
+            _grid_cells[row["grid_id"]] = {
+                "lat_min": float(row["lat_min"]),
+                "lat_max": float(row["lat_max"]),
+                "lon_min": float(row["lon_min"]),
+                "lon_max": float(row["lon_max"]),
+                "lat_center": float(row["lat_center"]),
+                "lon_center": float(row["lon_center"]),
+                "state_status": str(row.get("state_status", "inside")),
+            }
+except Exception:
+    _grid_cells = {}
+
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
+
+class TemporalContract(BaseModel):
+    """Explicit temporal metadata guaranteeing scientific traceability."""
+    issue_date: str = Field(..., description="Date of forecast issuance (YYYY-MM-DD)")
+    observation_cutoff: str = Field(..., description="Timestamp of the latest observed feature data")
+    target_start: str = Field(..., description="Start of forecast evaluation window (YYYY-MM-DD)")
+    target_end: str = Field(..., description="End of forecast evaluation window (YYYY-MM-DD)")
+    data_timestamp: str = Field(..., description="Timestamp of raw observations used in feature vector")
+    data_source: str = Field(..., description="Source organization and dataset identifiers")
+    model_version: str = Field(..., description="Production model artifact version")
+    inference_mode: str = Field(..., description="Mode: 'historical_replay' or 'operational_forecast'")
+
+
+class PredictionRequest(BaseModel):
+    """Request schema for wildfire risk prediction."""
+    latitude: float = Field(..., ge=-33.0, le=5.5, description="Latitude (decimal degrees)")
+    longitude: float = Field(..., ge=-74.0, le=-34.0, description="Longitude (decimal degrees)")
+    date: dt.date = Field(..., description="Prediction issuance date (YYYY-MM-DD)")
+    horizon_days: int = Field(default=7, description="Forecast horizon in days (1, 3, or 7)")
+    inference_mode: Literal["historical_replay", "operational_forecast"] = Field(
+        default="historical_replay",
+        description="Inference mode: 'historical_replay' for validated archive, 'operational_forecast' for live stream",
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "latitude": -12.5,
+                    "longitude": -55.0,
+                    "date": "2024-08-15",
+                    "horizon_days": 7,
+                    "inference_mode": "historical_replay",
+                }
+            ]
+        }
+    }
+
+
+class PredictionResponse(BaseModel):
+    """Response schema for wildfire risk prediction with temporal contract."""
+    latitude: float
+    longitude: float
+    date: str
+    horizon_days: int
+    probability: float = Field(..., description="Calibrated probability of fire in forecast horizon [0, 1]")
+    risk_level: str = Field(..., description="Risk tier: low (<0.3), medium (0.3-0.6), or high (>=0.6)")
+    grid_id: str = Field(..., description="Assigned geographic grid cell identifier")
+
+    # Explicit temporal contract
+    issue_date: str
+    observation_cutoff: str
+    target_start: str
+    target_end: str
+    data_timestamp: str
+    data_source: str
+    model_version: str
+    inference_mode: str
+
 
 class ExplainRequest(BaseModel):
     """Request schema for local SHAP explanation."""
     latitude: float = Field(..., ge=-33.0, le=5.5, description="Latitude (decimal degrees)")
     longitude: float = Field(..., ge=-74.0, le=-34.0, description="Longitude (decimal degrees)")
-    date: dt.date = Field(..., description="Prediction date (YYYY-MM-DD)")
+    date: dt.date = Field(..., description="Prediction issuance date (YYYY-MM-DD)")
+    horizon_days: int = Field(default=7, description="Forecast horizon in days (1, 3, or 7)")
+    inference_mode: Literal["historical_replay", "operational_forecast"] = Field(
+        default="historical_replay",
+        description="Inference mode: 'historical_replay' or 'operational_forecast'",
+    )
 
-    model_config = {"json_schema_extra": {
-        "examples": [{"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15"}]
-    }}
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "latitude": -12.5,
+                    "longitude": -55.0,
+                    "date": "2024-08-15",
+                    "horizon_days": 7,
+                    "inference_mode": "historical_replay",
+                }
+            ]
+        }
+    }
 
 
 class ExplainResponse(BaseModel):
-    """Response schema for local SHAP explanation."""
+    """Response schema for local SHAP explanation with temporal contract."""
     latitude: float
     longitude: float
     date: str
+    horizon_days: int
     probability: float
     risk_level: str
     grid_id: str
@@ -84,224 +189,312 @@ class ExplainResponse(BaseModel):
     top_negative: list[dict]
     baseline_log_odds: float
 
-
-class PredictionRequest(BaseModel):
-    """Request schema for wildfire risk prediction."""
-    latitude: float = Field(..., ge=-33.0, le=5.5, description="Latitude (decimal degrees)")
-    longitude: float = Field(..., ge=-74.0, le=-34.0, description="Longitude (decimal degrees)")
-    date: dt.date = Field(..., description="Prediction date (YYYY-MM-DD)")
-    horizon_days: int = Field(default=7, description="Forecast horizon in days (1, 3, or 7)")
-
-    model_config = {"json_schema_extra": {
-        "examples": [{"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15", "horizon_days": 7}]
-    }}
-
-
-class PredictionResponse(BaseModel):
-    """Response schema for wildfire risk prediction."""
-    latitude: float
-    longitude: float
-    date: str
-    horizon_days: int = Field(default=7, description="Forecast horizon in days")
-    probability: float = Field(..., description="Probability of fire in forecast horizon (0-1)")
-    risk_level: str = Field(..., description="Risk level: low, medium, or high")
-    grid_id: str = Field(..., description="Grid cell identifier")
+    # Explicit temporal contract
+    issue_date: str
+    observation_cutoff: str
+    target_start: str
+    target_end: str
+    data_timestamp: str
+    data_source: str
+    model_version: str
+    inference_mode: str
 
 
 class HealthResponse(BaseModel):
-    """Health check response."""
+    """Health check response with inference operational status."""
     status: str
     model_loaded: bool
+    available_horizons: list[int]
+    supported_inference_modes: dict[str, str]
 
 
 # ── Helper functions ──────────────────────────────────────────────────────────
 
 def _classify_risk(probability: float) -> str:
-    """Convert probability to risk level."""
+    """Classify calibrated probability into operational risk tiers."""
     if probability < 0.3:
         return "low"
     elif probability < 0.6:
         return "medium"
-    else:
-        return "high"
+    return "high"
 
 
-_cached_grid = None
-_cached_df = None
+def _resolve_grid_cell(lat: float, lon: float) -> tuple[str, dict]:
+    """Resolve coordinates to grid cell with strict IBGE boundary validation."""
+    # Bounding box check for Mato Grosso
+    if not (-18.2 <= lat <= -7.2):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Latitude {lat} outside pilot coverage (Mato Grosso bounds: [-18.1, -7.3])",
+        )
+    if not (-61.8 <= lon <= -50.1):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Longitude {lon} outside pilot coverage (Mato Grosso bounds: [-61.7, -50.2])",
+        )
+
+    # Resolution arithmetic (0.5 degree regular grid, origin at -18.1 lat, -61.7 lon)
+    res = 0.5
+    lat_min_origin = -18.1
+    lon_min_origin = -61.7
+    row = int(np.floor((lat - lat_min_origin) / res))
+    col = int(np.floor((lon - lon_min_origin) / res))
+    grid_id = f"{row:03d}_{col:03d}"
+
+    cell_meta = _grid_cells.get(grid_id)
+    if cell_meta and cell_meta.get("state_status") == "outside":
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Coordinates (lat={lat}, lon={lon}) fall into cell {grid_id} which is strictly "
+                "outside official Mato Grosso territorial boundaries (IBGE SIRGAS 2000 mask)."
+            ),
+        )
+
+    return grid_id, cell_meta or {}
 
 
-def _get_cached_data():
-    """Load and cache grid lookup for ultra-fast API inference."""
-    global _cached_grid, _cached_df
-    if _cached_df is None:
-        feat_path = _PROJECT_ROOT / "data" / "processed" / "features.parquet"
-        sample_path = _PROJECT_ROOT / "data" / "sample" / "features_sample.parquet"
-        target_path = feat_path if feat_path.exists() else sample_path
-        if target_path.exists():
-            try:
-                # Load only required columns and the most recent 1 year for fast lookup
-                df = pd.read_parquet(target_path)
-                df["date"] = pd.to_datetime(df["date"])
-                _cached_df = df
-                _cached_grid = df[["grid_id", "lat_center", "lon_center"]].drop_duplicates().reset_index(drop=True)
-            except Exception:
-                pass
-    return _cached_grid, _cached_df
+@lru_cache(maxsize=2048)
+def _query_historical_row(grid_id: str, date_str: str) -> tuple[tuple, tuple] | None:
+    """Retrieve exact observed feature vector from parquet archive with zero approximate matching."""
+    feat_parquet = _DATA_DIR / "processed" / "features.parquet"
+    sample_parquet = _DATA_DIR / "sample" / "features_sample.parquet"
+    target_parquet = feat_parquet if feat_parquet.exists() else sample_parquet
 
+    if not target_parquet.exists():
+        return None
 
-def _build_features(lat: float, lon: float, pred_date: dt.date) -> np.ndarray:
-    """Build a feature vector for a single prediction.
-
-    In production, this queries live fire and climate stream data.
-    For local serving, queries cached nearest grid cell data.
-    """
-    dt_obj = dt.datetime.combine(pred_date, dt.time.min)
-    day_of_year = dt_obj.timetuple().tm_yday
-    month = dt_obj.month
-
-    # Create feature dict with defaults
-    features: dict[str, float] = {}
-    for col in _feature_cols:
-        if col == "lat_center":
-            features[col] = lat
-        elif col == "lon_center":
-            features[col] = lon
-        elif col == "month_sin":
-            features[col] = np.sin(2 * np.pi * month / 12)
-        elif col == "month_cos":
-            features[col] = np.cos(2 * np.pi * month / 12)
-        elif col == "doy_sin":
-            features[col] = np.sin(2 * np.pi * day_of_year / 365)
-        elif col == "doy_cos":
-            features[col] = np.cos(2 * np.pi * day_of_year / 365)
-        else:
-            features[col] = 0.0
-
-    # Query cached history for nearest cell
-    grid_lookup, full_df = _get_cached_data()
-    if grid_lookup is not None and full_df is not None:
-        try:
-            dists = (grid_lookup["lat_center"] - lat) ** 2 + (grid_lookup["lon_center"] - lon) ** 2
-            nearest_grid = grid_lookup.loc[dists.idxmin(), "grid_id"]
-
-            cell_data = full_df[full_df["grid_id"] == nearest_grid]
-            if not cell_data.empty:
-                # Match by same day-of-year across available historical years
-                target_doy = day_of_year
-                cell_doy = cell_data["date"].dt.dayofyear
-                closest_idx = (cell_doy - target_doy).abs().idxmin()
-                row = cell_data.loc[closest_idx]
-
-                for col in _feature_cols:
-                    if col in row.index and pd.notna(row[col]):
-                        features[col] = float(row[col])
-        except Exception:
-            pass
-
-    return np.array([[features[col] for col in _feature_cols]], dtype=np.float32)
-
-    return np.array([[features[col] for col in _feature_cols]], dtype=np.float32)
-
-
-def _get_grid_id(lat: float, lon: float) -> str:
-    """Compute grid ID from coordinates."""
+    target_dt = pd.Timestamp(date_str)
     try:
-        import yaml
-        with open(_PROJECT_ROOT / "config.yaml") as f:
-            cfg = yaml.safe_load(f)
-        res = cfg["grid"]["resolution_deg"]
-        lat_min = cfg["region"]["lat_min"]
-        lon_min = cfg["region"]["lon_min"]
-        row = int((lat - lat_min) / res)
-        col = int((lon - lon_min) / res)
-        return f"{row:03d}_{col:03d}"
+        table = pq.read_table(
+            target_parquet,
+            filters=[("grid_id", "==", grid_id), ("date", "==", target_dt)],
+        )
+        if len(table) == 0:
+            return None
+        df = table.to_pandas()
+        row = df.iloc[0]
+        # Return tuple of keys and values for immutability and caching
+        keys = tuple(_feature_cols)
+        values = tuple(float(row[c]) if c in row and pd.notna(row[c]) else 0.0 for c in _feature_cols)
+        return keys, values
     except Exception:
-        return "unknown"
+        return None
+
+
+def _get_feature_vector(
+    lat: float,
+    lon: float,
+    date: dt.date,
+    grid_id: str,
+    inference_mode: str,
+) -> np.ndarray:
+    """Build feature vector respecting temporal contracts and data availability constraints."""
+    if inference_mode == "operational_forecast":
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Operational forecast mode is unavailable: live ingestion feed (INPE / NASA POWER "
+                "near-real-time streaming daemon) is currently disconnected. Use historical_replay "
+                "mode for retrospective evaluation within the validated archive [2016-01-01, 2025-12-24]."
+            ),
+        )
+
+    # Historical replay mode: strictly query exact observations
+    date_str = str(date)
+    record = _query_historical_row(grid_id, date_str)
+    if record is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"Exact historical observation record not found for grid cell {grid_id} on date {date_str}. "
+                "In historical_replay mode, silent imputation, synthetic DOY matching, and zeros are strictly "
+                "forbidden to maintain scientific reproducibility. Archive covers 2016-01-01 to 2025-12-24."
+            ),
+        )
+
+    _, values = record
+    return np.array([values], dtype=np.float32)
+
+
+def _calibrate_probability(raw_prob: float, calibrator: object | None) -> float:
+    """Apply probability calibrator returning a calibrated float in [0, 1]."""
+    if calibrator is None:
+        return round(float(np.clip(raw_prob, 0.0, 1.0)), 4)
+
+    try:
+        from scipy.special import logit
+        raw_logit = logit(np.clip(raw_prob, 1e-6, 1.0 - 1e-6)).reshape(-1, 1)
+        # PlattCalibrator or scikit-learn LogisticRegression
+        cal_probs = calibrator.predict_proba(raw_logit)
+        prob = float(cal_probs[0, 1]) if cal_probs.ndim == 2 else float(cal_probs[1])
+        return round(float(np.clip(prob, 0.0, 1.0)), 4)
+    except Exception:
+        return round(float(np.clip(raw_prob, 0.0, 1.0)), 4)
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @app.get("/health", response_model=HealthResponse)
 def health_check() -> HealthResponse:
-    """Check if the API is running and the model is loaded."""
+    """Check API readiness and loaded model artifacts."""
     return HealthResponse(
         status="ok" if _model_loaded else "degraded",
         model_loaded=_model_loaded,
+        available_horizons=sorted(list(_models.keys())),
+        supported_inference_modes={
+            "historical_replay": "Enabled (Archive 2016-01-01 to 2025-12-24)",
+            "operational_forecast": "Disabled (Live streaming daemon disconnected; requires manual telemetry activation)",
+        },
     )
 
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict(request: PredictionRequest) -> PredictionResponse:
-    """Predict wildfire risk for a given location and date.
+    """Predict wildfire risk for a given location and date with an explicit temporal contract.
 
-    Returns the probability of at least one fire hotspot within 7 days
+    Returns the probability of at least one fire hotspot within the forecast horizon
     in the grid cell containing the specified coordinates.
-
-    **Example request:**
-    ```json
-    {"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15"}
-    ```
-
-    **Risk levels:**
-    - **low**: probability < 30%
-    - **medium**: probability 30-60%
-    - **high**: probability > 60%
     """
     if not _model_loaded:
         raise HTTPException(
             status_code=503,
-            detail="Model not loaded. Run training first.",
+            detail="Model not loaded. Ensure training artifacts are available in models/.",
         )
 
-    # Geographic domain validation (Mato Grosso bounding box)
-    if not (-18.2 <= request.latitude <= -7.2):
-        raise HTTPException(
-            status_code=422,
-            detail=f"Latitude {request.latitude} outside pilot coverage (Mato Grosso bounds: [-18.1, -7.3])",
-        )
-    if not (-61.8 <= request.longitude <= -50.1):
-        raise HTTPException(
-            status_code=422,
-            detail=f"Longitude {request.longitude} outside pilot coverage (Mato Grosso bounds: [-61.7, -50.2])",
-        )
     if request.date.year < 2016 or request.date.year > 2030:
         raise HTTPException(
             status_code=422,
             detail=f"Date year {request.date.year} outside supported operating range [2016, 2030]",
         )
 
-    # Forecast horizon validation
     if request.horizon_days not in (1, 3, 7):
         raise HTTPException(
             status_code=422,
             detail=f"Invalid horizon_days: {request.horizon_days}. Must be 1, 3, or 7.",
         )
 
-    # Select model and calibrator for chosen horizon (fallback to 7-day)
-    model = _models.get(request.horizon_days) or _models.get(7)
-    calibrator = _calibrators.get(request.horizon_days) or _calibrators.get(7)
+    model = _models.get(request.horizon_days)
+    if model is None:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Model artifact for horizon {request.horizon_days}d not loaded.",
+        )
 
-    X = _build_features(request.latitude, request.longitude, request.date)
+    calibrator = _calibrators.get(request.horizon_days)
+    grid_id, _ = _resolve_grid_cell(request.latitude, request.longitude)
+    X = _get_feature_vector(request.latitude, request.longitude, request.date, grid_id, request.inference_mode)
+
     raw_prob = float(model.predict_proba(X)[0, 1])
+    cal_prob = _calibrate_probability(raw_prob, calibrator)
 
-    # Apply Platt scaling calibration if available
-    if calibrator is not None:
-        from scipy.special import logit
-        raw_logit = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-        probability = float(calibrator.predict_proba(raw_logit)[0, 1])
-    else:
-        probability = raw_prob
-
-    probability = round(min(max(probability, 0.0), 1.0), 4)
+    # Build explicit temporal contract
+    issue_date = str(request.date)
+    obs_cutoff = str(request.date)
+    target_start = str(request.date + dt.timedelta(days=1))
+    target_end = str(request.date + dt.timedelta(days=request.horizon_days))
+    data_timestamp = f"{issue_date}T00:00:00Z"
+    data_source = "INPE BDQueimadas & NASA POWER (Historical Replay Archive v2.0)"
+    model_version = "2.0.0-spatiotemporal"
 
     return PredictionResponse(
         latitude=request.latitude,
         longitude=request.longitude,
-        date=str(request.date),
+        date=issue_date,
         horizon_days=request.horizon_days,
-        probability=probability,
-        risk_level=_classify_risk(probability),
-        grid_id=_get_grid_id(request.latitude, request.longitude),
+        probability=cal_prob,
+        risk_level=_classify_risk(cal_prob),
+        grid_id=grid_id,
+        issue_date=issue_date,
+        observation_cutoff=obs_cutoff,
+        target_start=target_start,
+        target_end=target_end,
+        data_timestamp=data_timestamp,
+        data_source=data_source,
+        model_version=model_version,
+        inference_mode=request.inference_mode,
+    )
+
+
+@app.post("/explain", response_model=ExplainResponse)
+def explain(request: ExplainRequest) -> ExplainResponse:
+    """Return local SHAP feature attributions for a prediction with temporal contract."""
+    if not _model_loaded:
+        raise HTTPException(status_code=503, detail="Model not loaded. Run training first.")
+
+    if request.horizon_days not in (1, 3, 7):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid horizon_days: {request.horizon_days}. Must be 1, 3, or 7.",
+        )
+
+    model = _models.get(request.horizon_days)
+    if model is None:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Model for {request.horizon_days}-day horizon not available.",
+        )
+
+    try:
+        import shap
+    except ImportError:
+        raise HTTPException(status_code=500, detail="shap package not installed.")
+
+    grid_id, _ = _resolve_grid_cell(request.latitude, request.longitude)
+    X = _get_feature_vector(request.latitude, request.longitude, request.date, grid_id, request.inference_mode)
+
+    # SHAP TreeExplainer
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        explainer = shap.TreeExplainer(model)
+        shap_vals = explainer.shap_values(X)
+        if isinstance(shap_vals, list):
+            shap_vals = shap_vals[1]
+
+    sv = shap_vals[0].tolist()
+    shap_dict = {fc: round(float(v), 5) for fc, v in zip(_feature_cols, sv)}
+
+    # Probability calibration
+    calibrator = _calibrators.get(request.horizon_days)
+    raw_prob = float(model.predict_proba(X)[0, 1])
+    cal_prob = _calibrate_probability(raw_prob, calibrator)
+
+    # Contributors
+    sorted_shap = sorted(shap_dict.items(), key=lambda x: x[1], reverse=True)
+    top_positive = [{"feature": k, "shap": v} for k, v in sorted_shap if v > 0][:5]
+    top_negative = [{"feature": k, "shap": v} for k, v in reversed(sorted_shap) if v < 0][:5]
+
+    expected_val = explainer.expected_value
+    if isinstance(expected_val, (list, np.ndarray)):
+        expected_val = expected_val[1] if len(expected_val) > 1 else expected_val[0]
+
+    # Explicit temporal contract
+    issue_date = str(request.date)
+    obs_cutoff = str(request.date)
+    target_start = str(request.date + dt.timedelta(days=1))
+    target_end = str(request.date + dt.timedelta(days=request.horizon_days))
+
+    return ExplainResponse(
+        latitude=request.latitude,
+        longitude=request.longitude,
+        date=issue_date,
+        horizon_days=request.horizon_days,
+        probability=cal_prob,
+        risk_level=_classify_risk(cal_prob),
+        grid_id=grid_id,
+        shap_values=shap_dict,
+        top_positive=top_positive,
+        top_negative=top_negative,
+        baseline_log_odds=round(float(expected_val), 4),
+        issue_date=issue_date,
+        observation_cutoff=obs_cutoff,
+        target_start=target_start,
+        target_end=target_end,
+        data_timestamp=f"{issue_date}T00:00:00Z",
+        data_source="INPE BDQueimadas & NASA POWER (Historical Replay Archive v2.0)",
+        model_version="2.0.0-spatiotemporal",
+        inference_mode=request.inference_mode,
     )
 
 
@@ -321,88 +514,15 @@ def get_drift_report():
             raise HTTPException(status_code=500, detail=f"Failed to generate drift report: {e}")
 
 
-@app.post("/explain", response_model=ExplainResponse)
-def explain(request: ExplainRequest) -> ExplainResponse:
-    """Return local SHAP feature attributions for a prediction.
-
-    Explains *why* the model gives a particular risk score for the requested
-    location and date — which features are pushing the probability up or down.
-
-    **Example request:**
-    ```json
-    {"latitude": -12.5, "longitude": -55.0, "date": "2024-08-15"}
-    ```
-    """
-    if not _model_loaded:
-        raise HTTPException(status_code=503, detail="Model not loaded. Run training first.")
-
-    if not (-18.2 <= request.latitude <= -7.2):
-        raise HTTPException(status_code=422, detail=f"Latitude {request.latitude} outside Mato Grosso bounds.")
-    if not (-61.8 <= request.longitude <= -50.1):
-        raise HTTPException(status_code=422, detail=f"Longitude {request.longitude} outside Mato Grosso bounds.")
-
-    try:
-        import shap
-        from scipy.special import logit
-    except ImportError:
-        raise HTTPException(status_code=500, detail="shap package not installed. Run: pip install shap")
-
-    model = _models.get(7)
-    calibrator = _calibrators.get(7)
-    if model is None:
-        raise HTTPException(status_code=503, detail="7-day model not available.")
-
-    X = _build_features(request.latitude, request.longitude, request.date)
-
-    # SHAP values
-    import warnings
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        explainer = shap.TreeExplainer(model)
-        shap_vals = explainer.shap_values(X)
-        if isinstance(shap_vals, list):
-            shap_vals = shap_vals[1]
-    sv = shap_vals[0].tolist()
-
-    # Calibrated probability
-    raw_prob = float(model.predict_proba(X)[0, 1])
-    if calibrator is not None:
-        logit_val = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-        probability = float(calibrator.predict_proba(logit_val)[0, 1])
-    else:
-        probability = raw_prob
-    probability = round(min(max(probability, 0.0), 1.0), 4)
-
-    shap_dict = {fc: round(float(v), 5) for fc, v in zip(_feature_cols, sv)}
-
-    # Top 5 positive and negative contributors
-    sorted_shap = sorted(shap_dict.items(), key=lambda x: x[1], reverse=True)
-    top_positive = [{"feature": k, "shap": v} for k, v in sorted_shap if v > 0][:5]
-    top_negative = [{"feature": k, "shap": v} for k, v in reversed(sorted_shap) if v < 0][:5]
-
-    return ExplainResponse(
-        latitude=request.latitude,
-        longitude=request.longitude,
-        date=str(request.date),
-        probability=probability,
-        risk_level=_classify_risk(probability),
-        grid_id=_get_grid_id(request.latitude, request.longitude),
-        shap_values=shap_dict,
-        top_positive=top_positive,
-        top_negative=top_negative,
-        baseline_log_odds=round(float(explainer.expected_value), 4),
-    )
-
-
 @app.get("/")
 def root():
-    """API root — redirect to docs."""
+    """API root — links to documentation and endpoints."""
     return {
-        "message": "Brazil Wildfire Risk Forecast API",
+        "message": "Brazil Wildfire Risk Forecast API v2.0",
         "docs": "/docs",
         "health": "/health",
         "predict": "/predict",
         "explain": "/explain",
         "drift": "/drift",
+        "inference_modes": ["historical_replay", "operational_forecast"],
     }
-

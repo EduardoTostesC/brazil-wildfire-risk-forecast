@@ -3,7 +3,7 @@
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions)
-[![Testes](https://img.shields.io/badge/testes-21%20passaram-brightgreen)](tests/)
+[![Testes](https://img.shields.io/badge/testes-29%20passaram-brightgreen)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-blueviolet)](https://github.com/astral-sh/ruff)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
@@ -75,11 +75,11 @@ Combater incêndios florestais quando as chamas já atingiram dezenas de quilôm
 
 | Dimensão | Escolha Técnica | Justificativa |
 |---|---|---|
-| **Unidade Espacial** | Grade regular de 0,5° (~56 km no equador) | Alinhada à resolução nativa do modelo de reanálise atmosférica da NASA (MERRA-2) e computacionalmente eficiente (506 células cobrem 100% do Mato Grosso). Configurável via `config.yaml`. |
-| **Unidade Temporal** | Diária, com horizonte de 7 dias à frente | Permite ação tática operacional semanal (tempo hábil de mobilização de brigadas terrestres). |
-| **Alvo Binário** | $y \in \{0, 1\}$ ($\ge 1$ foco na célula entre $D+1$ e $D+7$) | Formulação robusta contra ruídos finos de contagem e detecções isoladas. Os últimos 7 dias da série histórica são descartados por terem janela futura incompleta. |
+| **Unidade Espacial** | Grade regular de 0,5° (~56 km no equador) | Alinhada à resolução da NASA (MERRA-2) e recortada com máscara oficial do IBGE (SIRGAS 2000), resultando em 352 células ativas (154 células externas excluídas para eliminar zeros artificiais). |
+| **Unidade Temporal** | Diária, multi-horizonte (1d, 3d, 7d) | Permite ação tática operacional imediata e estratégica semanal (tempo hábil de mobilização de brigadas). |
+| **Alvo Binário** | $y \in \{0, 1\}$ ($\ge 1$ foco na célula entre $D+1$ e $D+H$) | Formulação robusta contra ruídos finos de contagem. Aplica-se embargo estrito de $H+1$ dias em todas as datas de corte entre partições. |
 | **Região Piloto** | Mato Grosso (MT) | Estado líder histórico em queimadas no Brasil, englobando três biomas de relevância global: Cerrado, Amazônia e Pantanal. |
-| **Período** | 2016 a 2025 (10 anos completos de histórico) | 8 anos para treino (2016–2023: 1.478.532 registros) e 2 anos para teste cego temporal (2024–2025: 366.344 registros). |
+| **Período** | 2016 a 2025 (10 anos completos de histórico) | 7 anos para treino (2016–2022: 897.600 registros), 1 ano holdout para calibração out-of-sample (2023: 126.016 registros) e 2 anos para teste cego temporal (2024–2025: 254.848 registros). |
 
 ---
 
@@ -152,6 +152,32 @@ A tabela abaixo reflete a **execução real** do pipeline no conjunto de teste e
 <p align="center">
   <img src="reports/figures/calibration_curve.png" width="70%" alt="Curva de Calibração de Probabilidades" />
 </p>
+
+### 🚨 Métricas de Decisão Operacional para Triagem em Campo
+
+Brigadistas não conseguem patrulhar 100% do estado; a triagem tática prioriza setores de maior risco:
+
+| Modelo | Recall @ Top-5% | Recall @ Top-10% | Precisão @ Top-5% | Precisão @ Top-10% | NNS @ Top-10% (Vistorias / Foco) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Persistência (Empírica)** | 17.00% | 28.63% | 80.55% | 67.83% | 1.47 |
+| **Climatologia** | 14.81% | 26.56% | 70.19% | 62.91% | 1.59 |
+| **Regressão Logística** | 16.74% | 29.16% | 79.30% | 69.07% | 1.45 |
+| **LightGBM (Platt Calibrated)** | **18.22%** | **31.89%** | **86.30%** | **75.55%** | **1.32** |
+
+*Priorizar vistorias no Top-10% de células de maior risco captura **31.89% de todos os focos** com precisão de **75.55%**, demandando apenas **1.32 vistorias por foco detectado**.*
+
+### 🔬 Estudo de Ablação de Variáveis
+
+Quantificando a contribuição marginal de cada família de atributos:
+
+| Subconjunto de Features | Quantidade de Features | PR-AUC | ROC-AUC | Brier Score | ECE |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Modelo Completo (Todas as Features)** | **39** | **0.6329** | **0.8193** | **0.1715** | **0.1791** |
+| Sem Clima (Histórico de Fogo + Geografia) | 14 | 0.6320 | 0.8188 | 0.1727 | 0.1813 |
+| Apenas Histórico de Fogo | 5 | 0.6074 | 0.8043 | 0.1747 | 0.1811 |
+| Apenas Sazonalidade e Posição | 6 | 0.4842 | 0.7607 | 0.2048 | 0.2071 |
+| Sem Histórico de Fogo (Clima + Geografia) | 34 | 0.4816 | 0.7591 | 0.2136 | 0.2259 |
+| Apenas Clima (Meteorologia Reanalítica) | 25 | 0.3600 | 0.6427 | 0.2501 | 0.2609 |
 
 ### 🧠 Benchmark de Deep Learning Sequencial: PyTorch LSTM vs LightGBM
 

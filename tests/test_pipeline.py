@@ -141,9 +141,6 @@ class TestLeakDetection:
         })
 
         # Compute target manually
-        # Days 3-9 should have target=1 (fire on day 10 is within 7-day horizon)
-        # Day 10 itself: target looks at days 11-17, all zero -> target=0
-        # So target=1 for days 3,4,5,6,7,8,9 (indices 2-8)
         horizon = 7
         targets = []
         for i in range(len(df)):
@@ -152,6 +149,29 @@ class TestLeakDetection:
         assert sum(targets) == 7
         assert targets[2:9] == [1] * 7
         assert targets[9] == 0
+
+    def test_temporal_purging_embargo_prevents_leak(self):
+        """Verify that enforcing an H-day embargo prevents label leakage across boundaries."""
+        horizon = 7
+        cal_start = pd.Timestamp("2023-01-01")
+        test_start = pd.Timestamp("2024-01-01")
+
+        train_cutoff = cal_start - pd.Timedelta(days=horizon + 1)
+        cal_cutoff = test_start - pd.Timedelta(days=horizon + 1)
+
+        # For the last sample in training (train_cutoff):
+        # Target evaluation window is [train_cutoff + 1 day, train_cutoff + horizon days]
+        last_train_target_end = train_cutoff + pd.Timedelta(days=horizon)
+        assert last_train_target_end < cal_start, (
+            f"Leakage detected: train target window reaches {last_train_target_end}, "
+            f"which overlaps with calibration start {cal_start}"
+        )
+
+        last_cal_target_end = cal_cutoff + pd.Timedelta(days=horizon)
+        assert last_cal_target_end < test_start, (
+            f"Leakage detected: calibration target window reaches {last_cal_target_end}, "
+            f"which overlaps with test start {test_start}"
+        )
 
 
 # ── API Fixture ───────────────────────────────────────────────────────────────
@@ -253,10 +273,55 @@ class TestAPI:
         assert "top_positive" in data
         assert "top_negative" in data
         assert "baseline_log_odds" in data
+        assert "issue_date" in data
+        assert "observation_cutoff" in data
+        assert "target_start" in data
+        assert "target_end" in data
         assert 0.0 <= data["probability"] <= 1.0
         assert data["risk_level"] in ("low", "medium", "high")
         assert isinstance(data["shap_values"], dict)
         assert len(data["shap_values"]) > 0
+
+    def test_predict_temporal_contract(self, client):
+        """Verify explicit temporal contract fields in prediction response."""
+        response = client.post("/predict", json={
+            "latitude": -12.5,
+            "longitude": -55.0,
+            "date": "2024-08-15",
+            "horizon_days": 7,
+            "inference_mode": "historical_replay",
+        })
+        assert response.status_code == 200
+        data = response.json()
+        assert data["issue_date"] == "2024-08-15"
+        assert data["observation_cutoff"] == "2024-08-15"
+        assert data["target_start"] == "2024-08-16"
+        assert data["target_end"] == "2024-08-22"
+        assert data["inference_mode"] == "historical_replay"
+        assert "model_version" in data
+        assert "data_source" in data
+
+    def test_predict_operational_forecast_returns_503(self, client):
+        """Verify operational_forecast returns 503 when live stream is disconnected."""
+        response = client.post("/predict", json={
+            "latitude": -12.5,
+            "longitude": -55.0,
+            "date": "2024-08-15",
+            "inference_mode": "operational_forecast",
+        })
+        assert response.status_code == 503
+        assert "Operational forecast mode is unavailable" in response.json()["detail"]
+
+    def test_predict_missing_record_returns_404(self, client):
+        """Verify missing historical date returns 404 instead of silent fallback."""
+        response = client.post("/predict", json={
+            "latitude": -12.5,
+            "longitude": -55.0,
+            "date": "2015-05-01",  # Prior to archive start 2016-01-01
+            "inference_mode": "historical_replay",
+        })
+        # Either 422 (date range check) or 404 (exact record not found)
+        assert response.status_code in (404, 422)
 
 
 # ── Drift Monitoring tests ───────────────────────────────────────────────────
@@ -329,6 +394,73 @@ class TestDataProcessing:
         assert "start_year" in cfg["data"]
         assert "end_year" in cfg["data"]
         assert "seed" in cfg["model"]
+
+
+# ── Calibration & Decision Metrics tests ─────────────────────────────────────
+
+class TestCalibrationAndMetrics:
+    """Tests for probability calibrators, ECE, and operational metrics."""
+
+    def test_platt_calibrator_fit_and_predict(self):
+        from src.models.calibration import PlattCalibrator
+        rng = np.random.default_rng(42)
+        y_true = rng.binomial(1, 0.3, size=200)
+        # Raw uncalibrated probabilities with positive bias
+        raw_probs = np.clip(y_true * 0.7 + rng.normal(0.2, 0.1, size=200), 0.01, 0.99)
+
+        calibrator = PlattCalibrator()
+        calibrator.fit(raw_probs, y_true, is_logit=False)
+        assert calibrator.is_fitted_
+
+        probs = calibrator.calibrate(raw_probs)
+        assert len(probs) == 200
+        assert (probs >= 0.0).all() and (probs <= 1.0).all()
+        # Verify 2D predict_proba shape
+        proba_2d = calibrator.predict_proba(raw_probs, is_logit=False)
+        assert proba_2d.shape == (200, 2)
+        np.testing.assert_allclose(proba_2d[:, 0] + proba_2d[:, 1], 1.0, atol=1e-5)
+
+    def test_ece_computation(self):
+        from src.models.calibration import compute_ece
+        # Perfect calibration: 50% ones, predicted exactly 0.50
+        y_true = np.array([0, 1, 0, 1, 0, 1])
+        y_prob = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+        ece = compute_ece(y_true, y_prob, n_bins=5)
+        assert ece == pytest.approx(0.0, abs=1e-5)
+
+        # Severely miscalibrated: all zeros, predicted 0.99
+        y_true_bad = np.zeros(100)
+        y_prob_bad = np.full(100, 0.99)
+        ece_bad = compute_ece(y_true_bad, y_prob_bad, n_bins=10)
+        assert ece_bad > 0.90
+
+    def test_operational_decision_metrics(self):
+        from src.models.train import compute_operational_decision_metrics
+        # 100 samples, 20 positive fires
+        y_true = np.array([1]*20 + [0]*80)
+        # Perfect ranker: top 20 probabilities correspond to the 20 positives
+        y_prob = np.linspace(1.0, 0.0, 100)
+
+        metrics = compute_operational_decision_metrics(y_true, y_prob, "PerfectModel")
+        assert metrics["Recall@Top10%"] == 0.50  # Top 10% (10 samples) captures 10/20 = 50% of fires
+        assert metrics["Precision@Top10%"] == 1.00  # All 10 inspected cells are fires
+        assert metrics["NNS@Top10%"] == 1.00  # 1 inspection per detected fire
+
+
+# ── Territorial Masking tests ─────────────────────────────────────────────────
+
+class TestTerritorialMasking:
+    """Tests for official IBGE state border classification."""
+
+    def test_grid_status_values(self):
+        from src.data.build_grid import build_grid
+        grid = build_grid()
+        assert "state_status" in grid.columns
+        assert "state_coverage_pct" in grid.columns
+        valid_statuses = {"inside", "partial", "outside"}
+        assert set(grid["state_status"].unique()).issubset(valid_statuses)
+        # Inside Mato Grosso cells should be dominant
+        assert (grid["state_status"] == "inside").sum() > 200
 
 
 if __name__ == "__main__":

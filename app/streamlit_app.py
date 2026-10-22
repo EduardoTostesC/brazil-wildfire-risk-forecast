@@ -95,8 +95,15 @@ def _add_predictions(df: pd.DataFrame, models, calibrators, feature_cols, horizo
     raw = model.predict_proba(X)[:, 1]
 
     if calibrator is not None:
-        logits = logit(np.clip(raw, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-        prob = calibrator.predict_proba(logits)[:, 1]
+        try:
+            if hasattr(calibrator, "calibrate"):
+                prob = calibrator.calibrate(raw)
+            else:
+                logits = logit(np.clip(raw, 1e-6, 1 - 1e-6)).reshape(-1, 1)
+                res = calibrator.predict_proba(logits)
+                prob = res[:, 1] if res.ndim == 2 else res.ravel()
+        except Exception:
+            prob = raw
     else:
         prob = raw
 
@@ -442,8 +449,15 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
     calibrator = calibrators.get(7)
     raw_prob = float(model.predict_proba(X_row)[0, 1])
     if calibrator is not None:
-        logit_val = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-        prob = float(calibrator.predict_proba(logit_val)[0, 1])
+        try:
+            if hasattr(calibrator, "calibrate"):
+                prob = float(calibrator.calibrate(np.array([raw_prob]))[0])
+            else:
+                logit_val = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
+                res = calibrator.predict_proba(logit_val)
+                prob = float(res[0, 1] if res.ndim == 2 else res[0])
+        except Exception:
+            prob = raw_prob
     else:
         prob = raw_prob
     level = "High" if prob >= RISK_THRESHOLDS["Medium"] else "Medium" if prob >= RISK_THRESHOLDS["Low"] else "Low"

@@ -31,6 +31,7 @@ stages:
     deps:
       - data/processed/features.parquet
       - src/models/train.py
+      - src/models/calibration.py
     outs:
       - models/lightgbm_model.joblib:
           cache: false
@@ -40,6 +41,12 @@ stages:
       - reports/model_comparison.csv:
           cache: false
       - reports/multi_horizon_comparison.csv:
+          cache: false
+      - reports/operational_decision_metrics.csv:
+          cache: false
+      - reports/ablation_study.csv:
+          cache: false
+      - reports/walk_forward_metrics.csv:
           cache: false
 
   explain:
