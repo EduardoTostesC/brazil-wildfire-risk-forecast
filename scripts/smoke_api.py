@@ -1,5 +1,6 @@
 """Exercise the real HTTP server and retain exact response examples."""
 
+import argparse
 import json
 import os
 import subprocess
@@ -13,11 +14,18 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    logfile = (ROOT / "reports/evidence/api-server.txt").open("w", encoding="utf-8")
-    process = subprocess.Popen([sys.executable, "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8005"],
-                               cwd=ROOT, stdout=logfile, stderr=subprocess.STDOUT,
-                               creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
-    base = "http://127.0.0.1:8005"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--base-url", help="Exercise an existing server instead of starting a local process")
+    args = parser.parse_args()
+    (ROOT / "reports/evidence").mkdir(parents=True, exist_ok=True)
+    logfile = None
+    process = None
+    base = args.base_url.rstrip("/") if args.base_url else "http://127.0.0.1:8005"
+    if not args.base_url:
+        logfile = (ROOT / "reports/evidence/api-server.txt").open("w", encoding="utf-8")
+        process = subprocess.Popen([sys.executable, "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8005"],
+                                   cwd=ROOT, stdout=logfile, stderr=subprocess.STDOUT,
+                                   creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
     examples = []
     try:
         for _ in range(60):
@@ -51,9 +59,11 @@ def main():
         (ROOT / "reports/evidence/real-http-examples.json").write_text(json.dumps(examples, indent=2), encoding="utf-8")
         print(f"Verified {len(examples)} actual HTTP responses")
     finally:
-        process.terminate()
-        process.wait(timeout=20)
-        logfile.close()
+        if process is not None:
+            process.terminate()
+            process.wait(timeout=20)
+        if logfile is not None:
+            logfile.close()
 
 
 if __name__ == "__main__":
