@@ -39,7 +39,9 @@ ruff==0.11.13
 
 # MLOps & Tracking
 mlflow==2.22.2
+sqlalchemy==2.0.41
 dvc==3.59.2
+pathspec==0.12.1
 scipy==1.14.1
 
 # Notebook

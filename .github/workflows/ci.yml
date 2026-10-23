@@ -39,6 +39,11 @@ jobs:
       run: |
         python -m pytest tests/ -v --junitxml=test-results.xml
 
+    - name: Verify generated documentation
+      run: |
+        python -m src.reporting.generate_readme_metrics --check
+        python -m src.reporting.generate_research_tables --check
+
     - name: Preserve validation evidence
       if: always()
       uses: actions/upload-artifact@v4

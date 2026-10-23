@@ -14,7 +14,6 @@ Scientific Rigor Implementation (Phases 2, 3 & 4):
 """
 
 import json
-import logging
 import platform
 import random
 import subprocess
@@ -444,6 +443,12 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     """Execute the full scientifically defensible training and calibration pipeline."""
     cfg = config or load_config()
     root = get_project_root()
+    import hashlib
+    execution_snapshot = {
+        "commit_at_start": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "working_tree_dirty_at_start": bool(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip()),
+        "train_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    }
     seed = cfg["model"]["seed"]
     np.random.seed(seed)
     random.seed(seed)
@@ -822,6 +827,7 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
         "best_params": study.best_params,
         "seed": seed,
         "python": platform.python_version(),
+        "execution_snapshot": execution_snapshot,
         "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         "missing_policy": "native NaN for LightGBM; training median + indicator for logistic regression",
         "calibration_policy": "Platt fixed a priori; isotonic is a secondary descriptive comparison, not selected on test",
@@ -838,60 +844,8 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     print("\nSaved models/training_metadata.json")
 
     # ── 14. MLflow Logging (with Bugfix) ───────────────────────────────────
-    try:
-        import mlflow
-        db_path = (root / "mlflow.db").resolve()
-        mlflow.set_tracking_uri(f"sqlite:///{db_path}")
-        mlflow.set_experiment("brazil-wildfire-risk-forecast")
-        with mlflow.start_run(run_name="lightgbm-calibrated-spatiotemporal-v2") as run:
-            mlflow.log_params(study.best_params)
-            mlflow.log_params({
-                "model_type": "LightGBM + Out-of-Sample Platt Scaling",
-                "spatial_blocks": "North_Central_South_MT",
-                "seed": seed,
-                "train_size": len(train_df),
-                "calibration_size": len(cal_df),
-                "test_size": len(test_df),
-                "n_features": len(feature_cols),
-                "delta_AP_vs_climatology": p_val_vs_clim["observed_delta_AP"],
-            })
-            for r in results:
-                # Key error bugfix: handle either "model" or "Model"
-                raw_name = r.get("model") or r.get("Model", "unknown")
-                m_name = raw_name.lower().replace(" ", "_").replace("(", "").replace(")", "")
-                for metric_key in ["PR-AUC", "ROC-AUC", "Brier", "ECE", "Recall@P50"]:
-                    if metric_key in r:
-                        metric_val = float(r[metric_key])
-                        sanitized_key = metric_key.lower().replace("-", "_").replace("@", "_")
-                        mlflow.log_metric(f"{m_name}_{sanitized_key}", metric_val)
-            for h_row in horizon_results:
-                h_name = h_row["horizon"].replace("-", "_")
-                for metric_key in ["PR-AUC", "ROC-AUC", "Brier", "ECE", "Recall@P50"]:
-                    if metric_key in h_row:
-                        sanitized_key = metric_key.lower().replace("-", "_").replace("@", "_")
-                        mlflow.log_metric(f"{h_name}_{sanitized_key}", float(h_row[metric_key]))
-
-            mlflow.log_artifact(str(models_dir / "training_metadata.json"))
-            from src.data.manifest import compute_sha256
-            mlflow.set_tags({"git_commit": meta["commit"], "seed": str(seed), "python": meta["python"],
-                             "features_sha256": compute_sha256(feat_path)})
-            for artifact in models_dir.glob("*.joblib"):
-                mlflow.log_artifact(str(artifact), artifact_path="models")
-            mlflow.log_artifact(str(root / "requirements.lock"))
-            if (root / "reports" / "model_comparison.csv").exists():
-                mlflow.log_artifact(str(root / "reports" / "model_comparison.csv"))
-            if (root / "reports" / "operational_decision_metrics.csv").exists():
-                mlflow.log_artifact(str(root / "reports" / "operational_decision_metrics.csv"))
-            if (root / "reports" / "ablation_study.csv").exists():
-                mlflow.log_artifact(str(root / "reports" / "ablation_study.csv"))
-            if (root / "reports" / "walk_forward_metrics.csv").exists():
-                mlflow.log_artifact(str(root / "reports" / "walk_forward_metrics.csv"))
-            for fig_path in figures_dir.glob("*.png"):
-                mlflow.log_artifact(str(fig_path), artifact_path="figures")
-            print(f"\n[MLflow] Experiment run logged successfully! (Run ID: {run.info.run_id})")
-    except Exception as e:
-        logging.exception("MLflow tracking failed")
-        raise RuntimeError("Required scientific experiment tracking failed") from e
+    from src.models.tracking import register_results
+    register_results(root)
 
     print("\nTraining and validation pipeline complete!")
     return results_df

@@ -66,7 +66,7 @@ def render(root: Path) -> str:
             markdown_table(frames["model_comparison.csv"][["model", "AP", "PR-AUC_Trap", "ROC-AUC", "Brier", "ECE", "Recall@P50"]]),
             "Dedicated calibrated horizons:", markdown_table(frames["multi_horizon_comparison.csv"]),
             "Top-K metrics count positive cell-days in overlapping target windows, not distinct fires or field inspections.",
-            markdown_table(frames["operational_decision_metrics.csv"])]
+            markdown_table(frames["operational_decision_metrics.csv"][["model", "Recall@Top10%", "Precision@Top10%"]])]
     text.append(END)
     return "\n\n".join(text)
 

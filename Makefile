@@ -1,7 +1,8 @@
 .PHONY: install data features train evaluate explain drift dvc-repro mlflow-ui lint api app test all clean
 
 install:
-	pip install -r requirements.txt
+	python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+	python -m pip install --require-hashes -r requirements.lock
 
 data:
 	python -m src.data.download_fire
@@ -39,7 +40,13 @@ app:
 test:
 	pytest tests/ -v
 
-all: data features train explain drift
+research:
+	python -m src.models.research
+	python -m src.models.train_lstm
+	python -m src.reporting.generate_readme_metrics
+	python -m src.reporting.generate_research_tables
+
+all: data features train explain drift research
 
 clean:
-	rm -rf data/raw/ data/processed/ models/*.pkl models/*.joblib reports/figures/*.png
+	@echo "Automatic deletion disabled: raw data and versioned artifacts must be preserved. Remove only explicitly reviewed generated files."

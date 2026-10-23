@@ -12,6 +12,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from pyproj import Geod
 from shapely.geometry import box, shape
 
 from src.config import get_project_root, load_config
@@ -61,6 +62,7 @@ def build_grid(
     lon_edges = np.arange(region["lon_min"], region["lon_max"] + res, res)
 
     ibge_poly = _load_ibge_polygon(root)
+    geod = Geod(ellps="GRS80")
 
     rows: list[dict] = []
     for i in range(len(lat_edges) - 1):
@@ -75,14 +77,19 @@ def build_grid(
             # Territorial status
             state_status = "inside"
             coverage_pct = 1.0
+            cell_area_km2 = 0.0
+            state_area_km2 = 0.0
 
             if ibge_poly is not None:
                 cbox = box(lon_min, lat_min, lon_max, lat_max)
+                cell_area_km2 = abs(geod.geometry_area_perimeter(cbox)[0]) / 1e6
                 if not ibge_poly.intersects(cbox):
                     state_status = "outside"
                     coverage_pct = 0.0
                 else:
                     inter = ibge_poly.intersection(cbox)
+                    if inter.geom_type in {"Polygon", "MultiPolygon"}:
+                        state_area_km2 = abs(geod.geometry_area_perimeter(inter)[0]) / 1e6
                     # Geographic fraction is retained for historical comparability.
                     # It is a dimensionless fraction in degree area, not km².
                     pct = float(inter.area / cbox.area)
@@ -106,6 +113,9 @@ def build_grid(
                 "lon_max": lon_max,
                 "state_status": state_status,
                 "state_coverage_pct": coverage_pct,
+                "cell_area_km2": cell_area_km2,
+                "state_area_km2": state_area_km2,
+                "state_fraction_geodesic": state_area_km2 / cell_area_km2 if cell_area_km2 else 0.0,
             })
 
     grid_df = pd.DataFrame(rows)

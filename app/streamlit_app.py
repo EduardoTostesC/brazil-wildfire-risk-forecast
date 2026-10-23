@@ -8,6 +8,7 @@ Multi-tab interactive dashboard featuring:
 - Tab 5: About — data sources, methodology, and model performance.
 """
 
+import os
 import sys
 import warnings
 from pathlib import Path
@@ -41,7 +42,7 @@ st.set_page_config(
     },
 )
 
-from src.data.build_grid import build_grid
+from src.data.build_grid import _load_ibge_polygon, build_grid
 from src.models.inference import calibrated_probabilities, feature_matrix
 from src.models.risk_tiers import DEFAULT_RISK_CONFIG
 
@@ -83,7 +84,7 @@ def _load_dataframe():
     """Load the feature dataset (full or sample fallback)."""
     full = _PROJECT_ROOT / "data" / "processed" / "features.parquet"
     sample = _PROJECT_ROOT / "data" / "sample" / "features_sample.parquet"
-    is_sample = not full.exists()
+    is_sample = os.environ.get("WILDFIRE_USE_SAMPLE") == "1" or not full.exists()
     path = sample if is_sample else full
     if not path.exists():
         return None, is_sample
@@ -139,9 +140,10 @@ def _build_risk_map(df_day: pd.DataFrame, selected_grid: str | None = None) -> f
 
     clat = df_day["lat_center"].mean()
     clon = df_day["lon_center"].mean()
-    m = folium.Map(location=[clat, clon], zoom_start=6, tiles="CartoDB positron")
+    m = folium.Map(location=[clat, clon], zoom_start=6, tiles="OpenStreetMap")
 
-    folium.TileLayer("OpenStreetMap", name="OpenStreetMap", show=False).add_to(m)
+    folium.GeoJson(_load_ibge_polygon(_PROJECT_ROOT).__geo_interface__, name="Archived IBGE state boundary",
+                   style_function=lambda feature: {"color": "#34495e", "weight": 2, "fillOpacity": 0}).add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
 
     for _, row in df_day.iterrows():
@@ -275,8 +277,8 @@ def tab_risk_map(df: pd.DataFrame, is_sample: bool, models, calibrators, feature
 def tab_ranking(df: pd.DataFrame, models, calibrators, feature_cols):
     st.markdown("### 🏆 Highest-Risk Cell Ranking")
     st.markdown(
-        "Top cells by mean fire probability across the **test period (2024–2025)**. "
-        "Cells ranked highest signal persistent structural risk (vegetation, chronic drought, ignition history)."
+        "Top cells by mean predicted probability over the available historical interval. "
+        "In demonstration mode this interval is a selected week, not the full evaluation period."
     )
 
     horizon = st.selectbox(
@@ -324,7 +326,7 @@ def tab_ranking(df: pd.DataFrame, models, calibrators, feature_cols):
         st.markdown("#### 📍 Top Cells on Map")
         m = folium.Map(
             location=[agg["lat"].mean(), agg["lon"].mean()],
-            zoom_start=6, tiles="CartoDB positron",
+            zoom_start=6, tiles="OpenStreetMap",
         )
         for i, row in agg.iterrows():
             prob = float(row["mean_prob"])
@@ -507,7 +509,7 @@ the probability up by approximately +0.15 log-odds relative to the model baselin
 def tab_drift():
     st.markdown("### 🩺 Model & Data Health Dashboard")
     st.markdown(
-        "Monitors whether the climatological input distributions in the **operational period (2024–2025)** "
+        "Compares historical input distributions in **2024–2025** "
         "have shifted relative to the **training baseline (2016–2023)**. "
         "Significant drift signals that retraining may be needed."
     )
@@ -544,7 +546,7 @@ def tab_drift():
     st.markdown(
         f"**Baseline:** `{drift.get('baseline_period', '2016–2023')}` "
         f"— {drift.get('baseline_samples', 0):,} samples  \n"
-        f"**Operational:** `{drift.get('current_period', '2024–2025')}` "
+        f"**Historical comparison:** `{drift.get('current_period', '2024–2025')}` "
         f"— {drift.get('current_samples', 0):,} samples"
     )
 

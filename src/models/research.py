@@ -210,6 +210,8 @@ def run(repetitions=500):
     meta = {"commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
             "seed": SEED, "python": platform.python_version(), "bootstrap_repetitions": repetitions,
             "features_sha256": compute_sha256(root / "data/processed/features.parquet"),
+            "primary_model_sha256": compute_sha256(root / "models/lightgbm_model.joblib"),
+            "primary_calibrator_sha256": compute_sha256(root / "models/platt_calibrator.joblib"),
             "spatial_params_fixed_before_test": SPATIAL_PARAMS, "ablation_params": params,
             "ablation_features": groups, "oracle_label": ORACLE,
             "temporal_protocol": "train <=2022-12-24; calibrate 2023-01-01..12-24; test 2024-01-01..2025-12-24",
