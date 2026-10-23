@@ -4,6 +4,7 @@ stages:
     deps:
       - config.yaml
       - src/data/build_grid.py
+      - src/config.py
       - data/geo/mato_grosso_ibge.geojson
     outs:
       - data/processed/grid.csv:
@@ -15,6 +16,11 @@ stages:
       - config.yaml
       - data/processed/grid.csv
       - src/data/process_data.py
+      - src/data/build_grid.py
+      - src/config.py
+      - data/raw/fire
+      - data/raw/climate
+      - data/geo/mato_grosso_ibge.geojson
     outs:
       - data/processed/dataset.parquet:
           cache: false
@@ -25,6 +31,8 @@ stages:
       - config.yaml
       - data/processed/dataset.parquet
       - src/features/build_features.py
+      - src/data/quality.py
+      - src/config.py
     outs:
       - data/processed/features.parquet:
           cache: false
@@ -37,6 +45,11 @@ stages:
       - src/models/train.py
       - src/models/calibration.py
       - src/models/risk_tiers.py
+      - src/models/inference.py
+      - src/models/evaluation.py
+      - src/config.py
+      - requirements.lock
+      - data/processed/grid.csv
     outs:
       - models/lightgbm_model.joblib:
           cache: false
@@ -53,6 +66,16 @@ stages:
       - models/feature_cols.joblib:
           cache: false
       - models/training_metadata.json:
+          cache: false
+      - models/logistic_regression.joblib:
+          cache: false
+      - models/logistic_calibrator.joblib:
+          cache: false
+      - models/scaler.joblib:
+          cache: false
+      - reports/figures/calibration_curve.png:
+          cache: false
+      - reports/figures/error_analysis_breakdown.png:
           cache: false
     metrics:
       - reports/model_comparison.csv:
@@ -73,8 +96,29 @@ stages:
       - data/processed/grid.csv
       - reports/model_comparison.csv
       - src/models/train_lstm.py
+      - src/models/research.py
+      - src/models/train.py
+      - src/models/calibration.py
+      - src/models/evaluation.py
+      - src/models/inference.py
+      - src/features/build_features.py
+      - models/feature_cols.joblib
+      - models/training_metadata.json
+      - data/processed/features.parquet
+      - config.yaml
+      - requirements.lock
     outs:
       - models/lstm_model.pt:
+          cache: false
+      - models/lstm_preprocessing.joblib:
+          cache: false
+      - models/lstm_calibrator.joblib:
+          cache: false
+      - reports/research/matched_lstm.csv:
+          cache: false
+      - reports/research/matched_lstm_metadata.json:
+          cache: false
+      - reports/research/matched_lstm_test_keys.parquet:
           cache: false
     metrics:
       - reports/lstm_comparison.csv:
@@ -85,8 +129,19 @@ stages:
     deps:
       - models/lightgbm_model.joblib
       - src/models/explain.py
+      - src/models/inference.py
+      - src/data/build_grid.py
+      - src/config.py
+      - config.yaml
+      - models/feature_cols.joblib
+      - data/processed/features.parquet
+      - data/geo/mato_grosso_ibge.geojson
     outs:
       - reports/figures/shap_summary.png:
+          cache: false
+      - reports/figures/shap_bar.png:
+          cache: false
+      - reports/feature_importance.csv:
           cache: false
 
   drift:
@@ -94,6 +149,10 @@ stages:
     deps:
       - data/processed/features.parquet
       - src/monitoring/drift_detector.py
+      - src/data/build_grid.py
+      - src/config.py
+      - config.yaml
+      - data/geo/mato_grosso_ibge.geojson
     outs:
       - reports/figures/drift_summary.png:
           cache: false

@@ -30,10 +30,7 @@ class WeightedMetrics:
         ap = np.sum(np.diff(np.r_[0, tp]) * precision) / positives
         roc = np.trapz(np.r_[0, tp / positives], np.r_[0, fp / negatives])
         brier = np.sum(weights * (self.p - self.y) ** 2) / weights.sum()
-        ece = 0.0
-        for b in range(10):
-            mask = self.bin == b
-            ece += abs(np.sum(weights[mask] * (self.y[mask] - self.p[mask]))) / weights.sum()
+        ece = np.abs(np.bincount(self.bin, weights * (self.y - self.p), minlength=10)).sum() / weights.sum()
         return np.asarray([ap, roc, brier, ece])
 
 

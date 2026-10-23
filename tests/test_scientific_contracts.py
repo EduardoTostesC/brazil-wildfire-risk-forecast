@@ -46,6 +46,17 @@ def test_unknown_spell_never_becomes_observed_dryness():
     np.testing.assert_allclose(result, [0, 1, np.nan, np.nan, 0, 1], equal_nan=True)
 
 
+def test_sequence_endpoint_includes_issue_day_and_returns_exact_keys():
+    from src.models.train_lstm import build_sequences
+    frame = pd.DataFrame({"grid_id": "cell", "date": pd.date_range("2023-12-28", periods=8),
+                          "target": np.arange(8) % 2, "feature": np.arange(8)})
+    x, y, keys = build_sequences(frame, ["feature"], seq_len=3, return_keys=True)
+    np.testing.assert_array_equal(x[0, :, 0], [0, 1, 2])
+    np.testing.assert_array_equal(x[-1, :, 0], [5, 6, 7])
+    assert keys.date.iloc[0] == pd.Timestamp("2023-12-30")
+    np.testing.assert_array_equal(y, frame.target.iloc[2:])
+
+
 def test_weighted_bootstrap_metrics_match_expanded_rows():
     y = np.array([0, 1, 0, 1, 1])
     p = np.array([.2, .8, .8, .6, .6])
@@ -67,3 +78,19 @@ def test_paired_bootstrap_identical_models_has_zero_difference():
     for weights in date_block_weights(dates, repetitions=10, block_days=7):
         assert weights.sum() == len(dates)
         np.testing.assert_array_equal(weights[::2], weights[1::2])
+
+
+def test_calibrators_require_fit_and_preserve_extreme_numerics(tmp_path):
+    import joblib
+
+    from src.models.calibration import IsotonicCalibrator, PlattCalibrator
+    with pytest.raises(ValueError, match="fitted"):
+        PlattCalibrator().calibrate(np.array([.5]))
+    x = np.array([0., 1e-12, .2, .8, 1 - 1e-12, 1.])
+    y = np.array([0, 0, 0, 1, 1, 1])
+    for calibrator in [PlattCalibrator().fit(x, y, is_logit=False), IsotonicCalibrator().fit(x, y)]:
+        p = calibrator.calibrate(x)
+        assert np.isfinite(p).all() and np.all(np.diff(p) >= 0)
+        path = tmp_path / 'calibrator.joblib'
+        joblib.dump(calibrator, path)
+        np.testing.assert_array_equal(p, joblib.load(path).calibrate(x))

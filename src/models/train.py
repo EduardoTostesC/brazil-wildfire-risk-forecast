@@ -96,7 +96,7 @@ def persistence_baseline(
     labels = ["0", "1", "2-5", "6+"]
     train_copy = train_df.copy()
     train_copy["fire_bin"] = pd.cut(
-        train_copy["fire_count_7d"].fillna(0),
+        train_copy["fire_count_7d"],
         bins=bins,
         labels=labels,
     )
@@ -107,10 +107,13 @@ def persistence_baseline(
     )
 
     test_bins = pd.cut(
-        test_df["fire_count_7d"].fillna(0), bins=bins, labels=labels
+        test_df["fire_count_7d"], bins=bins, labels=labels
     )
     base_rate = float(train_copy["target"].mean())
-    return test_bins.map(empirical_rates).fillna(base_rate).values.astype(float)
+    probabilities = test_bins.map(empirical_rates).astype(float).fillna(base_rate)
+    missing_rate = train_df.loc[train_df.fire_count_7d.isna(), "target"].mean()
+    probabilities.loc[test_df.fire_count_7d.isna()] = missing_rate if pd.notna(missing_rate) else base_rate
+    return probabilities.to_numpy(dtype=float)
 
 
 def climatology_baseline(

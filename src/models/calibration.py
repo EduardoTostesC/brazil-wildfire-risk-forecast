@@ -1,4 +1,4 @@
-"""Probability calibration utilities with zero cross-version pickling fragility.
+"""Probability calibration utilities with explicit fitted-state contracts.
 
 Provides:
 - PlattCalibrator: 1D sigmoid scaling on log-odds (Platt, 1999) storing only
@@ -75,6 +75,10 @@ class PlattCalibrator:
         """
         y_true = np.asarray(y_true, dtype=int)
         x = np.asarray(probs_or_logits, dtype=float)
+        if not np.isfinite(x).all() or len(x) != len(y_true) or set(np.unique(y_true)) != {0, 1}:
+            raise ValueError("Calibration requires finite scores and both binary classes")
+        if not is_logit and ((x < 0) | (x > 1)).any():
+            raise ValueError("Calibration probabilities must lie in [0, 1]")
 
         if not is_logit:
             clipped = np.clip(x, self.clip_eps, 1.0 - self.clip_eps)
@@ -103,6 +107,10 @@ class PlattCalibrator:
             column 0 is P(y=0), column 1 is P(y=1).
         """
         x = np.asarray(probs_or_logits, dtype=float)
+        if not self.is_fitted_:
+            raise ValueError("Calibrator has not been fitted")
+        if not np.isfinite(x).all() or (not is_logit and ((x < 0) | (x > 1)).any()):
+            raise ValueError("Invalid probability calibration input")
         if not is_logit:
             clipped = np.clip(x, self.clip_eps, 1.0 - self.clip_eps)
             z = logit(clipped)
@@ -149,6 +157,8 @@ class IsotonicCalibrator:
 
     def predict_proba(self, probs: np.ndarray) -> np.ndarray:
         probs = np.asarray(probs, dtype=float)
+        if not self.is_fitted_ or not np.isfinite(probs).all() or ((probs < 0) | (probs > 1)).any():
+            raise ValueError("Fitted isotonic calibrator and valid probabilities required")
         p1 = np.clip(self.ir.predict(probs), 0.0, 1.0)
         p0 = 1.0 - p1
         return np.column_stack([p0, p1])
