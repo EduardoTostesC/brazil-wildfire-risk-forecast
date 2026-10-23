@@ -19,7 +19,7 @@ Atualização deliberada do lock:
 ```bash
 python -m pip install uv==0.13.5
 python -m uv pip compile requirements.txt --universal --python-version 3.11 --generate-hashes -o requirements.lock
-python -m uv pip compile requirements.txt --universal --python-version 3.11 --torch-backend cpu --emit-index-url --default-index https://pypi.org/simple --generate-hashes -o requirements-cpu.lock
+python -m uv pip compile requirements.txt --universal --python-version 3.11 --torch-backend cpu --emit-index-url --default-index https://pypi.org/simple --extra-index-url https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match --generate-hashes -o requirements-cpu.lock
 ```
 
 LightGBM 4.5.0 com sklearn recente falhou em `force_all_finite`. O ambiente validado usa LightGBM 4.6.0 e sklearn 1.7.2. A mudança do argumento está documentada no [sklearn](https://scikit-learn.org/1.6/modules/generated/sklearn.utils.check_array.html); a evolução do adaptador está nas [notas do LightGBM](https://github.com/lightgbm-org/LightGBM/releases/tag/v4.6.0). Também foram fixados SQLAlchemy e pathspec após incompatibilidades reais no MLflow/DVC. `pip check` sozinho não detectava essas falhas em runtime.

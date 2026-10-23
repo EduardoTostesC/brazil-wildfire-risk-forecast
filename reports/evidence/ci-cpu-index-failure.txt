@@ -1,0 +1,11 @@
+Run: https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022041366
+Job: 120648753724 (Python 3.12; 3.11 also failed installation)
+Verbatim excerpts:
+2026-10-23T20:48:28.6371253Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +62aaa47e97d18a5efcc28d27e674d32782f37e69:refs/remotes/origin/audit/reproducibility-2026-10-23
+2026-10-23T20:48:29.4252321Z  * [new ref]         62aaa47e97d18a5efcc28d27e674d32782f37e69 -> origin/audit/reproducibility-2026-10-23
+2026-10-23T20:48:29.5242323Z 62aaa47e97d18a5efcc28d27e674d32782f37e69
+2026-10-23T20:48:31.8953982Z [36;1mpip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock[0m
+2026-10-23T20:48:54.0873979Z ERROR: Could not find a version that satisfies the requirement torch==2.5.1+cpu (from versions: 2.2.0, 2.2.1, 2.2.2, 2.3.0, 2.3.1, 2.4.0, 2.4.1, 2.5.0, 2.5.1, 2.6.0, 2.7.0, 2.7.1, 2.8.0, 2.9.0, 2.9.1, 2.10.0, 2.11.0, 2.12.0, 2.12.1, 2.13.0, 2.14.0, 2.14.1)
+2026-10-23T20:48:54.0875159Z ERROR: No matching distribution found for torch==2.5.1+cpu
+
+Diagnosis reproduced with an isolated pip dry-run: --index-url in a requirement file resets index_urls and drops a command-line-only extra index. The corrected CPU lock emits both index lines explicitly. No scientific package versions were changed.
