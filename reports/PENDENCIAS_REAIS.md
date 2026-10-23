@@ -9,6 +9,7 @@ Este documento diferencia limitações ainda abertas das verificações locais c
 | Dependente de infraestrutura | Previsão operacional | Não existe ingestão contínua, validação em tempo de emissão, monitoramento de SLA e estudo operacional. A API retorna 503 |
 | Dependente de infraestrutura | Docker runtime | Executável Docker ausente no host. Construir imagem, iniciar container e exercer endpoints/healthcheck em máquina com Docker |
 | Dependente de plataforma externa | Demo pública | Sem deployment Streamlit/Space autenticado validado. Publicar o candidato, testar as cinco abas e os três horizontes e só então divulgar a URL |
+| Dependente de permissão externa | Criar pull request | O push da branch de auditoria foi autorizado e concluído, mas a integração GitHub respondeu 403 ao criar PR. Abrir pelo comparador da branch ou conceder a permissão específica de pull requests. O CI da auditoria roda por push |
 | Dependente de revisão externa | Submissão científica | Revisão atual é interna. Resolver proveniência temporal, auditar os novos resultados e buscar replicação/revisão independente antes de alegar prontidão acadêmica |
 | Pendente de pesquisa | Risco de Fogo oficial do INPE | Não havia série histórica comparável com horários e cobertura admissíveis. Definir protocolo antes de consultar resultados e registrar a indisponibilidade se persistir |
 | Pendente de pesquisa | Incerteza espacial ampliada | Três regiões e bootstrap de datas não estimam incerteza de novos estados. Definir mais blocos/novas regiões e desenho de reamostragem apropriado |

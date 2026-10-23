@@ -11,6 +11,8 @@ O repositório público foi consultado no início: branch principal `main`, duas
 
 Não reescrever tags históricas. Não apresentar o texto anterior como artigo aceito ou auditoria independente.
 
+A branch `audit/reproducibility-2026-10-23` foi enviada. A criação de PR pela integração retornou `403 Resource not accessible by integration`; nenhum PR foi criado por essa chamada. A revisão pode ser aberta no [comparador](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/compare/main...audit/reproducibility-2026-10-23?expand=1). O CI também aceita pushes em `audit/**`, sem depender da criação de PR.
+
 ## Demonstração
 
 O dashboard foi exercitado localmente com a amostra real; veja os screenshots e o log de navegador em reports/evidence. Não há URL pública validada nesta auditoria.
