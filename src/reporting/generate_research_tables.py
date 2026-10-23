@@ -25,6 +25,9 @@ def render_research(root):
     main["AP 95% CI"] = main.apply(lambda row: f"[{row['PR-AUC_95CI_low']:.4f}, {row['PR-AUC_95CI_high']:.4f}]", axis=1)
     nofire_text = markdown_table(main[["model", "n", "prevalence", "AP", "AP 95% CI", "ROC-AUC", "Brier", "ECE", "Precision@Top10%", "Recall@Top10%"]])
     nofire_text += "\n\n" + markdown_table(nofire[(nofire["group"] == "all") & nofire.model.isin(["LightGBM", "Climatology"])][["subset", "model", "n", "prevalence", "AP", "ROC-AUC", "Brier"]])
+    nofire_pair = json.loads((folder / "no_fire_paired_difference.json").read_text())
+    low, high = nofire_pair["delta_AP_95CI"]
+    nofire_text += f"\n\nPaired delta AP (LightGBM minus climatology), no-local-30d: {nofire_pair['observed_delta_AP']:.4f}; 95% CI [{low:.4f}, {high:.4f}]. This interval includes zero; the point comparison does not establish a significant difference."
     spatial = pd.read_csv(folder / "spatial_generalization.csv")
     spatial_text = markdown_table(spatial[["held_region", "model", "train_n", "calibration_n", "n", "prevalence", "AP", "ROC-AUC", "Brier", "ECE"]])
     ablation = pd.read_csv(folder / "ablation.csv")

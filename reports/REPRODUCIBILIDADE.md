@@ -56,6 +56,8 @@ Observação, publicação e processamento são tempos distintos. A NASA descrev
 python -m src.models.train
 python -m src.models.research
 python -m src.models.train_lstm
+python -m src.reporting.decision_diagnostics
+python -m src.reporting.plot_research
 python -m src.models.explain
 python -m src.monitoring.drift_detector
 python -m src.data.build_sample
@@ -63,6 +65,7 @@ python -m src.data.manifest --generate
 python -m src.data.manifest --verify
 python -m src.reporting.generate_readme_metrics
 python -m src.reporting.generate_research_tables
+python -m src.models.artifacts
 ```
 
 A política de ausência é NaN nativo para árvores e mediana aprendida no treino para modelos que exigem entradas finitas. Indicadores são usados na regressão logística; a LSTM atual usa mediana e escala, sem indicadores adicionais. Janelas meteorológicas exigem observações completas; uma lacuna torna o comprimento do período seco desconhecido até uma observação de chuva reiniciar a contagem. Valores inválidos não são corrigidos para zero.
@@ -99,6 +102,7 @@ python -m pytest tests/ -m "not artifacts" -v
 python -m ruff check .
 python -m src.reporting.generate_readme_metrics --check
 python -m src.reporting.generate_research_tables --check
+python -m src.models.artifacts --verify
 ```
 
 A suíte padrão usa fixtures sintéticas explícitas, artefatos versionados e amostra real. Não precisa dos dados completos. Testes de artefatos são marcados `artifacts`; os marcadores `integration`, `pipeline`, `download` e `performance` são reservados para categorizações futuras e não significam que já exista uma suíte completa em cada categoria. Scripts de treino/pesquisa são os experimentos integrais, distintos da suíte unitária.

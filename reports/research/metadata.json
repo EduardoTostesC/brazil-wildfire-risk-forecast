@@ -1,9 +1,11 @@
 {
-  "commit": "3a7e9029c1b1b26b63d333ab943983fac096c83d",
+  "commit": "c59dbeb880e6fbe70d9ddeb961fd39850a08ac16",
   "seed": 42,
   "python": "3.12.10",
   "bootstrap_repetitions": 500,
-  "features_sha256": "a61e44d7e8ef29a1449909a7cf50e6f00b91bb3529f0cf4b4e5fb49730ab1cff",
+  "features_sha256": "5e99b15c4b7a5bef47be0dd0c91136a0135888060ec1a582cd7c01f847fc92c8",
+  "primary_model_sha256": "91c04f70ac586886ce8478744206845844eeb85d350a88dd7b1e375d7d7c22cd",
+  "primary_calibrator_sha256": "6ec003697addb8f2948f86db193b84435ef1a13f382ef87e65b7eaf378e33adc",
   "spatial_params_fixed_before_test": {
     "n_estimators": 200,
     "learning_rate": 0.05,
@@ -450,8 +452,5 @@
   "oracle_label": "ORACLE / PERFECT FUTURE WEATHER INFORMATION \u2014 NON-OPERATIONAL EXPERIMENT",
   "temporal_protocol": "train <=2022-12-24; calibrate 2023-01-01..12-24; test 2024-01-01..2025-12-24",
   "statistical_unit": "cell-day, >=1 detectable hotspot in D+1..D+7, overlapping windows",
-  "publication_time": "unknown; retrospective; legacy POWER LST and INPE UTC day definitions differ",
-  "primary_model_sha256": "855ff8f8871100bd504f552748f3ecb6eb4feb6b158802f53f7d362099720b27",
-  "primary_calibrator_sha256": "6ec003697addb8f2948f86db193b84435ef1a13f382ef87e65b7eaf378e33adc",
-  "provenance_note": "Hashes registered after the run and matched to the MLflow registration recorded during research execution; not an immutable training-time source snapshot."
+  "publication_time": "unknown; retrospective; legacy POWER LST and INPE UTC day definitions differ"
 }

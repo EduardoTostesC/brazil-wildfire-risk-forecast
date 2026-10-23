@@ -17,8 +17,8 @@
     },
     {
       "file": "data/processed/dataset.parquet",
-      "size_bytes": 14448186,
-      "sha256": "459ddf3fac3c94723ec40efa5c84dc706a246ed3049694991cafb5ba769baa30",
+      "size_bytes": 14048150,
+      "sha256": "8e8e7f4675a64ad7f3cfb289f1e0965ce9c7e7a975c8a9f71d6a3c3f32c5276a",
       "rows": 1844876,
       "columns": [
         "grid_id",
@@ -39,13 +39,13 @@
         "lon_center"
       ],
       "schema": {
-        "grid_id": "large_string",
-        "date": "timestamp[us]",
-        "fire_count": "int64",
-        "target_1d": "int64",
-        "target_3d": "int64",
-        "target_7d": "int64",
-        "target": "int64",
+        "grid_id": "string",
+        "date": "timestamp[ns]",
+        "fire_count": "int32",
+        "target_1d": "int32",
+        "target_3d": "int32",
+        "target_7d": "int32",
+        "target": "int32",
         "T2M_MAX": "double",
         "T2M_MIN": "double",
         "RH2M": "double",
@@ -62,8 +62,8 @@
     },
     {
       "file": "data/processed/features.parquet",
-      "size_bytes": 179285283,
-      "sha256": "40108c063bfc5d8c163bbc4a797c2eb66cddc1b246899ad8faac47715ee48db4",
+      "size_bytes": 178599870,
+      "sha256": "5e99b15c4b7a5bef47be0dd0c91136a0135888060ec1a582cd7c01f847fc92c8",
       "rows": 1844876,
       "columns": [
         "grid_id",
@@ -115,12 +115,12 @@
         "doy_cos"
       ],
       "schema": {
-        "grid_id": "large_string",
-        "date": "timestamp[us]",
-        "target_1d": "int64",
-        "target_3d": "int64",
-        "target_7d": "int64",
-        "target": "int64",
+        "grid_id": "string",
+        "date": "timestamp[ns]",
+        "target_1d": "int32",
+        "target_3d": "int32",
+        "target_7d": "int32",
+        "target": "int32",
         "T2M_MAX": "double",
         "T2M_MIN": "double",
         "RH2M": "double",
@@ -157,7 +157,7 @@
         "dtr_mean_14d": "double",
         "fwi_proxy_mean_7d": "double",
         "fwi_proxy_mean_14d": "double",
-        "dry_days": "int64",
+        "dry_days": "double",
         "month_sin": "double",
         "month_cos": "double",
         "doy_sin": "double",
@@ -169,8 +169,8 @@
     },
     {
       "file": "data/processed/grid.csv",
-      "size_bytes": 32178,
-      "sha256": "016d9b88cbd1f569d10250950030ace9a8617fb8e4622ca65d0479bf236fc8dc",
+      "size_bytes": 52418,
+      "sha256": "d3d26ee88b26940ff2346c3433b0454122615534c75e37684ae84d769a523830",
       "rows": 506,
       "columns": [
         "grid_id",
@@ -183,7 +183,10 @@
         "lon_min",
         "lon_max",
         "state_status",
-        "state_coverage_pct"
+        "state_coverage_pct",
+        "cell_area_km2",
+        "state_area_km2",
+        "state_fraction_geodesic"
       ]
     },
     {
@@ -22467,10 +22470,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 27305,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2016-01-01 16:33:00+00:00",
+        "date_max": "2016-12-31 17:41:00+00:00",
+        "detected_days": 341,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22490,10 +22504,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 30911,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2017-01-01 16:44:00+00:00",
+        "date_max": "2017-12-31 17:10:00+00:00",
+        "detected_days": 332,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22513,10 +22538,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 18032,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2018-01-01 17:50:00+00:00",
+        "date_max": "2018-12-30 17:35:00+00:00",
+        "detected_days": 335,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22536,10 +22572,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 31169,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2019-01-01 17:20:00+00:00",
+        "date_max": "2019-12-31 17:45:00+00:00",
+        "detected_days": 349,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22559,10 +22606,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 47708,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2020-01-01 16:50:00+00:00",
+        "date_max": "2020-12-30 17:15:00+00:00",
+        "detected_days": 353,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22582,10 +22640,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 22520,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2021-01-01 17:00:00+00:00",
+        "date_max": "2021-12-30 16:45:00+00:00",
+        "detected_days": 333,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22605,10 +22674,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 29039,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2022-01-02 17:17:00+00:00",
+        "date_max": "2022-12-31 17:26:00+00:00",
+        "detected_days": 323,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22628,10 +22708,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 21723,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2023-01-01 18:06:00+00:00",
+        "date_max": "2023-12-31 17:21:00+00:00",
+        "detected_days": 337,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22651,10 +22742,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 50551,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2024-01-01 18:02:00+00:00",
+        "date_max": "2024-12-31 17:51:00+00:00",
+        "detected_days": 338,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22674,10 +22776,21 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 11061,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2025-01-01 18:30:00+00:00",
+        "date_max": "2025-12-31 18:34:00+00:00",
+        "detected_days": 302,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
@@ -22697,32 +22810,43 @@
         "bioma"
       ],
       "quality": {
-        "valid": false,
-        "missing_columns": [
-          "satelite"
-        ]
+        "valid": true,
+        "rows": 290019,
+        "issues": {
+          "invalid_dates": 0,
+          "invalid_coordinates": 0,
+          "wrong_satellite": 0,
+          "wrong_state": 0,
+          "wrong_year": 0,
+          "duplicates": 0
+        },
+        "satellite_verification": "reference_product_URL_only; no per-row satellite column",
+        "date_min": "2016-01-01 16:33:00+00:00",
+        "date_max": "2025-12-31 18:34:00+00:00",
+        "detected_days": 3343,
+        "coverage_note": "Detection dates cannot establish full sensor coverage or prove physical absence of fire."
       }
     },
     {
       "file": "data/sample/climate_sample.csv",
-      "size_bytes": 17292,
-      "sha256": "1180d3e83c559c4b5b5dc70f34803ef119c0b7504f0be1d12a3a8ab0d274d550",
-      "rows": 365,
+      "size_bytes": 115360,
+      "sha256": "293502195572d14a6fd6ed6ef50733c3b52e68c6bd405485f81e5a015e3d3fe1",
+      "rows": 2464,
       "columns": [
         "date",
+        "grid_id",
         "T2M_MAX",
         "T2M_MIN",
         "RH2M",
         "PRECTOTCORR",
-        "WS10M",
-        "grid_id"
+        "WS10M"
       ]
     },
     {
       "file": "data/sample/features_sample.parquet",
-      "size_bytes": 424631,
-      "sha256": "80cdad8e0fd5278556cf12e89b05b7f0431068f5ac009028eea902f229cfe7f0",
-      "rows": 2000,
+      "size_bytes": 364462,
+      "sha256": "9be6171af2516322ce1010222020d0b600c34e0534d292c5dc05f75f6d65d1c2",
+      "rows": 2464,
       "columns": [
         "grid_id",
         "date",
@@ -22773,12 +22897,12 @@
         "doy_cos"
       ],
       "schema": {
-        "grid_id": "large_string",
-        "date": "timestamp[us]",
-        "target_1d": "int64",
-        "target_3d": "int64",
-        "target_7d": "int64",
-        "target": "int64",
+        "grid_id": "string",
+        "date": "timestamp[ns]",
+        "target_1d": "int32",
+        "target_3d": "int32",
+        "target_7d": "int32",
+        "target": "int32",
         "T2M_MAX": "double",
         "T2M_MIN": "double",
         "RH2M": "double",
@@ -22815,14 +22939,14 @@
         "dtr_mean_14d": "double",
         "fwi_proxy_mean_7d": "double",
         "fwi_proxy_mean_14d": "double",
-        "dry_days": "int64",
+        "dry_days": "double",
         "month_sin": "double",
         "month_cos": "double",
         "doy_sin": "double",
         "doy_cos": "double"
       },
-      "date_min": "2016-01-01 00:00:00",
-      "date_max": "2025-12-24 00:00:00",
+      "date_min": "2024-08-12 00:00:00",
+      "date_max": "2024-08-18 00:00:00",
       "duplicate_keys": 0
     },
     {
@@ -22844,9 +22968,9 @@
     },
     {
       "file": "data/sample/grid_sample.csv",
-      "size_bytes": 1111,
-      "sha256": "8e9857efab99701b53aac76e85573f8a91b0641574f7b4bae17ad998a5f8ef32",
-      "rows": 20,
+      "size_bytes": 38536,
+      "sha256": "c18d6747bfa6ec67a973275bc8553c99ca5886b51333205bfd43733587f94407",
+      "rows": 352,
       "columns": [
         "grid_id",
         "grid_row",
@@ -22856,9 +22980,19 @@
         "lat_min",
         "lat_max",
         "lon_min",
-        "lon_max"
+        "lon_max",
+        "state_status",
+        "state_coverage_pct",
+        "cell_area_km2",
+        "state_area_km2",
+        "state_fraction_geodesic"
       ]
+    },
+    {
+      "file": "data/sample/sample_metadata.json",
+      "size_bytes": 404,
+      "sha256": "529bb0aa753408cde87923d351100bb0220866426d91a0a3a4b404deb22839bb"
     }
   ],
-  "generated_at": "2026-10-23T19:57:35.901429+00:00"
+  "generated_at": "2026-10-23T20:36:26.379284+00:00"
 }

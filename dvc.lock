@@ -1,0 +1,629 @@
+schema: '2.0'
+stages:
+  build_grid:
+    cmd: python -m src.data.build_grid
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/geo/mato_grosso_ibge.geojson
+      hash: md5
+      md5: 6a1d4424f897671f10a8ade1868029b7
+      size: 57267
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/data/build_grid.py
+      hash: md5
+      md5: ee6a05801cb057806426af5e2a6916a3
+      size: 6783
+    outs:
+    - path: data/processed/grid.csv
+      hash: md5
+      md5: 705a962da3781d9844cdeac73b1321ab
+      size: 52418
+  process_data:
+    cmd: python -m src.data.process_data
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/geo/mato_grosso_ibge.geojson
+      hash: md5
+      md5: 6a1d4424f897671f10a8ade1868029b7
+      size: 57267
+    - path: data/processed/grid.csv
+      hash: md5
+      md5: 705a962da3781d9844cdeac73b1321ab
+      size: 52418
+    - path: data/raw/climate
+      hash: md5
+      md5: f36732f27c09d9811736105159b032e5.dir
+      size: 87592806
+      nfiles: 506
+    - path: data/raw/fire
+      hash: md5
+      md5: 3e03cafa0d7f4d98fd240b69bc19d556.dir
+      size: 75592386
+      nfiles: 11
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/data/build_grid.py
+      hash: md5
+      md5: ee6a05801cb057806426af5e2a6916a3
+      size: 6783
+    - path: src/data/process_data.py
+      hash: md5
+      md5: 078480ae143a5b987ac24d01f8dbeeda
+      size: 7947
+    outs:
+    - path: data/processed/dataset.parquet
+      hash: md5
+      md5: d45d1b8cd1b0cc54524fa9ac7717b40c
+      size: 14048150
+  build_features:
+    cmd: python -m src.features.build_features
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/processed/dataset.parquet
+      hash: md5
+      md5: d45d1b8cd1b0cc54524fa9ac7717b40c
+      size: 14048150
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/data/quality.py
+      hash: md5
+      md5: 755112cff122fc4bfce15928d03fe035
+      size: 3199
+    - path: src/features/build_features.py
+      hash: md5
+      md5: 9ad91a252f38fa367050dd116c92101a
+      size: 10354
+    outs:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 58ce87ce6dce718ae89d1a890fa1d583
+      size: 178599870
+  train:
+    cmd: python -m src.models.train
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 58ce87ce6dce718ae89d1a890fa1d583
+      size: 178599870
+    - path: data/processed/grid.csv
+      hash: md5
+      md5: 705a962da3781d9844cdeac73b1321ab
+      size: 52418
+    - path: requirements.lock
+      hash: md5
+      md5: a9a0427b9519b1cb5b36b4ce30450906
+      size: 308778
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/data/manifest.py
+      hash: md5
+      md5: 6b8b6e0426e90fcc5789ff9417f60a30
+      size: 5584
+    - path: src/data/quality.py
+      hash: md5
+      md5: 755112cff122fc4bfce15928d03fe035
+      size: 3199
+    - path: src/models/calibration.py
+      hash: md5
+      md5: 665e72f1db2be264b0eaf8b80b5e66c6
+      size: 6415
+    - path: src/models/evaluation.py
+      hash: md5
+      md5: e9e7d1b24f6a5f354e4c430aab587741
+      size: 3930
+    - path: src/models/inference.py
+      hash: md5
+      md5: c4e914386c0bb1af2aa77afe4cbe1764
+      size: 1100
+    - path: src/models/risk_tiers.py
+      hash: md5
+      md5: 20f6e07ec2a8ef2221037916e354ee9d
+      size: 2973
+    - path: src/models/tracking.py
+      hash: md5
+      md5: a58161e227d72aaf36268dceb08559cc
+      size: 3953
+    - path: src/models/train.py
+      hash: md5
+      md5: 8c013ee46641874cc8e037ef021e5f58
+      size: 42925
+    outs:
+    - path: models/feature_cols.joblib
+      hash: md5
+      md5: edaf888ea393516d35bfa265a82aea90
+      size: 593
+    - path: models/lightgbm_1d.joblib
+      hash: md5
+      md5: b70030ba330805511217fe65f401619d
+      size: 988412
+    - path: models/lightgbm_3d.joblib
+      hash: md5
+      md5: 18f5b5a851ca1ee070d230c40b447684
+      size: 994220
+    - path: models/lightgbm_model.joblib
+      hash: md5
+      md5: 57c9a9c606520e7e866b8be67e09a8cb
+      size: 997004
+    - path: models/logistic_calibrator.joblib
+      hash: md5
+      md5: 397c6c011fe8da9d35314392c7037f72
+      size: 138
+    - path: models/logistic_regression.joblib
+      hash: md5
+      md5: fba7a7480d7e08d369ce1953f61921d8
+      size: 1343
+    - path: models/platt_calibrator.joblib
+      hash: md5
+      md5: f42b8aaf1d10d93c6c944b7c0235dd07
+      size: 138
+    - path: models/platt_calibrator_1d.joblib
+      hash: md5
+      md5: 6eca0a14780f88e592b1938859039933
+      size: 138
+    - path: models/platt_calibrator_3d.joblib
+      hash: md5
+      md5: 38dddeac882e3ff0360d7f3722c8dd38
+      size: 138
+    - path: models/scaler.joblib
+      hash: md5
+      md5: 17119f6b29b036ab75c3e195e7856f6e
+      size: 3137
+    - path: models/training_metadata.json
+      hash: md5
+      md5: e61cc0d75b9eff625191582de6ff154f
+      size: 36206
+    - path: reports/ablation_study.csv
+      hash: md5
+      md5: 5135190f66e7f8f8e369d697066cd4df
+      size: 648
+    - path: reports/figures/calibration_curve.png
+      hash: md5
+      md5: f03201c4b1219eeaf393193b05c876fc
+      size: 127870
+    - path: reports/figures/error_analysis_breakdown.png
+      hash: md5
+      md5: d38aec7d83447ea3b0b1764853dc575f
+      size: 52255
+    - path: reports/model_comparison.csv
+      hash: md5
+      md5: 146fc67894c9dfc130b07026773568ec
+      size: 575
+    - path: reports/multi_horizon_comparison.csv
+      hash: md5
+      md5: 0891ff4d9c9018de03864535e82331da
+      size: 243
+    - path: reports/operational_decision_metrics.csv
+      hash: md5
+      md5: dfa3e034a8918f1df0a6eca9803399ad
+      size: 615
+    - path: reports/walk_forward_metrics.csv
+      hash: md5
+      md5: df829991e4a3fe56ee7c1d3350d10a18
+      size: 578
+  train_lstm:
+    cmd: python -m src.models.train_lstm
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/processed/dataset.parquet
+      hash: md5
+      md5: d45d1b8cd1b0cc54524fa9ac7717b40c
+      size: 14048150
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 58ce87ce6dce718ae89d1a890fa1d583
+      size: 178599870
+    - path: data/processed/grid.csv
+      hash: md5
+      md5: 705a962da3781d9844cdeac73b1321ab
+      size: 52418
+    - path: models/feature_cols.joblib
+      hash: md5
+      md5: edaf888ea393516d35bfa265a82aea90
+      size: 593
+    - path: models/training_metadata.json
+      hash: md5
+      md5: e61cc0d75b9eff625191582de6ff154f
+      size: 36206
+    - path: reports/model_comparison.csv
+      hash: md5
+      md5: 146fc67894c9dfc130b07026773568ec
+      size: 575
+    - path: requirements.lock
+      hash: md5
+      md5: a9a0427b9519b1cb5b36b4ce30450906
+      size: 308778
+    - path: src/features/build_features.py
+      hash: md5
+      md5: 9ad91a252f38fa367050dd116c92101a
+      size: 10354
+    - path: src/models/calibration.py
+      hash: md5
+      md5: 665e72f1db2be264b0eaf8b80b5e66c6
+      size: 6415
+    - path: src/models/evaluation.py
+      hash: md5
+      md5: e9e7d1b24f6a5f354e4c430aab587741
+      size: 3930
+    - path: src/models/inference.py
+      hash: md5
+      md5: c4e914386c0bb1af2aa77afe4cbe1764
+      size: 1100
+    - path: src/models/research.py
+      hash: md5
+      md5: eee16c059e08aee6508ae262fe7b0211
+      size: 14883
+    - path: src/models/train.py
+      hash: md5
+      md5: 8c013ee46641874cc8e037ef021e5f58
+      size: 42925
+    - path: src/models/train_lstm.py
+      hash: md5
+      md5: 75ffedc66ddd695bc3018e7462f352f6
+      size: 9033
+    outs:
+    - path: models/lstm_calibrator.joblib
+      hash: md5
+      md5: ab01877abe485bcf0031956e8f8878b3
+      size: 138
+    - path: models/lstm_model.pt
+      hash: md5
+      md5: a3ace4afbc293259cbf682a4010dc493
+      size: 89508
+    - path: models/lstm_preprocessing.joblib
+      hash: md5
+      md5: b1098e0c2e5ed3307d4ca50239297576
+      size: 1761
+    - path: reports/lstm_comparison.csv
+      hash: md5
+      md5: 710f16c849fef942913bf336cbee098c
+      size: 870
+    - path: reports/research/matched_lstm.csv
+      hash: md5
+      md5: 710f16c849fef942913bf336cbee098c
+      size: 870
+    - path: reports/research/matched_lstm_metadata.json
+      hash: md5
+      md5: 178acb805294ad32c8f95a40e00459f4
+      size: 15699
+    - path: reports/research/matched_lstm_test_keys.parquet
+      hash: md5
+      md5: aac362234ad8509cd35ec566312b9dd8
+      size: 34320
+  research:
+    cmd: python -m src.models.research
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/geo/mato_grosso_ibge.geojson
+      hash: md5
+      md5: 6a1d4424f897671f10a8ade1868029b7
+      size: 57267
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 58ce87ce6dce718ae89d1a890fa1d583
+      size: 178599870
+    - path: data/processed/grid.csv
+      hash: md5
+      md5: 705a962da3781d9844cdeac73b1321ab
+      size: 52418
+    - path: data/raw/climate
+      hash: md5
+      md5: f36732f27c09d9811736105159b032e5.dir
+      size: 87592806
+      nfiles: 506
+    - path: models/feature_cols.joblib
+      hash: md5
+      md5: edaf888ea393516d35bfa265a82aea90
+      size: 593
+    - path: models/lightgbm_model.joblib
+      hash: md5
+      md5: 57c9a9c606520e7e866b8be67e09a8cb
+      size: 997004
+    - path: models/platt_calibrator.joblib
+      hash: md5
+      md5: f42b8aaf1d10d93c6c944b7c0235dd07
+      size: 138
+    - path: models/training_metadata.json
+      hash: md5
+      md5: e61cc0d75b9eff625191582de6ff154f
+      size: 36206
+    - path: requirements.lock
+      hash: md5
+      md5: a9a0427b9519b1cb5b36b4ce30450906
+      size: 308778
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/data/build_grid.py
+      hash: md5
+      md5: ee6a05801cb057806426af5e2a6916a3
+      size: 6783
+    - path: src/data/manifest.py
+      hash: md5
+      md5: 6b8b6e0426e90fcc5789ff9417f60a30
+      size: 5584
+    - path: src/data/quality.py
+      hash: md5
+      md5: 755112cff122fc4bfce15928d03fe035
+      size: 3199
+    - path: src/models/calibration.py
+      hash: md5
+      md5: 665e72f1db2be264b0eaf8b80b5e66c6
+      size: 6415
+    - path: src/models/evaluation.py
+      hash: md5
+      md5: e9e7d1b24f6a5f354e4c430aab587741
+      size: 3930
+    - path: src/models/inference.py
+      hash: md5
+      md5: c4e914386c0bb1af2aa77afe4cbe1764
+      size: 1100
+    - path: src/models/research.py
+      hash: md5
+      md5: eee16c059e08aee6508ae262fe7b0211
+      size: 14883
+    - path: src/models/train.py
+      hash: md5
+      md5: 8c013ee46641874cc8e037ef021e5f58
+      size: 42925
+    outs:
+    - path: reports/research/ablation.csv
+      hash: md5
+      md5: 2b3e78167e2800bcc9ce44e7e18a0496
+      size: 3354
+    - path: reports/research/baselines.csv
+      hash: md5
+      md5: accae534ee8c571b931c9e9596d61279
+      size: 1047
+    - path: reports/research/bootstrap_sensitivity.json
+      hash: md5
+      md5: 73160d9adeb958f9407eddaa89f54164
+      size: 57450
+    - path: reports/research/climate_slices.csv
+      hash: md5
+      md5: e46ad8c05b7d6982718a37722693a579
+      size: 5051
+    - path: reports/research/metadata.json
+      hash: md5
+      md5: 257dd3d1f7f9476fbc3812810a9db707
+      size: 10849
+    - path: reports/research/no_recent_fire.csv
+      hash: md5
+      md5: cdbc75186e13b2c2540f92a6b792352f
+      size: 27649
+    - path: reports/research/oracle.csv
+      hash: md5
+      md5: 92dcb5313c4ff5af0d67c9b876a47730
+      size: 794
+    - path: reports/research/simple_logistic.joblib
+      hash: md5
+      md5: e934f1423d78345f0806af76376a599c
+      size: 2241
+    - path: reports/research/simple_logistic_calibrator.joblib
+      hash: md5
+      md5: 730f8f3cffd6d0e8149c6db208b48e14
+      size: 138
+    - path: reports/research/spatial_generalization.csv
+      hash: md5
+      md5: 9e4f6875c97d8f591996ea5b4db799f9
+      size: 2794
+    - path: reports/research/yearly_prevalence.csv
+      hash: md5
+      md5: 24d3f038c8be1ca5ca2ec42bf744c2e0
+      size: 533
+  explain:
+    cmd: python -m src.models.explain
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/geo/mato_grosso_ibge.geojson
+      hash: md5
+      md5: 6a1d4424f897671f10a8ade1868029b7
+      size: 57267
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 58ce87ce6dce718ae89d1a890fa1d583
+      size: 178599870
+    - path: models/feature_cols.joblib
+      hash: md5
+      md5: edaf888ea393516d35bfa265a82aea90
+      size: 593
+    - path: models/lightgbm_model.joblib
+      hash: md5
+      md5: 57c9a9c606520e7e866b8be67e09a8cb
+      size: 997004
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/data/build_grid.py
+      hash: md5
+      md5: ee6a05801cb057806426af5e2a6916a3
+      size: 6783
+    - path: src/models/explain.py
+      hash: md5
+      md5: 1ecd706d3eebf9a3908aecde2fd45cfe
+      size: 6141
+    - path: src/models/inference.py
+      hash: md5
+      md5: c4e914386c0bb1af2aa77afe4cbe1764
+      size: 1100
+    outs:
+    - path: reports/feature_importance.csv
+      hash: md5
+      md5: 0684160123210e8e876f8bd58e9e52b9
+      size: 1371
+    - path: reports/figures/shap_bar.png
+      hash: md5
+      md5: f7f21348719644576aac872c3f509608
+      size: 83150
+    - path: reports/figures/shap_summary.png
+      hash: md5
+      md5: bbb1f6da8d48ac2bf7f4de8dcf8bb331
+      size: 170974
+  drift:
+    cmd: python -m src.monitoring.drift_detector
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/geo/mato_grosso_ibge.geojson
+      hash: md5
+      md5: 6a1d4424f897671f10a8ade1868029b7
+      size: 57267
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 58ce87ce6dce718ae89d1a890fa1d583
+      size: 178599870
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/data/build_grid.py
+      hash: md5
+      md5: ee6a05801cb057806426af5e2a6916a3
+      size: 6783
+    - path: src/monitoring/drift_detector.py
+      hash: md5
+      md5: 7a9df383108a40c4b078084103f51260
+      size: 7968
+    outs:
+    - path: reports/drift_report.json
+      hash: md5
+      md5: 8f95655da77f64165422230313e22a41
+      size: 3287
+    - path: reports/figures/drift_summary.png
+      hash: md5
+      md5: 6c2d3560516d9be91d4d95c271836835
+      size: 71672
+  decision_diagnostics:
+    cmd: python -m src.reporting.decision_diagnostics
+    deps:
+    - path: config.yaml
+      hash: md5
+      md5: 684582c1c1e3c94e2f70719ebac70703
+      size: 1035
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 58ce87ce6dce718ae89d1a890fa1d583
+      size: 178599870
+    - path: data/processed/grid.csv
+      hash: md5
+      md5: 705a962da3781d9844cdeac73b1321ab
+      size: 52418
+    - path: models/lightgbm_model.joblib
+      hash: md5
+      md5: 57c9a9c606520e7e866b8be67e09a8cb
+      size: 997004
+    - path: models/platt_calibrator.joblib
+      hash: md5
+      md5: f42b8aaf1d10d93c6c944b7c0235dd07
+      size: 138
+    - path: models/training_metadata.json
+      hash: md5
+      md5: e61cc0d75b9eff625191582de6ff154f
+      size: 36206
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/models/calibration.py
+      hash: md5
+      md5: 665e72f1db2be264b0eaf8b80b5e66c6
+      size: 6415
+    - path: src/models/evaluation.py
+      hash: md5
+      md5: e9e7d1b24f6a5f354e4c430aab587741
+      size: 3930
+    - path: src/models/inference.py
+      hash: md5
+      md5: c4e914386c0bb1af2aa77afe4cbe1764
+      size: 1100
+    - path: src/models/train.py
+      hash: md5
+      md5: 8c013ee46641874cc8e037ef021e5f58
+      size: 42925
+    - path: src/reporting/decision_diagnostics.py
+      hash: md5
+      md5: f3e6d9d97b90947b3bafdaf2989e3e66
+      size: 2763
+    outs:
+    - path: reports/research/frozen_threshold_diagnostics.csv
+      hash: md5
+      md5: 262567879daf4a531c320e849fb37f07
+      size: 3649
+    - path: reports/research/no_fire_paired_difference.json
+      hash: md5
+      md5: 6c2ee36d08e0afa529f5c0360463bb91
+      size: 14367
+  research_figures:
+    cmd: python -m src.reporting.plot_research
+    deps:
+    - path: reports/research/matched_lstm.csv
+      hash: md5
+      md5: 710f16c849fef942913bf336cbee098c
+      size: 870
+    - path: reports/research/no_recent_fire.csv
+      hash: md5
+      md5: cdbc75186e13b2c2540f92a6b792352f
+      size: 27649
+    - path: reports/research/oracle.csv
+      hash: md5
+      md5: 92dcb5313c4ff5af0d67c9b876a47730
+      size: 794
+    - path: reports/research/spatial_generalization.csv
+      hash: md5
+      md5: 9e4f6875c97d8f591996ea5b4db799f9
+      size: 2794
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/reporting/plot_research.py
+      hash: md5
+      md5: d7f9bd2edb3dcafa753eccf2d0613952
+      size: 2406
+    outs:
+    - path: reports/figures/lstm_vs_lgbm.png
+      hash: md5
+      md5: 1e9a98da462f9cfd88e1261aabd87a24
+      size: 47681
+    - path: reports/figures/research_summary.png
+      hash: md5
+      md5: bb22f2e7709a39a3b3207bf4d273f514
+      size: 67948
+    - path: reports/figures/research_summary.svg
+      hash: md5
+      md5: 93e2e0f6898843ceff5161830781b711
+      size: 67139

@@ -25,11 +25,13 @@ Não se treina um modelo especial para cada recorte: os modelos ajustados no per
 | no_local_30d_and_neighbor_7d | LightGBM | 60426 | 0.0524 | 0.1280 | 0.7372 | 0.0478 |
 | no_local_30d_and_neighbor_7d | Climatology | 60426 | 0.0524 | 0.1449 | 0.7505 | 0.0593 |
 
+Paired delta AP (LightGBM minus climatology), no-local-30d: -0.0060; 95% CI [-0.0211, 0.0063]. This interval includes zero; the point comparison does not establish a significant difference.
+
 <!-- END GENERATED RESEARCH -->
 
 ## Interpretação
 
-O LightGBM não supera a climatologia em AP no recorte principal de 30 dias sem focos locais. A vantagem agregada do modelo não pode ser generalizada automaticamente para esse cenário. A taxa positiva também cai substancialmente: AP bruto de populações diferentes não deve ser comparado como se a dificuldade fosse idêntica.
+O LightGBM tem AP pontual menor que a climatologia no recorte principal de 30 dias sem focos locais. O intervalo pareado da diferença inclui zero; não se declara superioridade estatística de nenhum dos dois nesse recorte. A vantagem agregada do modelo não pode ser generalizada automaticamente para esse cenário. A taxa positiva também cai substancialmente: AP bruto de populações diferentes não deve ser comparado como se a dificuldade fosse idêntica.
 
 Os intervalos absolutos AP/ROC-AUC/Brier/ECE usam 500 reamostragens pareadas por datas, com blocos de 14 dias. Os resultados por ano e região, todos os modelos e os recortes adicionais estão em [no_recent_fire.csv](research/no_recent_fire.csv). A ausência de histórico local não exclui sinais do ano anterior ou dos vizinhos, exceto o recorte explicitamente mais restrito.
 

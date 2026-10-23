@@ -60,7 +60,12 @@
   },
   "seed": 42,
   "python": "3.12.10",
-  "commit": "3a7e9029c1b1b26b63d333ab943983fac096c83d",
+  "execution_snapshot": {
+    "commit_at_start": "dbbc21b34a667fe60a14a811aa1169b54435fde1",
+    "working_tree_dirty_at_start": true,
+    "train_source_sha256": "dc830b35acf4abea6c5714010b5d07e55487c7e7f9a539b6de34f905f9734cf0"
+  },
+  "commit": "dbbc21b34a667fe60a14a811aa1169b54435fde1",
   "missing_policy": "native NaN for LightGBM; training median + indicator for logistic regression",
   "calibration_policy": "Platt fixed a priori; isotonic is a secondary descriptive comparison, not selected on test",
   "selected_thresholds": {
@@ -1112,8 +1117,8 @@
         0.15957813441390212
       ],
       "ECE_95CI": [
-        0.013624532962527806,
-        0.05144921893028609
+        0.013624532962515219,
+        0.05144921893037577
       ]
     },
     "Climatology": {
@@ -1130,8 +1135,8 @@
         0.1694470505151979
       ],
       "ECE_95CI": [
-        0.048226233741184905,
-        0.08964127233707814
+        0.04822623374118533,
+        0.08964127233707808
       ]
     },
     "LogisticRegression": {
@@ -1148,7 +1153,7 @@
         0.201373866956495
       ],
       "ECE_95CI": [
-        0.18608848965193164,
+        0.1860884896519316,
         0.2293767420874102
       ]
     },
@@ -1166,8 +1171,8 @@
         0.1430356565253369
       ],
       "ECE_95CI": [
-        0.013094024656265716,
-        0.04025752815705497
+        0.013094024656265715,
+        0.04025752815705499
       ]
     }
   },

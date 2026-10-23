@@ -8,6 +8,8 @@ Treino 2016-01-01 a 2022-12-24; calibração e seleção de limiares 2023-01-01 
 
 LightGBM usa NaN nativo. Regressão logística e LSTM ajustam mediana e escala somente no treino. Platt foi predefinido; isotônica é uma comparação secundária, sem escolha pelo teste. T_P50 e T_F1 são escolhidos em 2023 e congelados. Recall@P50 da curva de teste é uma estatística descritiva diferente.
 
+Matrizes de confusão, precisão, recall, taxa de falsos positivos, fração de falsos alertas entre alertas e taxa de acionamento por ano/região estão em [frozen_threshold_diagnostics.csv](research/frozen_threshold_diagnostics.csv). O limiar não é reotimizado nesses recortes.
+
 <!-- BEGIN GENERATED METRICS -->
 
 Training: `2016-01-01 to 2022-12-24` (897,600 cell-days). Calibration: `2023-01-01 to 2023-12-24` (126,016). Test: `2024-01-01 to 2025-12-24` (254,848). Features: 39.

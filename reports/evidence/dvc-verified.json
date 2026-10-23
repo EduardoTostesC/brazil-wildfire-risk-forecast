@@ -1,0 +1,11 @@
+{
+  "repro": {
+    "exit_code": 0,
+    "log": "dvc-repro-verified.txt"
+  },
+  "status": {
+    "exit_code": 0,
+    "log": "dvc-status-verified.txt",
+    "changes": {}
+  }
+}
