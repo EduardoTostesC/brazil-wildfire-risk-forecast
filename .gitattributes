@@ -1,0 +1,6 @@
+# Scientific fingerprints identify exact bytes, including line endings.
+# Preserve serialized bundles and fingerprinted source data across platforms.
+models/*.joblib -text
+models/*.pt -text
+models/training_metadata.json -text
+data/** -text
