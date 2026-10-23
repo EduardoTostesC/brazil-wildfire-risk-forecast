@@ -65,17 +65,16 @@ Recent hotspot history provides most of the discriminative signal in the archive
 
 ## Limitations
 
-This is historical replay. Daily observations from D were not necessarily published on D. Publication timestamps were not archived. Legacy POWER requests used Local Solar Time, while fire records were grouped by UTC date; the [source audit](reports/REPRODUCIBILIDADE.md) explains the unresolved alignment limitation. There is no live acquisition or operational forecast service.
+This is historical replay. Daily observations from D were not necessarily published on D. Publication timestamps were not archived. Legacy POWER requests defaulted to Local Solar Time while fire records used UTC dates; all archived detections retain the same calendar date under the tested regional offsets. Original weather-response metadata are incomplete. The [source audit](reports/REPRODUCIBILIDADE.md) distinguishes this calendar check from unverified publication timing. There is no live acquisition or operational forecast service.
 
 AP varies with prevalence. Top-K metrics count cell-days with overlapping future windows, not distinct fires, field visits or avoided losses. Bootstrap intervals condition on these observed cells; they do not establish nationwide generalization. SHAP explains raw model log-odds before calibration and does not establish causality. Visual low/medium/high bands are conventions at 0.25 and 0.55, separate from validation-selected decision thresholds.
 
 ## Run locally
 
-Python 3.11 or 3.12. Create and activate a virtual environment, then install the CPU PyTorch wheel and the hashed dependency lock:
+Python 3.11 or 3.12. Create and activate a virtual environment, then install the CPU dependency lock, including hashed PyTorch CPU wheels:
 
 ```bash
-python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-python -m pip install --require-hashes -r requirements.lock
+python -m pip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock
 python -m pip check
 python -m pytest tests/ -v
 python -m ruff check .

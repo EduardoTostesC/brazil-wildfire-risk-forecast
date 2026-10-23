@@ -60,4 +60,4 @@ Resultados negativos são mantidos: sem histórico local recente a climatologia 
 
 ## Limitações de dados
 
-Downloads legados da POWER usaram LST e os focos foram agrupados em UTC. Faltam horários históricos de publicação e metadados das respostas originais. O produto INPE é de referência, mas os CSVs locais não têm satélite por linha. Hashes locais não demonstram reaquisição independente ou cobertura física perfeita do sensor.
+Downloads legados da POWER usaram o padrão LST e os focos foram agrupados em UTC. Nos 290.019 registros arquivados, as horas UTC 16–19 mantêm a mesma data sob deslocamentos de -3, -4 e -5 horas; não foi detectada alteração do dia dos focos. Faltam horários históricos de publicação e metadados das respostas climáticas originais. O produto INPE é de referência, mas os CSVs locais não têm satélite por linha. Hashes locais não demonstram reaquisição independente ou cobertura física perfeita do sensor.

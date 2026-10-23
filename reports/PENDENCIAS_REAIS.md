@@ -4,7 +4,7 @@ Este documento diferencia limitações ainda abertas das verificações locais c
 
 | Categoria | Item | Motivo preciso e procedimento restante |
 |---|---|---|
-| Dependente de nova aquisição | Uniformizar UTC/LST | POWER legada usa LST; datas de focos usam UTC. Reaquisição em base temporal comum, reconstrução de features/rótulos e repetição dos experimentos são necessárias. Não foi inferida conversão sem as respostas originais |
+| Dependente de metadados de origem | Confirmar respostas climáticas originais | POWER legada usa o padrão LST, sem cabeçalhos arquivados. O calendário dos 290.019 focos foi verificado e não muda sob offsets regionais testados; não se presume erro de data. Recuperar metadados climáticos e versões de fonte, ou reaquiri-los com base temporal explícita, antes de afirmar proveniência diária integral |
 | Dependente de dados históricos | Validar disponibilidade em D | Não foram arquivados horários de publicação. Obter fontes com versões/horários de emissão ou avaliar política explícita de atraso; separar testes de previsão meteorológica arquivada |
 | Dependente de infraestrutura | Previsão operacional | Não existe ingestão contínua, validação em tempo de emissão, monitoramento de SLA e estudo operacional. A API retorna 503 |
 | Dependente de infraestrutura | Docker runtime | Executável Docker ausente no host. Construir imagem, iniciar container e exercer endpoints/healthcheck em máquina com Docker |
@@ -18,7 +18,6 @@ Este documento diferencia limitações ainda abertas das verificações locais c
 | Pendente de produto | Tradução integral do dashboard | Avisos principais são claros, mas muitas labels seguem em inglês. Adicionar localização completa com testes de cada idioma se exigida pela publicação |
 | Pendente de proveniência | Vintage/CRS explícitos do polígono | GeoJSON arquivado não inclui ano e CRS explícitos. Recuperar metadados oficiais correspondentes ao hash, sem substituir silenciosamente a geometria |
 | Pendente de distribuição | Dados públicos versionados | Manifesto refere-se a arquivos locais. Definir arquivo público autorizado com licença/proveniência, hashes e controle de versão; um DAG não distribui as entradas |
-| Pendente de cadeia de instalação | Hash do wheel CPU PyTorch | A primeira instalação pelo índice CPU antecede o lock universal PyPI. Produzir locks por plataforma/índice para verificar também esse download |
 
 Corrigidos e testados: contratos de inferência e dados ausentes; testes determinísticos; modelo/calibrador por horizonte; inferência de artefatos; validação de ponto; rótulos e embargo; tabelas contra metadados; comparação pareada e experimentos executados. A matriz detalhada está em [AUDITORIA_FINAL](AUDITORIA_FINAL.md).
 

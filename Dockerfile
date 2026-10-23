@@ -13,11 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies: install CPU-only PyTorch first to reduce image size
-RUN pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-
-COPY requirements.lock .
-RUN pip install --no-cache-dir --require-hashes -r requirements.lock && pip check
+# The CPU lock includes hashes for the PyTorch CPU wheels as well.
+COPY requirements-cpu.lock .
+RUN pip install --no-cache-dir --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock && pip check
 
 # Create non-root system user for security compliance
 RUN useradd -m -u 1000 appuser && \

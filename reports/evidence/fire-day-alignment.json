@@ -1,0 +1,10 @@
+{
+  "observations": 290019,
+  "min_utc_hour": 16,
+  "max_utc_hour": 19,
+  "calendar_changes_by_offset_hours": {
+    "-3": 0,
+    "-4": 0,
+    "-5": 0
+  }
+}

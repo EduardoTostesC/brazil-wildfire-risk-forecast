@@ -65,17 +65,16 @@ O histórico recente de focos concentra a maior parte do sinal discriminatório 
 
 ## Limitações
 
-O sistema faz replay histórico. Observações diárias de D podem ter sido publicadas depois de D; esses horários não foram arquivados. Os downloads antigos da POWER usaram horário solar local, enquanto os focos foram agrupados por data UTC. A [reprodutibilidade](reports/REPRODUCIBILIDADE.md) detalha essa limitação de alinhamento ainda aberta. Não há ingestão contínua nem previsão operacional.
+O sistema faz replay histórico. Observações diárias de D podem ter sido publicadas depois de D; esses horários não foram arquivados. Os downloads antigos da POWER usaram o padrão solar local, enquanto os focos usam data UTC. Nenhum foco arquivado muda de data sob os deslocamentos regionais testados. A [reprodutibilidade](reports/REPRODUCIBILIDADE.md) distingue essa verificação de calendário da disponibilidade de publicação ainda desconhecida e dos metadados climáticos incompletos. Não há ingestão contínua nem previsão operacional.
 
 AP depende da prevalência. Top-K mede células-dias positivas em janelas futuras sobrepostas, sem contar incêndios distintos, vistorias reais ou perdas evitadas. Os intervalos bootstrap são condicionais às células observadas. SHAP explica log-odds do modelo bruto, antes da calibração, e não comprova causalidade. As faixas visuais baixo/médio/alto são convenções em 0,25 e 0,55, distintas dos limiares escolhidos na validação.
 
 ## Executar localmente
 
-Python 3.11 ou 3.12. Crie e ative um ambiente virtual; instale a versão CPU do PyTorch e o lock com hashes:
+Python 3.11 ou 3.12. Crie e ative um ambiente virtual; instale o lock CPU, incluindo hashes dos wheels CPU do PyTorch:
 
 ```bash
-python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-python -m pip install --require-hashes -r requirements.lock
+python -m pip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock
 python -m pip check
 python -m pytest tests/ -v
 python -m ruff check .

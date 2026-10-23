@@ -8,18 +8,18 @@ Revisão de 23/10/2026. A execução usa Windows e ambientes separados Python 3.
 python -m venv .venv
 # Windows: .venv\Scripts\Activate.ps1
 # Linux/macOS: source .venv/bin/activate
-python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-python -m pip install --require-hashes -r requirements.lock
+python -m pip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock
 python -m pip check
 ```
 
-`requirements.txt` fixa dependências diretas. `requirements.lock` resolve também as transitivas e inclui hashes, com marcadores de plataforma. A versão CPU do PyTorch é instalada antes; o lock universal inclui a distribuição PyPI, e o wheel CPU previamente instalado satisfaz a mesma versão pública. Portanto, o download CPU inicial não está protegido pelos hashes desse lock; para uma cadeia integralmente verificada é necessário gerar e distribuir um lock específico com o índice CPU. Essa limitação não é ocultada como verificação completa de todos os downloads.
+`requirements.txt` fixa dependências diretas. `requirements.lock` preserva a resolução genérica que fundamenta a execução científica local, incluindo dependências CUDA em Linux. `requirements-cpu.lock` é a variante recomendada para CI, Docker e demonstração: inclui hashes dos wheels CPU e evita instalar bibliotecas CUDA sem uso. A versão pública dos pacotes científicos é a mesma; a variante CPU explicita o sufixo do wheel por plataforma. Todas as entradas instaladas por esse comando estão sujeitas à verificação de hashes.
 
 Atualização deliberada do lock:
 
 ```bash
 python -m pip install uv==0.13.5
 python -m uv pip compile requirements.txt --universal --python-version 3.11 --generate-hashes -o requirements.lock
+python -m uv pip compile requirements.txt --universal --python-version 3.11 --torch-backend cpu --emit-index-url --default-index https://pypi.org/simple --generate-hashes -o requirements-cpu.lock
 ```
 
 LightGBM 4.5.0 com sklearn recente falhou em `force_all_finite`. O ambiente validado usa LightGBM 4.6.0 e sklearn 1.7.2. A mudança do argumento está documentada no [sklearn](https://scikit-learn.org/1.6/modules/generated/sklearn.utils.check_array.html); a evolução do adaptador está nas [notas do LightGBM](https://github.com/lightgbm-org/LightGBM/releases/tag/v4.6.0). Também foram fixados SQLAlchemy e pathspec após incompatibilidades reais no MLflow/DVC. `pip check` sozinho não detectava essas falhas em runtime.
@@ -46,7 +46,7 @@ O polígono IBGE é um arquivo versionado e identificado pelo hash. Não há ano
 
 A NASA informa resolução meteorológica de 0,5°×0,625°: a grade analítica de 0,5°×0,5° não é uma correspondência exata com células independentes do produto. [Metodologia POWER](https://power.larc.nasa.gov/docs/methodology/meteorology/).
 
-A POWER diária usa LST por padrão, agora explícito no downloader para não alterar silenciosamente o protocolo legado. Os focos foram agrupados por data UTC. Não se reconstruiu uma série UTC equivalente a partir das respostas antigas. Deve-se repetir a aquisição em uma base temporal comum e reavaliar antes de afirmar alinhamento diário físico integral. [Padrão temporal da API](https://power.larc.nasa.gov/docs/services/api/temporal/daily/).
+A POWER diária usa LST por padrão, agora explícito no downloader para não alterar silenciosamente o protocolo legado. Os focos foram agrupados por data UTC. A verificação exaustiva dos 290.019 timestamps mostra horas UTC entre 16 e 19, sem nenhuma mudança de data ao aplicar deslocamentos de -3, -4 ou -5 horas. Isso sustenta a correspondência do dia das detecções arquivadas sob esses deslocamentos, em vez de presumir erro de calendário. Não recupera os metadados de todas as respostas climáticas originais ou seus horários de publicação. Evidência: [fire-day-alignment.json](evidence/fire-day-alignment.json). [Padrão temporal da API](https://power.larc.nasa.gov/docs/services/api/temporal/daily/).
 
 Observação, publicação e processamento são tempos distintos. A NASA descreve produtos recentes com latência e revisões posteriores; horários históricos de disponibilidade não foram arquivados. A API retorna disponibilidade desconhecida, além do processamento real. [Fontes e latência](https://power.larc.nasa.gov/docs/methodology/data/sources/). O experimento continua retrospectivo, mesmo tendo features de D usadas para prever D+1..D+H.
 
