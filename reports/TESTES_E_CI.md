@@ -33,7 +33,22 @@ Os logs incluem as falhas intermediárias, em vez de reescrever a história como
 Os logs finais, XMLs por versão, manifesto, notebooks, execução DVC e eventual CI do candidato são anexados em `reports/evidence`. Não interpretar a existência de um workflow como sua aprovação. Uma execução limpa sem dados privados é exigida antes da declaração final desta auditoria.
 
 <!-- BEGIN FINAL VALIDATION -->
-Validação final em andamento; os resultados intermediários acima permanecem identificados por etapa.
+
+Snapshot Git `429c46f`, extra?do por `git archive`, sem diret?rios de dados privados. Verifica??o em dois interpretadores isolados:
+
+| Ambiente | Testes | Falhas | Erros | Skips | Segundos |
+|---|---|---|---|---|---|
+| py311 | 87 | 0 | 0 | 0 | 5.288 |
+| py312 | 87 | 0 | 0 | 0 | 4.940 |
+
+Logs: [3.11](evidence/clean-py311.txt), [3.12](evidence/clean-py312.txt), [snapshot e comandos](evidence/clean-snapshot-validation.json). Ruff aprovado; bundle de artefatos e ambos os geradores conferidos no snapshot.
+
+A reprodu??o DVC executou os oito est?gios cient?ficos originais expandidos e dois est?gios finais de diagn?stico/figuras; `dvc repro` e `dvc status --json` retornaram c?digo 0, com estado final `{}`. Evid?ncia: [dvc-verified.json](evidence/dvc-verified.json), [execu??o completa](evidence/dvc-repro-locked.txt), [est?gios complementares](evidence/dvc-repro-final-stages.txt). As entradas brutas j? estavam no disco; n?o ? uma reaquisi??o independente.
+
+Os dois notebooks foram executados sem erros de c?lula: [log](evidence/executed-notebooks.txt). A API respondeu 12 requisi??es HTTP reais nos cen?rios documentados: [exemplos](evidence/real-http-examples.json). O manifesto final foi verificado: [log](evidence/final-manifest-verification.txt). Links locais foram verificados nos documentos atuais; snapshots hist?ricos s?o exclu?dos dessa checagem.
+
+CI remoto do candidato: pendente de execu??o no GitHub Actions. A falha do commit inicial permanece registrada acima.
+
 <!-- END FINAL VALIDATION -->
 
 ## Comandos

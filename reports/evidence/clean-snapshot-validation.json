@@ -1,0 +1,51 @@
+{
+  "commit": "429c46f6fda52c25f0356289be2edeefffa361dc",
+  "snapshot": "release-429c46f6fd",
+  "private_data_present": false,
+  "checks": [
+    {
+      "interpreter": "py311",
+      "command": [
+        "-m",
+        "pytest",
+        "tests/",
+        "-v",
+        "--tb=short",
+        "--junitxml=C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\reports\\evidence\\clean-py311.xml"
+      ],
+      "exit_code": 0,
+      "log_sha256": "50dd46d1a762ef68267adc8e933ab4e758abc2888cb5803cf7cfdfb067a057d4"
+    },
+    {
+      "interpreter": "py312",
+      "command": [
+        "-m",
+        "pytest",
+        "tests/",
+        "-v",
+        "--tb=short",
+        "--junitxml=C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\reports\\evidence\\clean-py312.xml"
+      ],
+      "exit_code": 0,
+      "log_sha256": "354de7fc9511652503790b461ce8e651381de790921000c62487054ce3720860"
+    },
+    {
+      "module": "src.models.artifacts",
+      "exit_code": 0,
+      "stdout": "Model bundle verified\n",
+      "stderr": ""
+    },
+    {
+      "module": "src.reporting.generate_readme_metrics",
+      "exit_code": 0,
+      "stdout": "Documentation metrics verified\n",
+      "stderr": ""
+    },
+    {
+      "module": "src.reporting.generate_research_tables",
+      "exit_code": 0,
+      "stdout": "Research documentation verified\n",
+      "stderr": ""
+    }
+  ]
+}
