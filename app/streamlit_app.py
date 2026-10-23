@@ -41,6 +41,8 @@ st.set_page_config(
     },
 )
 
+from src.data.build_grid import build_grid
+from src.models.inference import calibrated_probabilities, feature_matrix
 from src.models.risk_tiers import DEFAULT_RISK_CONFIG
 
 # ── Theme constants ───────────────────────────────────────────────────────────
@@ -87,31 +89,18 @@ def _load_dataframe():
         return None, is_sample
     df = pd.read_parquet(path)
     df["date"] = pd.to_datetime(df["date"])
+    grid = build_grid()
+    valid = grid.loc[grid.state_status != "outside", "grid_id"]
+    df = df[df.grid_id.isin(valid)]
+    df = df[df.date >= "2024-01-01"]
     return df, is_sample
 
 
 def _add_predictions(df: pd.DataFrame, models, calibrators, feature_cols, horizon: int) -> pd.DataFrame:
     """Add probability and risk_level columns for a given forecast horizon."""
-    from scipy.special import logit
-
     model = models.get(horizon)
     calibrator = calibrators.get(horizon)
-    if model is None or not feature_cols:
-        return df
-
-    X = df[feature_cols].values.astype(np.float32)
-    X = np.nan_to_num(X, nan=0.0)
-    raw = model.predict_proba(X)[:, 1]
-
-    if calibrator is not None:
-        if hasattr(calibrator, "calibrate"):
-            prob = calibrator.calibrate(raw)
-        else:
-            logits = logit(np.clip(raw, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-            res = calibrator.predict_proba(logits)
-            prob = res[:, 1] if res.ndim == 2 else res.ravel()
-    else:
-        prob = raw
+    prob = calibrated_probabilities(model, calibrator, feature_matrix(df, feature_cols))
 
     df = df.copy()
     df["probability"] = prob
@@ -186,14 +175,14 @@ def _build_risk_map(df_day: pd.DataFrame, selected_grid: str | None = None) -> f
             ),
         ).add_to(m)
 
-    legend_html = """
+    legend_html = f"""
     <div style="position:fixed;bottom:30px;left:30px;z-index:1000;
                 background:white;padding:12px 16px;border-radius:8px;
                 border:1px solid #ccc;font-size:13px;line-height:1.6;">
         <b>🔥 Fire Risk</b><br>
-        <span style="color:#27ae60">●</span> Low (&lt;20%)<br>
-        <span style="color:#f39c12">●</span> Medium (20-50%)<br>
-        <span style="color:#e74c3c">●</span> High (&gt;50%)
+        <span style="color:#27ae60">●</span> Low (&lt;{DEFAULT_RISK_CONFIG.low_cutoff:.0%})<br>
+        <span style="color:#f39c12">●</span> Medium ({DEFAULT_RISK_CONFIG.low_cutoff:.0%}–{DEFAULT_RISK_CONFIG.high_cutoff:.0%})<br>
+        <span style="color:#e74c3c">●</span> High (≥{DEFAULT_RISK_CONFIG.high_cutoff:.0%})
     </div>
     """
     m.get_root().html.add_child(folium.Element(legend_html))
@@ -219,9 +208,7 @@ def tab_risk_map(df: pd.DataFrame, is_sample: bool, models, calibrators, feature
         index=0,
     )
 
-    df_pred = _add_predictions(df, models, calibrators, feature_cols, horizon)
-
-    available_dates = sorted(df_pred["date"].dt.date.unique())
+    available_dates = sorted(df["date"].dt.date.unique())
     default_idx = min(len(available_dates) * 3 // 4, len(available_dates) - 1)
     selected_date = st.sidebar.date_input(
         "📅 Date",
@@ -236,7 +223,7 @@ def tab_risk_map(df: pd.DataFrame, is_sample: bool, models, calibrators, feature
         default=["Low", "Medium", "High"],
     )
 
-    df_day = df_pred[df_pred["date"].dt.date == selected_date].copy()
+    df_day = _add_predictions(df[df["date"].dt.date == selected_date], models, calibrators, feature_cols, horizon)
     if risk_filter and "risk_level" in df_day.columns:
         df_day = df_day[df_day["risk_level"].isin(risk_filter)]
 
@@ -431,18 +418,11 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
     row_df = df[mask]
 
     if row_df.empty:
-        # Find closest date for this cell
-        cell_df = df[df["grid_id"] == sel_cell]
-        if cell_df.empty:
-            st.warning("No data for this cell.")
-            return
-        closest_idx = (cell_df["date"].dt.date.apply(lambda d: abs((d - sel_date).days))).idxmin()
-        row_df = cell_df.loc[[closest_idx]]
-        st.warning(f"No data for {sel_date} — showing closest available date: {row_df['date'].dt.date.iloc[0]}")
+        st.warning(f"No exact historical record for {sel_cell} on {sel_date}.")
+        return
 
     # Feature vector for this row
-    X_row = row_df[feature_cols].values.astype(np.float32)
-    X_row = np.nan_to_num(X_row, nan=0.0)
+    X_row = feature_matrix(row_df, feature_cols)
 
     with st.spinner("Computing SHAP values…"):
         explainer = shap.TreeExplainer(model)
@@ -451,21 +431,9 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
             shap_vals = shap_vals[1]  # positive class for LightGBM
         sv = shap_vals[0]  # shape (n_features,)
 
-    from scipy.special import logit
     calibrator = calibrators.get(7)
-    raw_prob = float(model.predict_proba(X_row)[0, 1])
-    if calibrator is not None:
-        try:
-            if hasattr(calibrator, "calibrate"):
-                prob = float(calibrator.calibrate(np.array([raw_prob]))[0])
-            else:
-                logit_val = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-                res = calibrator.predict_proba(logit_val)
-                prob = float(res[0, 1] if res.ndim == 2 else res[0])
-        except Exception:
-            prob = raw_prob
-    else:
-        prob = raw_prob
+    prob = float(calibrated_probabilities(model, calibrator, X_row)[0])
+    st.caption("SHAP explains raw model log-odds before Platt calibration. It does not decompose the calibrated probability or establish causality.")
     level = "High" if prob >= RISK_THRESHOLDS["Medium"] else "Medium" if prob >= RISK_THRESHOLDS["Low"] else "Low"
 
     # Summary metrics
@@ -670,7 +638,7 @@ def tab_about():
     comp = _load_comparison_csv("model_comparison.csv")
     horizon_comp = _load_comparison_csv("multi_horizon_comparison.csv")
 
-    st.markdown("#### 🏆 Model Benchmark (Out-of-Time Test: 2024–2025, n=366,344)")
+    st.markdown("#### Model benchmark — retrospective evaluation; consult run metadata for dates and sample counts")
     if comp is not None:
         comp_display = comp.copy()
         for col in ["PR-AUC", "ROC-AUC", "Brier", "Recall@P50"]:
@@ -689,9 +657,7 @@ def tab_about():
     fig_cols = st.columns(2)
     figs = [
         ("calibration_curve.png", "Probability Calibration (Reliability Diagram)"),
-        ("accuracy_by_month.png", "Operational Accuracy by Month"),
-        ("accuracy_by_region.png", "Accuracy by Spatial Region (MT)"),
-        ("lstm_vs_lgbm.png", "LSTM vs LightGBM PR/ROC Curves"),
+        ("error_analysis_breakdown.png", "Retrospective evaluation by month, year and region"),
         ("shap_bar.png", "SHAP Global Feature Importance"),
         ("shap_summary.png", "SHAP Beeswarm Summary"),
     ]
@@ -748,12 +714,16 @@ def main():
     st.title("🔥 Brazil Wildfire Risk Forecast")
     st.caption(
         "LightGBM + Platt Calibration · INPE fire data (2016–2025) · NASA POWER climate reanalysis · "
-        "Mato Grosso pilot region · **PR-AUC: 0.6301 · ROC-AUC: 0.8833 · Brier: 0.0927**"
+        "Mato Grosso · Historical replay / Análise retrospectiva"
     )
 
     # Load shared resources
     models, calibrators, feature_cols = _load_models()
     df, is_sample = _load_dataframe()
+    st.info("Historical replay / Replay histórico: observed daily data; historical publication times are unknown. Operational forecasts are unavailable. Visual risk tiers are conventions, not validated action thresholds.")
+    if set(models) != {1, 3, 7} or set(calibrators) != {1, 3, 7} or not feature_cols:
+        st.error("Required model/calibrator pairs are unavailable.")
+        return
 
     if df is None:
         st.error("❌ No data found. Please run: `make all` to download and process the full dataset.")

@@ -12,22 +12,25 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from shapely.geometry import box, shape
 
 from src.config import get_project_root, load_config
 
 
 def _load_ibge_polygon(root: Path):
-    """Load official IBGE state polygon if available."""
+    """Load the required versioned boundary; never silently omit the mask."""
     geo_path = root / "data" / "geo" / "mato_grosso_ibge.geojson"
     if not geo_path.exists():
-        return None
+        raise FileNotFoundError(f"Required territorial boundary missing: {geo_path}")
     try:
-        from shapely.geometry import shape
         with open(geo_path, "r", encoding="utf-8") as f:
             geojson = json.load(f)
-        return shape(geojson["features"][0]["geometry"])
-    except Exception:
-        return None
+        polygon = shape(geojson["features"][0]["geometry"])
+    except (KeyError, IndexError, ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid territorial GeoJSON: {geo_path}") from exc
+    if polygon.is_empty or not polygon.is_valid or polygon.geom_type not in {"Polygon", "MultiPolygon"}:
+        raise ValueError("Territorial boundary must be a valid nonempty polygon")
+    return polygon
 
 
 def build_grid(
@@ -58,12 +61,6 @@ def build_grid(
     lon_edges = np.arange(region["lon_min"], region["lon_max"] + res, res)
 
     ibge_poly = _load_ibge_polygon(root)
-    has_shapely = False
-    try:
-        from shapely.geometry import box
-        has_shapely = True
-    except ImportError:
-        has_shapely = False
 
     rows: list[dict] = []
     for i in range(len(lat_edges) - 1):
@@ -79,13 +76,15 @@ def build_grid(
             state_status = "inside"
             coverage_pct = 1.0
 
-            if ibge_poly is not None and has_shapely:
+            if ibge_poly is not None:
                 cbox = box(lon_min, lat_min, lon_max, lat_max)
                 if not ibge_poly.intersects(cbox):
                     state_status = "outside"
                     coverage_pct = 0.0
                 else:
                     inter = ibge_poly.intersection(cbox)
+                    # Geographic fraction is retained for historical comparability.
+                    # It is a dimensionless fraction in degree area, not km².
                     pct = float(inter.area / cbox.area)
                     coverage_pct = round(pct, 4)
                     if pct >= 0.95:
@@ -139,8 +138,11 @@ def assign_to_grid(
     lat = np.asarray(lat)
     lon = np.asarray(lon)
 
-    grid_row = np.floor((lat - region["lat_min"]) / res).astype(int)
-    grid_col = np.floor((lon - region["lon_min"]) / res).astype(int)
+    # Snap only floating-point arithmetic at exact regular-grid lines.
+    lat_index = np.round((lat - region["lat_min"]) / res, 10)
+    lon_index = np.round((lon - region["lon_min"]) / res, 10)
+    grid_row = np.floor(lat_index).astype(int)
+    grid_col = np.floor(lon_index).astype(int)
 
     return grid_row, grid_col
 
