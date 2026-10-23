@@ -13,11 +13,18 @@ information from the future that the model must predict, NOT use as input.
 """
 
 
-import numpy as np
 import pandas as pd
 
 from src.config import get_project_root, load_config
 from src.data.build_grid import assign_to_grid, build_grid
+
+
+def forward_target(counts: pd.Series, horizon: int) -> pd.Series:
+    """Label D using exactly D+1..D+H; incomplete horizons remain unknown."""
+    if horizon < 1:
+        raise ValueError("Horizon must be positive")
+    future = counts.iloc[::-1].shift(1).rolling(horizon, min_periods=horizon).sum().iloc[::-1]
+    return future.gt(0).astype(float).where(future.notna())
 
 
 def process_data(config: dict | None = None) -> pd.DataFrame:
@@ -49,6 +56,8 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
         dedup_cols.append("data_hora_gmt")
     elif "datahora" in fire_df.columns:
         dedup_cols.append("datahora")
+    else:
+        raise ValueError("Exact observation timestamp required for fire deduplication")
 
     init_count = len(fire_df)
     fire_df = fire_df.drop_duplicates(subset=dedup_cols).copy()
@@ -118,12 +127,7 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
 
     def _compute_horizon_target(group: pd.DataFrame, h: int) -> pd.Series:
         # Sum of fire_count strictly in [D+1, D+h]
-        rev = group["fire_count"].iloc[::-1]
-        fwd_sum = rev.shift(1).rolling(window=h).sum().iloc[::-1]
-        return pd.Series(
-            np.where(fwd_sum.isna(), np.nan, (fwd_sum > 0).astype(float)),
-            index=group.index,
-        )
+        return forward_target(group["fire_count"], h)
 
     for h in [1, 3, horizon]:
         dataset[f"target_{h}d"] = (
@@ -161,7 +165,7 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
         dataset = dataset.merge(climate_df, on=["grid_id", "date"], how="left")
         print(f"  Climate data merged: {len(climate_df):,} records")
     else:
-        print("  [warn] No climate data found. Proceeding without climate variables.")
+        raise FileNotFoundError("No climate source files: cannot build the configured dataset")
 
     # --- 5. Add grid metadata ---
     print("Step 5: Adding grid metadata...")

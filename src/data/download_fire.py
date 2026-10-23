@@ -16,6 +16,7 @@ import pandas as pd
 import requests
 
 from src.config import get_project_root, load_config
+from src.data.quality import fire_quality
 
 
 def download_fire_data(config: dict | None = None) -> Path:
@@ -45,6 +46,8 @@ def download_fire_data(config: dict | None = None) -> Path:
         if out_file.exists():
             print(f"  [skip] {out_file.name} already exists")
             df = pd.read_csv(out_file)
+            if not fire_quality(df, year, cfg["data"]["satellite"])["valid"]:
+                raise ValueError(f"Invalid cached INPE annual file: {out_file}")
             all_frames.append(df)
             continue
 
@@ -72,15 +75,13 @@ def download_fire_data(config: dict | None = None) -> Path:
                 except requests.exceptions.HTTPError:
                     continue
             if not downloaded:
-                print(f"  [warn] Could not download {year}. Skipping.")
-                continue
+                raise RuntimeError(f"Missing required INPE annual acquisition: {year}")
 
         # Extract CSV from zip
         with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
             csv_names = [n for n in zf.namelist() if n.endswith(".csv")]
             if not csv_names:
-                print(f"  [warn] No CSV found in zip for {year}")
-                continue
+                raise ValueError(f"No CSV in required annual archive: {year}")
             with zf.open(csv_names[0]) as csv_file:
                 df = pd.read_csv(csv_file, encoding="latin-1")
 
@@ -99,14 +100,16 @@ def download_fire_data(config: dict | None = None) -> Path:
 
         # Enforce reference satellite filtering if multiple sensors present
         if "satelite" in df.columns:
-            ref_mask = df["satelite"].astype(str).str.upper().str.contains("AQUA|REF")
-            if ref_mask.any():
-                df = df[ref_mask].copy()
+            ref_mask = df["satelite"].astype(str).str.upper().str.strip().eq(cfg["data"]["satellite"].upper())
+            df = df[ref_mask].copy()
 
         # Deduplicate identical transmission packets
         dedup_keys = [c for c in ["lat", "lon", "data_hora_gmt"] if c in df.columns]
         if dedup_keys:
             df = df.drop_duplicates(subset=dedup_keys).copy()
+
+        if not fire_quality(df, year, cfg["data"]["satellite"])["valid"]:
+            raise ValueError(f"INPE annual source failed validation: {year}")
 
         df.to_csv(out_file, index=False)
         all_frames.append(df)

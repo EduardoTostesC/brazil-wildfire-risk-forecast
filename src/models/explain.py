@@ -14,6 +14,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from src.config import get_project_root, load_config
+from src.data.build_grid import build_grid
+from src.models.inference import feature_matrix
 
 
 def explain_model(config: dict | None = None) -> None:
@@ -32,9 +34,10 @@ def explain_model(config: dict | None = None) -> None:
 
     test_mask = df["date"].dt.year >= cfg["model"]["test_start_year"]
     test_df = df[test_mask].copy()
+    grid = build_grid()
+    test_df = test_df[test_df.grid_id.isin(grid.loc[grid.state_status != "outside", "grid_id"])]
 
-    X_test = test_df[feature_cols].values.astype(np.float32)
-    X_test = np.nan_to_num(X_test, nan=0.0)
+    X_test = feature_matrix(test_df, feature_cols)
 
     # Sample for SHAP (full test set can be too large)
     n_sample = min(5000, len(X_test))

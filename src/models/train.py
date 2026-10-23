@@ -14,6 +14,10 @@ Scientific Rigor Implementation (Phases 2, 3 & 4):
 """
 
 import json
+import logging
+import platform
+import random
+import subprocess
 import warnings
 from pathlib import Path
 
@@ -24,6 +28,7 @@ import numpy as np
 import optuna
 import pandas as pd
 from sklearn.calibration import calibration_curve
+from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     auc,
@@ -33,6 +38,7 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from sklearn.model_selection import GroupKFold
+from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 matplotlib.use("Agg")
@@ -40,6 +46,7 @@ import matplotlib.pyplot as plt
 
 from src.config import get_project_root, load_config
 from src.models.calibration import IsotonicCalibrator, PlattCalibrator, compute_ece
+from src.models.inference import feature_matrix
 
 warnings.filterwarnings("ignore", category=UserWarning)
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -254,103 +261,14 @@ def compute_operational_decision_metrics(
 
 # ── Temporal Block Bootstrap Uncertainty ──────────────────────────────────────
 
-def compute_temporal_block_bootstrap_ci(
-    dates: pd.Series,
-    y_true: np.ndarray,
-    y_prob: np.ndarray,
-    n_bootstraps: int = 500,
-    block_days: int = 14,
-    seed: int = 42,
-) -> dict[str, tuple[float, float]]:
-    """Compute 95% confidence intervals via temporal block bootstrap.
-
-    Preserves serial and spatial dependency by resampling contiguous blocks of dates.
-    """
-    rng = np.random.RandomState(seed)
-    unique_dates = pd.date_range(dates.min(), dates.max(), freq="D")
-    n_days = len(unique_dates)
-    n_blocks = max(1, n_days // block_days)
-
-    date_series = pd.Series(dates.values)
-    # Map each date to row indices
-    date_to_idx: dict[pd.Timestamp, np.ndarray] = {}
-    for dt_val, group in date_series.groupby(date_series):
-        date_to_idx[pd.Timestamp(dt_val)] = group.index.values
-
-    pr_aucs, roc_aucs, briers, eces = [], [], [], []
-
-    for _ in range(n_bootstraps):
-        start_offsets = rng.randint(0, max(1, n_days - block_days + 1), size=n_blocks)
-        sampled_indices = []
-        for offset in start_offsets:
-            block_date_range = unique_dates[offset : offset + block_days]
-            for d in block_date_range:
-                if d in date_to_idx:
-                    sampled_indices.extend(date_to_idx[d])
-
-        if len(sampled_indices) == 0:
-            continue
-        idx_arr = np.array(sampled_indices)
-        y_t_b = y_true[idx_arr]
-        y_p_b = y_prob[idx_arr]
-
-        if len(np.unique(y_t_b)) < 2:
-            continue
-
-        pr_aucs.append(average_precision_score(y_t_b, y_p_b))
-        roc_aucs.append(roc_auc_score(y_t_b, y_p_b))
-        briers.append(brier_score_loss(y_t_b, y_p_b))
-        eces.append(compute_ece(y_t_b, y_p_b, n_bins=10))
-
-    return {
-        "PR-AUC_95CI": (round(float(np.percentile(pr_aucs, 2.5)), 4), round(float(np.percentile(pr_aucs, 97.5)), 4)),
-        "ROC-AUC_95CI": (round(float(np.percentile(roc_aucs, 2.5)), 4), round(float(np.percentile(roc_aucs, 97.5)), 4)),
-        "Brier_95CI": (round(float(np.percentile(briers, 2.5)), 4), round(float(np.percentile(briers, 97.5)), 4)),
-        "ECE_95CI": (round(float(np.percentile(eces, 2.5)), 4), round(float(np.percentile(eces, 97.5)), 4)),
-    }
+def compute_temporal_block_bootstrap_ci(dates, y_true, y_prob, n_bootstraps=500, block_days=14, seed=42):
+    from src.models.evaluation import block_confidence_intervals
+    return block_confidence_intervals(dates, y_true, y_prob, n_bootstraps, block_days, seed)
 
 
-def paired_temporal_block_bootstrap_test(
-    dates: pd.Series,
-    y_true: np.ndarray,
-    y_prob_a: np.ndarray,
-    y_prob_b: np.ndarray,
-    n_bootstraps: int = 500,
-    block_days: int = 14,
-    seed: int = 42,
-) -> float:
-    """Test H0: PR-AUC(A) <= PR-AUC(B) using paired temporal block bootstrap resamples."""
-    rng = np.random.RandomState(seed)
-    unique_dates = pd.date_range(dates.min(), dates.max(), freq="D")
-    n_days = len(unique_dates)
-    n_blocks = max(1, n_days // block_days)
-
-    date_series = pd.Series(dates.values)
-    date_to_idx: dict[pd.Timestamp, np.ndarray] = {}
-    for dt_val, group in date_series.groupby(date_series):
-        date_to_idx[pd.Timestamp(dt_val)] = group.index.values
-
-    diffs = []
-    for _ in range(n_bootstraps):
-        start_offsets = rng.randint(0, max(1, n_days - block_days + 1), size=n_blocks)
-        sampled_indices = []
-        for offset in start_offsets:
-            for d in unique_dates[offset : offset + block_days]:
-                if d in date_to_idx:
-                    sampled_indices.extend(date_to_idx[d])
-
-        if len(sampled_indices) == 0:
-            continue
-        idx_arr = np.array(sampled_indices)
-        y_t_b = y_true[idx_arr]
-        if len(np.unique(y_t_b)) < 2:
-            continue
-        pr_a = average_precision_score(y_t_b, y_prob_a[idx_arr])
-        pr_b = average_precision_score(y_t_b, y_prob_b[idx_arr])
-        diffs.append(pr_a - pr_b)
-
-    p_value = float(np.mean(np.array(diffs) <= 0))
-    return round(p_value, 4)
+def paired_temporal_block_bootstrap_test(dates, y_true, y_prob_a, y_prob_b, n_bootstraps=500, block_days=14, seed=42):
+    from src.models.evaluation import paired_ap_difference
+    return paired_ap_difference(dates, y_true, y_prob_a, y_prob_b, n_bootstraps, block_days, seed)
 
 
 # ── Walk-Forward Expanding Window Validation ───────────────────────────────────
@@ -381,9 +299,9 @@ def run_walk_forward(
         train_mask = df["date"] <= train_cutoff
         test_mask = df["date"].dt.year == test_year
 
-        X_tr = np.nan_to_num(df.loc[train_mask, feature_cols].values.astype(np.float32))
+        X_tr = feature_matrix(df.loc[train_mask], feature_cols)
         y_tr = df.loc[train_mask, "target"].values
-        X_te = np.nan_to_num(df.loc[test_mask, feature_cols].values.astype(np.float32))
+        X_te = feature_matrix(df.loc[test_mask], feature_cols)
         y_te = df.loc[test_mask, "target"].values
 
         # Fold-specific class weight derived strictly from available training samples
@@ -404,6 +322,9 @@ def run_walk_forward(
             "min_child_samples": 100,
             "subsample": 0.85,
             "colsample_bytree": 0.85,
+            "n_jobs": 4,
+            "deterministic": True,
+            "force_col_wise": True,
         }
 
         model = lgb.LGBMClassifier(**fold_params)
@@ -458,7 +379,7 @@ def run_feature_ablation(
     ]
     climate_feats = [
         f for f in all_features
-        if any(c in f for c in ["T2M", "RH2M", "PREC", "WS10M", "vpd", "dtr", "fwi_proxy", "dry_days"])
+        if any(c in f.lower() for c in ["t2m", "rh2m", "prec", "ws10m", "vpd", "dtr", "fwi_proxy", "dry_days"])
     ]
     fire_feats = [
         f for f in all_features
@@ -483,8 +404,8 @@ def run_feature_ablation(
     for grp_name, feat_subset in ablation_groups.items():
         if not feat_subset:
             continue
-        X_tr = np.nan_to_num(train_df[feat_subset].values.astype(np.float32))
-        X_te = np.nan_to_num(test_df[feat_subset].values.astype(np.float32))
+        X_tr = feature_matrix(train_df, feat_subset)
+        X_te = feature_matrix(test_df, feat_subset)
 
         m = lgb.LGBMClassifier(**best_params)
         m.fit(X_tr, y_train)
@@ -522,6 +443,7 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     root = get_project_root()
     seed = cfg["model"]["seed"]
     np.random.seed(seed)
+    random.seed(seed)
 
     # Load features and grid
     feat_path = root / "data" / "processed" / "features.parquet"
@@ -537,7 +459,7 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
         df = df[df["grid_id"].isin(valid_cells)].copy()
         print(f"[Territorial Masking] Retained {len(valid_cells)} inside/partial cells. Records: {len(df):,} (excluded {initial_count - len(df):,} outside cells)")
     else:
-        print("[Territorial Masking] grid.csv not found; using all cells.")
+        raise FileNotFoundError("Territorial grid.csv is required for training")
 
     feature_cols = _get_feature_cols(df)
     print(f"Dataset shape: {df.shape}, Features: {len(feature_cols)}")
@@ -567,13 +489,13 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     print(f"Calibration set (Holdout): {len(cal_df):,} samples ({cal_df['date'].min().date()} to {cal_df['date'].max().date()})")
     print(f"Test set (Unseen):        {len(test_df):,} samples ({test_df['date'].min().date()} to {test_df['date'].max().date()})")
 
-    X_train = np.nan_to_num(train_df[feature_cols].values.astype(np.float32))
+    X_train = feature_matrix(train_df, feature_cols)
     y_train = train_df["target"].values
 
-    X_cal = np.nan_to_num(cal_df[feature_cols].values.astype(np.float32))
+    X_cal = feature_matrix(cal_df, feature_cols)
     y_cal = cal_df["target"].values
 
-    X_test = np.nan_to_num(test_df[feature_cols].values.astype(np.float32))
+    X_test = feature_matrix(test_df, feature_cols)
     y_test = test_df["target"].values
 
     results: list[dict] = []
@@ -607,7 +529,7 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     print("=" * 50)
     print("3. Logistic Regression (Linear Benchmark)")
     print("=" * 50)
-    scaler = StandardScaler()
+    scaler = make_pipeline(SimpleImputer(strategy="median", add_indicator=True), StandardScaler())
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
@@ -617,6 +539,9 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     m = compute_metrics(y_test, y_prob_lr, "LogisticRegression")
     results.append(m)
     decision_results.append(compute_operational_decision_metrics(y_test, y_prob_lr, "LogisticRegression"))
+    lr_platt = PlattCalibrator().fit(lr.predict_proba(scaler.transform(X_cal))[:, 1], y_cal, is_logit=False)
+    results.append(compute_metrics(y_test, lr_platt.calibrate(y_prob_lr), "LogisticRegression (Platt Calibrated)"))
+    joblib.dump(lr_platt, models_dir / "logistic_calibrator.joblib")
     print(f"  {m}\n")
 
     joblib.dump(lr, models_dir / "logistic_regression.joblib")
@@ -640,6 +565,9 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
             "verbosity": -1,
             "seed": seed,
             "scale_pos_weight": scale_pos,
+            "n_jobs": 4,
+            "deterministic": True,
+            "force_col_wise": True,
             "n_estimators": trial.suggest_int("n_estimators", 150, 400),
             "learning_rate": trial.suggest_float("learning_rate", 0.02, 0.15, log=True),
             "max_depth": trial.suggest_int("max_depth", 4, 8),
@@ -666,7 +594,7 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
         return float(np.mean(scores))
 
     n_trials = cfg["model"].get("optuna_trials", 10)
-    study = optuna.create_study(direction="maximize")
+    study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=seed))
     study.optimize(objective, n_trials=n_trials, show_progress_bar=False)
 
     print(f"  Best trial: {study.best_trial.number}")
@@ -679,6 +607,9 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
         "verbosity": -1,
         "seed": seed,
         "scale_pos_weight": scale_pos,
+        "n_jobs": 4,
+        "deterministic": True,
+        "force_col_wise": True,
         **study.best_params,
     }
 
@@ -764,8 +695,8 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     p_val_vs_persist = paired_temporal_block_bootstrap_test(
         test_dates, y_test, y_prob_primary, y_prob_persist, n_bootstraps=500, block_days=14, seed=seed
     )
-    print(f"  Paired Block-Bootstrap p-value (LightGBM > Climatology): {p_val_vs_clim}")
-    print(f"  Paired Block-Bootstrap p-value (LightGBM > Persistence): {p_val_vs_persist}")
+    print(f"  Paired Block-Bootstrap AP difference (LightGBM > Climatology): {p_val_vs_clim}")
+    print(f"  Paired Block-Bootstrap AP difference (LightGBM > Persistence): {p_val_vs_persist}")
 
     ci_dict = {}
     for name, probs in [
@@ -832,11 +763,11 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
             h_cal_df = df[(df["date"] >= cal_start) & (df["date"] <= h_cal_cutoff)]
             h_test_df = df[(df["date"] >= test_start) & (df["date"] <= "2025-12-24")]
 
-            X_tr_h = np.nan_to_num(h_train_df[feature_cols].values.astype(np.float32))
+            X_tr_h = feature_matrix(h_train_df, feature_cols)
             y_tr_h = h_train_df[target_col].values
-            X_cal_h = np.nan_to_num(h_cal_df[feature_cols].values.astype(np.float32))
+            X_cal_h = feature_matrix(h_cal_df, feature_cols)
             y_cal_h = h_cal_df[target_col].values
-            X_te_h = np.nan_to_num(h_test_df[feature_cols].values.astype(np.float32))
+            X_te_h = feature_matrix(h_test_df, feature_cols)
             y_te_h = h_test_df[target_col].values
 
             spw = float(np.sum(y_tr_h == 0) / max(1, np.sum(y_tr_h == 1)))
@@ -886,8 +817,14 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
         "test_size": len(test_df),
         "spatial_block_cv": "Contiguous (North / Central / South MT)",
         "best_params": study.best_params,
-        "p_value_vs_climatology": p_val_vs_clim,
-        "p_value_vs_persistence": p_val_vs_persist,
+        "seed": seed,
+        "python": platform.python_version(),
+        "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "missing_policy": "native NaN for LightGBM; training median + indicator for logistic regression",
+        "calibration_policy": "Platt fixed a priori; isotonic is a secondary descriptive comparison, not selected on test",
+        "selected_thresholds": cal_thresholds,
+        "paired_AP_vs_climatology": p_val_vs_clim,
+        "paired_AP_vs_persistence": p_val_vs_persist,
         "confidence_intervals": ci_dict,
         "model_comparison": results,
         "operational_decision_metrics": decision_results,
@@ -913,7 +850,7 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
                 "calibration_size": len(cal_df),
                 "test_size": len(test_df),
                 "n_features": len(feature_cols),
-                "p_value_vs_climatology": p_val_vs_clim,
+                "delta_AP_vs_climatology": p_val_vs_clim["observed_delta_AP"],
             })
             for r in results:
                 # Key error bugfix: handle either "model" or "Model"
@@ -932,6 +869,12 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
                         mlflow.log_metric(f"{h_name}_{sanitized_key}", float(h_row[metric_key]))
 
             mlflow.log_artifact(str(models_dir / "training_metadata.json"))
+            from src.data.manifest import compute_sha256
+            mlflow.set_tags({"git_commit": meta["commit"], "seed": str(seed), "python": meta["python"],
+                             "features_sha256": compute_sha256(feat_path)})
+            for artifact in models_dir.glob("*.joblib"):
+                mlflow.log_artifact(str(artifact), artifact_path="models")
+            mlflow.log_artifact(str(root / "requirements.lock"))
             if (root / "reports" / "model_comparison.csv").exists():
                 mlflow.log_artifact(str(root / "reports" / "model_comparison.csv"))
             if (root / "reports" / "operational_decision_metrics.csv").exists():
@@ -944,7 +887,8 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
                 mlflow.log_artifact(str(fig_path), artifact_path="figures")
             print(f"\n[MLflow] Experiment run logged successfully! (Run ID: {run.info.run_id})")
     except Exception as e:
-        print(f"\n[MLflow] Warning: Could not log to MLflow: {e}")
+        logging.exception("MLflow tracking failed")
+        raise RuntimeError("Required scientific experiment tracking failed") from e
 
     print("\nTraining and validation pipeline complete!")
     return results_df

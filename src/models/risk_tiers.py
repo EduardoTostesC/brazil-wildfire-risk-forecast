@@ -14,7 +14,7 @@ RiskTier = Literal["low", "medium", "high"]
 class RiskConfig:
     """Operational risk thresholds and visual styling."""
 
-    # Probability cutoffs for operational surveillance
+    # Visual conventions only; these are not validated action thresholds.
     # Low: [0.00, 0.25)
     # Medium: [0.25, 0.55)
     # High: [0.55, 1.00]
@@ -63,6 +63,7 @@ def get_risk_color(tier: str, config: RiskConfig = DEFAULT_RISK_CONFIG) -> str:
 def get_risk_metadata() -> dict:
     """Return risk configuration metadata for API schemas and documentation."""
     return {
+        "interpretation": "Visual probability bands, not empirically optimized operational decisions",
         "tiers": {
             "low": {
                 "range": f"[0.0, {DEFAULT_RISK_CONFIG.low_cutoff})",

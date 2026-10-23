@@ -501,11 +501,11 @@ class TestFeatureEngineeringUnitFunctions:
             "T2M_MIN": [25.0, 18.0, 20.0],  # First row inverted
         })
         cleaned = validate_meteorological_variables(df_raw)
-        assert (cleaned["RH2M"] >= 0.0).all() and (cleaned["RH2M"] <= 100.0).all()
-        assert (cleaned["WS10M"] >= 0.0).all()
-        assert (cleaned["PRECTOTCORR"] >= 0.0).all()
-        # Inverted temperatures should be corrected so T_MAX >= T_MIN
-        assert (cleaned["T2M_MAX"] >= cleaned["T2M_MIN"]).all()
+        assert cleaned.loc[:1, "RH2M"].isna().all()
+        assert pd.isna(cleaned.loc[0, "WS10M"])
+        assert pd.isna(cleaned.loc[0, "PRECTOTCORR"])
+        assert cleaned.loc[0, ["T2M_MAX", "T2M_MIN"]].isna().all()
+        assert cleaned.loc[2, "RH2M"] == 65.0
 
 
 # ── Risk Tiers Consistency Tests ──────────────────────────────────────────────

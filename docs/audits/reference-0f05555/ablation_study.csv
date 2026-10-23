@@ -1,0 +1,9 @@
+feature_group,feature_count,PR-AUC,AP,PR-AUC_Trap,ROC-AUC,Brier,ECE
+Full Model (All Features),39,0.63,0.63,0.63,0.8172,0.1721,0.181
+No Coordinates (Ablate Lat/Lon),37,0.6274,0.6274,0.6274,0.8123,0.1699,0.1738
+No Spatial & Seasonality,33,0.6206,0.6206,0.6206,0.8089,0.1699,0.171
+No Climate (Fire + Geo),14,0.6299,0.6299,0.6299,0.8173,0.1725,0.1816
+No Fire History (Climate + Geo),34,0.4665,0.4665,0.4665,0.7483,0.2181,0.2342
+Fire History Features Only,5,0.6085,0.6085,0.6095,0.8046,0.1747,0.1815
+Seasonality & Geography Only,6,0.4646,0.4646,0.4646,0.7494,0.2087,0.2131
+Climate Features Only,25,0.3577,0.3577,0.3577,0.6412,0.2514,0.264
