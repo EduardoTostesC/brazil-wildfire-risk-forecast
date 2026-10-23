@@ -8,6 +8,7 @@ import pytest
 
 from src.config import get_project_root
 from src.reporting.generate_readme_metrics import render, update_document, validated_tables
+from src.reporting.generate_research_tables import BEGIN, END, render_research
 
 
 def test_generated_docs_are_current():
@@ -47,3 +48,11 @@ def test_matched_lstm_report_records_identical_evaluation_rows():
     assert frame.n.iloc[0] == metadata["test_rows"]
     assert metadata["same_labels_and_keys_verified"] is True
     assert metadata["training_stride"] == metadata["test_stride"] == 1
+
+
+def test_research_tables_are_current():
+    root = get_project_root()
+    for name, generated in render_research(root).items():
+        content = (root / "reports" / name).read_text(encoding="utf-8")
+        observed = content.split(BEGIN)[1].split(END)[0].strip()
+        assert observed == generated

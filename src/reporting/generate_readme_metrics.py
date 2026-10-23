@@ -32,6 +32,13 @@ def validated_tables(root: Path):
         path = root / "reports" / filename
         frame = pd.read_csv(path)
         reference = pd.DataFrame(meta[meta_key])
+        required = (["AP", "PR-AUC_Trap", "ROC-AUC", "Brier", "ECE", "Recall@P50"]
+                    if filename == "model_comparison.csv" else
+                    ["PR-AUC", "ROC-AUC", "Brier", "ECE", "Recall@P50"]
+                    if filename == "multi_horizon_comparison.csv" else
+                    ["Recall@Top5%", "Recall@Top10%", "Precision@Top5%", "Precision@Top10%", "NNS@Top10%"])
+        if any(column not in frame for column in required) or not np.isfinite(frame[required].to_numpy(dtype=float)).all():
+            raise ValueError(f"Required finite metrics missing: {filename}")
         if frame[key].duplicated().any() or set(frame[key]) != set(reference[key]):
             raise ValueError(f"Inconsistent experiment keys: {filename}")
         a, b = frame.set_index(key).sort_index(), reference.set_index(key).sort_index()

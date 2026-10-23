@@ -10,10 +10,7 @@ Multi-tab interactive dashboard featuring:
 
 import os
 import sys
-import warnings
 from pathlib import Path
-
-warnings.filterwarnings("ignore")
 
 # Add project root to path
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]

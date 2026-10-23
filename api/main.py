@@ -4,6 +4,7 @@ import datetime as dt
 import hashlib
 import json
 import logging
+import pickle
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -41,7 +42,7 @@ for _h in (1, 3, 7):
         _models[_h] = joblib.load(_mp)
         _calibrators[_h] = joblib.load(_cp)
         _model_versions[_h] = "sha256:" + hashlib.sha256(_mp.read_bytes() + _cp.read_bytes()).hexdigest()
-    except (OSError, ValueError, TypeError, ImportError, AttributeError):
+    except (OSError, ValueError, TypeError, ImportError, AttributeError, EOFError, pickle.UnpicklingError):
         logger.exception("Unable to load artifact pair for horizon %s", _h)
         _models.pop(_h, None)
         _calibrators.pop(_h, None)
@@ -185,7 +186,7 @@ def _prepare(request):
 
 @app.get("/health", response_model=HealthResponse)
 def health_check():
-    ready = sorted(h for h in _models if h in _calibrators and _feature_cols)
+    ready = sorted(h for h in _models if _model_loaded and h in _calibrators and _feature_cols)
     return HealthResponse(status="ok" if len(ready) == 3 and _polygon is not None and _grid_cells and _archive_path().exists() else "degraded",
                           model_loaded=bool(ready), available_horizons=ready,
                           supported_inference_modes={"historical_replay": "Exact cell/date lookup; publication time unknown",

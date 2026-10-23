@@ -34,6 +34,7 @@ def api_registry(tmp_path, monkeypatch):
     monkeypatch.setattr(api, "_models", dict.fromkeys([1, 3, 7], model))
     monkeypatch.setattr(api, "_calibrators", {h: PlattCalibrator(is_fitted_=True) for h in (1, 3, 7)})
     monkeypatch.setattr(api, "_model_loaded", True)
+    monkeypatch.setattr(api, "_model_versions", dict.fromkeys([1, 3, 7], "synthetic_test_fixture"))
     monkeypatch.setattr(api, "_polygon", box(-56.0, -13.0, -54.0, -11.0))
     monkeypatch.setattr(api, "_grid_cells", {"011_013": {"state_status": "partial"}})
     api._query_historical_row.cache_clear()

@@ -1,4 +1,4 @@
-.PHONY: install data features train evaluate explain drift dvc-repro mlflow-ui lint api app test all clean
+.PHONY: install data features train research explain drift dvc-repro mlflow-ui lint api app test all clean
 
 install:
 	python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu

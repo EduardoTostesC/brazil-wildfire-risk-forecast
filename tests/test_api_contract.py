@@ -97,3 +97,38 @@ def test_all_versioned_artifacts_infer(horizon):
     sample = pd.read_parquet(root / "data/sample/features_sample.parquet").iloc[:5]
     result = calibrated_probabilities(model, calibrator, feature_matrix(sample, columns))
     assert np.isfinite(result).all() and ((result >= 0) & (result <= 1)).all()
+
+
+@pytest.mark.artifacts
+def test_linear_and_recurrent_bundles_infer():
+    import joblib
+    import torch
+
+    from src.config import get_project_root
+    from src.models.train_lstm import WildfireLSTM
+    root = get_project_root()
+    sample = pd.read_parquet(root / "data/sample/features_sample.parquet").iloc[:3]
+    columns = joblib.load(root / "models/feature_cols.joblib")
+    scaler = joblib.load(root / "models/scaler.joblib")
+    linear = joblib.load(root / "models/logistic_regression.joblib")
+    calibrator = joblib.load(root / "models/logistic_calibrator.joblib")
+    prediction = calibrator.calibrate(linear.predict_proba(scaler.transform(sample[columns].to_numpy()))[:, 1])
+    assert np.isfinite(prediction).all() and ((prediction >= 0) & (prediction <= 1)).all()
+    recurrent = WildfireLSTM(10)
+    recurrent.load_state_dict(torch.load(root / "models/lstm_model.pt", map_location="cpu", weights_only=True))
+    recurrent.eval()
+    with torch.no_grad():
+        logits = recurrent(torch.zeros(2, 14, 10)).numpy()
+    p = joblib.load(root / "models/lstm_calibrator.joblib").calibrate(1 / (1 + np.exp(-logits)))
+    assert np.isfinite(p).all() and ((p >= 0) & (p <= 1)).all()
+
+
+@pytest.mark.artifacts
+def test_model_bundle_hashes_match():
+    import json
+
+    from src.config import get_project_root
+    from src.models.artifacts import bundle
+    root = get_project_root()
+    expected = json.loads((root / "models/artifact_manifest.json").read_text())
+    assert expected["files"] == bundle(root)

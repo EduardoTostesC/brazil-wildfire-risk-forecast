@@ -44,3 +44,12 @@ def test_missing_boundary_does_not_create_unmasked_grid(tmp_path):
     from src.data.build_grid import _load_ibge_polygon
     with pytest.raises(FileNotFoundError):
         _load_ibge_polygon(Path(tmp_path))
+
+
+def test_invalid_boundary_fails_explicitly(tmp_path):
+    from src.data.build_grid import _load_ibge_polygon
+    folder = tmp_path / "data/geo"
+    folder.mkdir(parents=True)
+    (folder / "mato_grosso_ibge.geojson").write_text('{"features": []}')
+    with pytest.raises(ValueError, match="GeoJSON"):
+        _load_ibge_polygon(tmp_path)
