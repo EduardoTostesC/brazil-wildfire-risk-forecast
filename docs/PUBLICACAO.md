@@ -17,7 +17,7 @@ A branch `audit/reproducibility-2026-10-23` foi enviada. A criação de PR pela 
 
 O dashboard foi exercitado localmente com a amostra real; veja os screenshots e o log de navegador em reports/evidence. Não há URL pública validada nesta auditoria.
 
-Para Streamlit Community Cloud, selecionar este repositório, a branch aprovada e `app/streamlit_app.py`; a configuração de dependências deve instalar o lock. A instalação padrão de `requirements.txt` fixa apenas dependências diretas. Validar o log da plataforma, inferência dos três horizontes, cinco abas, amostra e erros antes de divulgar o endereço.
+Para Streamlit Community Cloud, preparar uma branch específica de deploy a partir do candidato revisado e substituir nela o conteúdo de `requirements.txt` por uma única linha `-r requirements-cpu.lock`. Esse arquivo é a entrada de instalação da plataforma; o lock versionado contém os índices e hashes. Selecionar a branch de deploy e `app/streamlit_app.py`, com Python 3.12. A branch científica mantém seu `requirements.txt` original para regeneração dos locks. Validar o log da plataforma, inferência dos três horizontes, cinco abas, amostra e erros antes de divulgar o endereço. Esse procedimento ainda não foi executado na plataforma.
 
 Para um Space Docker, copiar os metadados de `README.hf.md` para o README da raiz do Space e usar um Dockerfile de demonstração com o seguinte comando final e healthcheck:
 
@@ -32,5 +32,7 @@ O Dockerfile principal inicia a API, não dois servidores simultâneos. Para ver
 docker build -t wildfire-risk:2.1.0-rc .
 docker run --rm -p 8000:8000 wildfire-risk:2.1.0-rc
 ```
+
+Construção e execução da imagem foram verificadas no CI Linux; veja [TESTES_E_CI](../reports/TESTES_E_CI.md). A mesma imagem pode executar somente o dashboard com `docker run --rm -p 8501:8501 --health-cmd 'curl --fail http://localhost:8501/_stcore/health' wildfire-risk:2.1.0-rc python -m streamlit run app/streamlit_app.py --server.address 0.0.0.0`. Esse comando também foi exercitado no executor remoto. O teste não publica uma demo permanente.
 
 Exercitar `/health`, `/predict`, `/explain`, 404 para registro ausente e 503 para modo operacional. O healthcheck HTTP 200 demonstra liveness; examinar o campo `status` para readiness. Não divulgar uma URL ou alegar operação em tempo real antes desses testes na plataforma.

@@ -1,0 +1,120 @@
+Source: https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022557955
+Commit: de081a04302eb6f5a196123082ebfd9e3953c000
+Job: 120650504293, py312, completed/success (GitHub API verified)
+Selected verbatim log excerpts:
+2026-10-23T20:52:31.5253116Z Successfully set up CPython (3.12.15)
+2026-10-23T20:54:22.5327858Z No broken requirements found.
+2026-10-23T20:54:22.9923881Z All checks passed!
+2026-10-23T20:54:31.9608480Z ============================== 87 passed in 7.12s ==============================
+2026-10-23T20:54:33.1838611Z Documentation metrics verified
+2026-10-23T20:54:33.7052688Z Research documentation verified
+Run python -m pytest tests/ -v --junitxml=test-results.xml
+2026-10-23T20:54:22.9968219Z [36;1mpython -m pytest tests/ -v --junitxml=test-results.xml[0m
+2026-10-23T20:54:23.0038371Z shell: /usr/bin/bash -e {0}
+2026-10-23T20:54:23.0038663Z env:
+2026-10-23T20:54:23.0038971Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-23T20:54:23.0039472Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-23T20:54:23.0039962Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-23T20:54:23.0040393Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-23T20:54:23.0040827Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-23T20:54:23.0041276Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-23T20:54:23.0041641Z ##[endgroup]
+2026-10-23T20:54:24.8452626Z ============================= test session starts ==============================
+2026-10-23T20:54:24.8454242Z platform linux -- Python 3.12.15, pytest-8.3.4, pluggy-1.7.0 -- /opt/hostedtoolcache/Python/3.12.15/x64/bin/python
+2026-10-23T20:54:24.8455001Z cachedir: .pytest_cache
+2026-10-23T20:54:24.8455594Z rootdir: /home/runner/work/brazil-wildfire-risk-forecast/brazil-wildfire-risk-forecast
+2026-10-23T20:54:24.8456263Z configfile: pyproject.toml
+2026-10-23T20:54:24.8456714Z plugins: hydra-core-1.3.7, platformdirs-4.13.5, anyio-4.15.1
+2026-10-23T20:54:26.2072276Z collecting ... collected 87 items
+2026-10-23T20:54:26.2072730Z 
+2026-10-23T20:54:26.6887091Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[1] PASSED [  1%]
+2026-10-23T20:54:26.7111265Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[3] PASSED [  2%]
+2026-10-23T20:54:26.7335206Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[7] PASSED [  3%]
+2026-10-23T20:54:26.7416238Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_polygon] PASSED [  4%]
+2026-10-23T20:54:26.7490517Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_grid_cells] PASSED [  5%]
+2026-10-23T20:54:26.7566361Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_calibrators] PASSED [  6%]
+2026-10-23T20:54:26.7645575Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_models] PASSED [  8%]
+2026-10-23T20:54:26.7719269Z tests/test_api_contract.py::test_point_outside_partial_cell_is_rejected PASSED [  9%]
+2026-10-23T20:54:26.7853000Z tests/test_api_contract.py::test_exact_polygon_boundary_included PASSED  [ 10%]
+2026-10-23T20:54:26.7952175Z tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid0] PASSED [ 11%]
+2026-10-23T20:54:26.8054021Z tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid1] PASSED [ 12%]
+2026-10-23T20:54:26.8199560Z tests/test_api_contract.py::test_invalid_archive_is_not_404[corrupt] PASSED [ 13%]
+2026-10-23T20:54:26.8360469Z tests/test_api_contract.py::test_invalid_archive_is_not_404[missing_column] PASSED [ 14%]
+2026-10-23T20:54:26.8503654Z tests/test_api_contract.py::test_invalid_archive_is_not_404[duplicate] PASSED [ 16%]
+2026-10-23T20:54:26.8654959Z tests/test_api_contract.py::test_invalid_archive_is_not_404[infinite] PASSED [ 17%]
+2026-10-23T20:54:26.8828409Z tests/test_api_contract.py::test_missing_values_preserved PASSED         [ 18%]
+2026-10-23T20:54:26.8973536Z tests/test_api_contract.py::test_internal_error_controlled PASSED        [ 19%]
+2026-10-23T20:54:26.9153750Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[1] PASSED [ 20%]
+2026-10-23T20:54:26.9265913Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[3] PASSED [ 21%]
+2026-10-23T20:54:26.9403815Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[7] PASSED [ 22%]
+2026-10-23T20:54:30.9776185Z tests/test_api_contract.py::test_linear_and_recurrent_bundles_infer PASSED [ 24%]
+2026-10-23T20:54:30.9830628Z tests/test_api_contract.py::test_model_bundle_hashes_match PASSED        [ 25%]
+2026-10-23T20:54:31.0008661Z tests/test_data_integrity.py::test_climate_cache_rejects_incomplete_duplicates_and_fill PASSED [ 26%]
+2026-10-23T20:54:31.0240235Z tests/test_data_integrity.py::test_manifest_verify_does_not_rewrite_and_detects_mutation PASSED [ 27%]
+2026-10-23T20:54:31.0253180Z tests/test_data_integrity.py::test_missing_boundary_does_not_create_unmasked_grid PASSED [ 28%]
+2026-10-23T20:54:31.0269927Z tests/test_data_integrity.py::test_invalid_boundary_fails_explicitly PASSED [ 29%]
+2026-10-23T20:54:31.0342070Z tests/test_pipeline.py::TestGrid::test_grid_has_required_columns PASSED  [ 31%]
+2026-10-23T20:54:31.0406403Z tests/test_pipeline.py::TestGrid::test_grid_cell_count PASSED            [ 32%]
+2026-10-23T20:54:31.0532710Z tests/test_pipeline.py::TestGrid::test_grid_center_within_bounds PASSED  [ 33%]
+2026-10-23T20:54:31.0541428Z tests/test_pipeline.py::TestGrid::test_assign_to_grid PASSED             [ 34%]
+2026-10-23T20:54:31.2704535Z tests/test_pipeline.py::TestGrid::test_grid_ids_unique PASSED            [ 35%]
+2026-10-23T20:54:31.2775255Z tests/test_pipeline.py::TestLeakDetection::test_no_future_leak_in_fire_features PASSED [ 36%]
+2026-10-23T20:54:31.2798881Z tests/test_pipeline.py::TestLeakDetection::test_target_uses_future_data PASSED [ 37%]
+2026-10-23T20:54:31.2808073Z tests/test_pipeline.py::TestLeakDetection::test_temporal_purging_embargo_prevents_leak PASSED [ 39%]
+2026-10-23T20:54:31.2902526Z tests/test_pipeline.py::TestAPI::test_root_endpoint PASSED               [ 40%]
+2026-10-23T20:54:31.2984064Z tests/test_pipeline.py::TestAPI::test_health_endpoint PASSED             [ 41%]
+2026-10-23T20:54:31.3132097Z tests/test_pipeline.py::TestAPI::test_predict_endpoint_schema PASSED     [ 42%]
+2026-10-23T20:54:31.3210026Z tests/test_pipeline.py::TestAPI::test_predict_invalid_coordinates PASSED [ 43%]
+2026-10-23T20:54:31.3287574Z tests/test_pipeline.py::TestAPI::test_predict_outside_mato_grosso PASSED [ 44%]
+2026-10-23T20:54:31.3553141Z tests/test_pipeline.py::TestAPI::test_predict_multi_horizon PASSED       [ 45%]
+2026-10-23T20:54:31.3646856Z tests/test_pipeline.py::TestAPI::test_predict_invalid_horizon PASSED     [ 47%]
+2026-10-23T20:54:31.3818222Z tests/test_pipeline.py::TestAPI::test_explain_endpoint_schema PASSED     [ 48%]
+2026-10-23T20:54:31.3989221Z tests/test_pipeline.py::TestAPI::test_predict_temporal_contract PASSED   [ 49%]
+2026-10-23T20:54:31.4114400Z tests/test_pipeline.py::TestAPI::test_predict_operational_forecast_returns_503 PASSED [ 50%]
+2026-10-23T20:54:31.4270865Z tests/test_pipeline.py::TestAPI::test_predict_missing_record_returns_404 PASSED [ 51%]
+2026-10-23T20:54:31.4317747Z tests/test_pipeline.py::TestDriftDetector::test_psi_identical_distributions PASSED [ 52%]
+2026-10-23T20:54:31.4335213Z tests/test_pipeline.py::TestDriftDetector::test_psi_shifted_distributions PASSED [ 54%]
+2026-10-23T20:54:31.4435102Z tests/test_pipeline.py::TestDriftDetector::test_drift_api_endpoint PASSED [ 55%]
+2026-10-23T20:54:31.4617734Z tests/test_pipeline.py::TestSequentialModel::test_lstm_forward_shape PASSED [ 56%]
+2026-10-23T20:54:31.4649277Z tests/test_pipeline.py::TestDataProcessing::test_config_loads PASSED     [ 57%]
+2026-10-23T20:54:31.4679115Z tests/test_pipeline.py::TestDataProcessing::test_config_has_required_fields PASSED [ 58%]
+2026-10-23T20:54:31.4790927Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_platt_calibrator_fit_and_predict PASSED [ 59%]
+2026-10-23T20:54:31.4804017Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_ece_computation PASSED [ 60%]
+2026-10-23T20:54:31.4813923Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_operational_decision_metrics PASSED [ 62%]
+2026-10-23T20:54:31.6940688Z tests/test_pipeline.py::TestTerritorialMasking::test_grid_status_values PASSED [ 63%]
+2026-10-23T20:54:31.6949832Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_vpd PASSED [ 64%]
+2026-10-23T20:54:31.6958412Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_dtr PASSED [ 65%]
+2026-10-23T20:54:31.6967793Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_fwi_proxy PASSED [ 66%]
+2026-10-23T20:54:31.7031561Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_validate_meteorological_variables PASSED [ 67%]
+2026-10-23T20:54:31.7040094Z tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_classification_ranges PASSED [ 68%]
+2026-10-23T20:54:31.7051767Z tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_metadata_matches_config PASSED [ 70%]
+2026-10-23T20:54:31.7074524Z tests/test_pipeline.py::TestOutOfSampleThresholds::test_threshold_selection_and_application PASSED [ 71%]
+2026-10-23T20:54:31.7085704Z tests/test_pipeline.py::TestArtifactCompatibility::test_platt_calibrator_serialization PASSED [ 72%]
+2026-10-23T20:54:31.7204568Z tests/test_pipeline.py::TestArtifactCompatibility::test_loaded_artifacts_predict_successfully PASSED [ 73%]
+2026-10-23T20:54:31.7435561Z tests/test_reporting.py::test_generated_docs_are_current PASSED          [ 74%]
+2026-10-23T20:54:31.7513740Z tests/test_reporting.py::test_reporting_rejects_conflicting_metrics PASSED [ 75%]
+2026-10-23T20:54:31.7522657Z tests/test_reporting.py::test_no_climate_ablation_excludes_rainfall_accumulations PASSED [ 77%]
+2026-10-23T20:54:31.7547015Z tests/test_reporting.py::test_matched_lstm_report_records_identical_evaluation_rows PASSED [ 78%]
+2026-10-23T20:54:31.7704996Z tests/test_reporting.py::test_research_tables_are_current PASSED         [ 79%]
+2026-10-23T20:54:31.7742533Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-1] PASSED [ 80%]
+2026-10-23T20:54:31.7775943Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-3] PASSED [ 81%]
+2026-10-23T20:54:31.7808263Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-7] PASSED [ 82%]
+2026-10-23T20:54:31.7840156Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-1] PASSED [ 83%]
+2026-10-23T20:54:31.7871832Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-3] PASSED [ 85%]
+2026-10-23T20:54:31.7903513Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-7] PASSED [ 86%]
+2026-10-23T20:54:31.7934778Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-1] PASSED [ 87%]
+2026-10-23T20:54:31.7966015Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-3] PASSED [ 88%]
+2026-10-23T20:54:31.7998406Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-7] PASSED [ 89%]
+2026-10-23T20:54:31.8030067Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-1] PASSED [ 90%]
+2026-10-23T20:54:31.8062672Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-3] PASSED [ 91%]
+2026-10-23T20:54:31.8095029Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-7] PASSED [ 93%]
+2026-10-23T20:54:31.9334220Z tests/test_scientific_contracts.py::test_actual_features_ignore_future_and_preserve_unknown_weather PASSED [ 94%]
+2026-10-23T20:54:31.9345200Z tests/test_scientific_contracts.py::test_unknown_spell_never_becomes_observed_dryness PASSED [ 95%]
+2026-10-23T20:54:31.9388040Z tests/test_scientific_contracts.py::test_sequence_endpoint_includes_issue_day_and_returns_exact_keys PASSED [ 96%]
+2026-10-23T20:54:31.9426220Z tests/test_scientific_contracts.py::test_weighted_bootstrap_metrics_match_expanded_rows PASSED [ 97%]
+2026-10-23T20:54:31.9499477Z tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_zero_difference PASSED [ 98%]
+2026-10-23T20:54:31.9605180Z tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
+2026-10-23T20:54:31.9606042Z 
+2026-10-23T20:54:31.9607249Z - generated xml file: /home/runner/work/brazil-wildfire-risk-forecast/brazil-wildfire-risk-forecast/test-results.xml -
+2026-10-23T20:54:31.9608480Z ============================== 87 passed in 7.12s ==============================
+2026-10-23T20:54:32.7216158Z ##[group]

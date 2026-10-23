@@ -627,3 +627,83 @@ stages:
       hash: md5
       md5: 93e2e0f6898843ceff5161830781b711
       size: 67139
+  artifact_bundle:
+    cmd: python -m src.models.artifacts
+    deps:
+    - path: models/feature_cols.joblib
+      hash: md5
+      md5: edaf888ea393516d35bfa265a82aea90
+      size: 593
+    - path: models/lightgbm_1d.joblib
+      hash: md5
+      md5: b70030ba330805511217fe65f401619d
+      size: 988412
+    - path: models/lightgbm_3d.joblib
+      hash: md5
+      md5: 18f5b5a851ca1ee070d230c40b447684
+      size: 994220
+    - path: models/lightgbm_model.joblib
+      hash: md5
+      md5: 57c9a9c606520e7e866b8be67e09a8cb
+      size: 997004
+    - path: models/logistic_calibrator.joblib
+      hash: md5
+      md5: 397c6c011fe8da9d35314392c7037f72
+      size: 138
+    - path: models/logistic_regression.joblib
+      hash: md5
+      md5: fba7a7480d7e08d369ce1953f61921d8
+      size: 1343
+    - path: models/lstm_calibrator.joblib
+      hash: md5
+      md5: ab01877abe485bcf0031956e8f8878b3
+      size: 138
+    - path: models/lstm_model.pt
+      hash: md5
+      md5: a3ace4afbc293259cbf682a4010dc493
+      size: 89508
+    - path: models/lstm_preprocessing.joblib
+      hash: md5
+      md5: b1098e0c2e5ed3307d4ca50239297576
+      size: 1761
+    - path: models/platt_calibrator.joblib
+      hash: md5
+      md5: f42b8aaf1d10d93c6c944b7c0235dd07
+      size: 138
+    - path: models/platt_calibrator_1d.joblib
+      hash: md5
+      md5: 6eca0a14780f88e592b1938859039933
+      size: 138
+    - path: models/platt_calibrator_3d.joblib
+      hash: md5
+      md5: 38dddeac882e3ff0360d7f3722c8dd38
+      size: 138
+    - path: models/scaler.joblib
+      hash: md5
+      md5: 17119f6b29b036ab75c3e195e7856f6e
+      size: 3137
+    - path: models/training_metadata.json
+      hash: md5
+      md5: e61cc0d75b9eff625191582de6ff154f
+      size: 36206
+    - path: src/config.py
+      hash: md5
+      md5: 7a0ebaf7e7205114cf889eae3bcb397c
+      size: 751
+    - path: src/data/manifest.py
+      hash: md5
+      md5: 6b8b6e0426e90fcc5789ff9417f60a30
+      size: 5584
+    - path: src/data/quality.py
+      hash: md5
+      md5: 755112cff122fc4bfce15928d03fe035
+      size: 3199
+    - path: src/models/artifacts.py
+      hash: md5
+      md5: f562a29c4cd7e3e9363f084b00feda61
+      size: 1460
+    outs:
+    - path: models/artifact_manifest.json
+      hash: md5
+      md5: 0f9a7b8c72d8827ec5983884d31e7438
+      size: 2166

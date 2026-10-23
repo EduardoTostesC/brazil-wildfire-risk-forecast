@@ -1,6 +1,6 @@
 # Alterações implementadas
 
-Registro desta sessão, iniciada em 23/10/2026 a partir de `0f05555`. Os hashes dos commits são locais até a publicação explicitamente registrada no relatório de testes.
+Registro desta sessão, iniciada em 23/10/2026 a partir de `0f05555`. Os commits abaixo foram enviados à branch `audit/reproducibility-2026-10-23`; não houve merge em `main`. A criação de PR pela integração retornou 403, registrada em docs/PUBLICACAO.md.
 
 | Commit | Mudança concreta | Evidências e limites |
 |---|---|---|
@@ -9,6 +9,14 @@ Registro desta sessão, iniciada em 23/10/2026 a partir de `0f05555`. Os hashes 
 | `1dc4629` | Manifesto verificável, qualidade exaustiva das fontes, NaN preservado, rolling/dry-spell explícitos, estatística pareada e arquivo histórico | 77 testes naquela etapa; falhas de metadados de satélite foram identificadas, sem inventar coluna |
 | `3a7e902` | Experimentos predefinidos, LSTM pareada, gerador de tabelas, DVC expandido e calibração com estado validado | 79 testes naquela etapa; scripts científicos separados dos testes rápidos |
 | `dbbc21b` | Novos pesos e calibradores, resultados completos, amostra real contígua, screenshots, tracking estrito, pins transitivos MLflow/DVC | 83 testes antes do fechamento; tracking recuperado após falha explícita; ver resultados negativos nos relatórios |
+| `c59dbeb` | READMEs bilíngues, 13 relatórios, API documentada e limites de publicação | Números derivados dos arquivos atuais; resultados negativos e ausência de operação divulgados |
+| `429c46f` | Reprodução DVC, notebooks executados, diagnósticos de limiares e figuras | Dez estágios registrados; estado final DVC sem mudanças; API e navegador reais |
+| `e359aef` | Validação do snapshot Git sem arquivos privados nos dois interpretadores | 87 aprovados por ambiente; logs e XMLs versionados |
+| `3b680f4` | CI por push em audit/**, independente da permissão de criar PR | Primeira execução Linux detectou conversão de quebras de linha nos metadados |
+| `bb845bf` | Lock CPU com hashes e verificação exaustiva do calendário dos focos | 290.019 timestamps sem mudança de data sob offsets regionais; primeiro lock CPU ainda omitia o índice extra |
+| `62aaa47` | Regras .gitattributes para dados/modelos identificados por hash | A regra exigiu renormalização seletiva posterior para atualizar blobs já no índice |
+| `de081a0` | Índice CPU emitido no lock e bytes científicos reaplicados ao índice Git | CI Linux verde: 87 aprovados em cada Python; snapshot Windows repetido com 87 por ambiente |
+| `0c125c3` | Job Docker com imagem CPU, usuário sem privilégios, hashes, 12 HTTPs e health Streamlit | Smoke local repetido; resultado Docker remoto em TESTES_E_CI |
 
 Consulte `git log --reverse 0f05555..HEAD` para os commits de fechamento posteriores a esta tabela. Não houve reescrita ou remoção de commits anteriores.
 
@@ -24,7 +32,7 @@ Consulte `git log --reverse 0f05555..HEAD` para os commits de fechamento posteri
 - `src/models/train_lstm.py`: inclui D na sequência, contexto através das fronteiras sem ajuste sobre teste, chaves/rótulos iguais, calibração independente, cinco épocas fixas e controle LightGBM pareado.
 - `src/models/tracking.py`: registro/verificação explícitos; apenas a lista admissível de artefatos é registrada. O banco legado é preservado.
 - `app/streamlit_app.py`: amostra identificada, faixas centralizadas, inferência sem zeros arbitrários, explicação por registro exato, mapa OpenStreetMap e polígono estadual.
-- `requirements.lock`, CI e Docker: instalação controlada, matriz sem cancelamento entre versões, logs de ambiente/testes e usuário Docker sem privilégios. Docker runtime permanece não verificado neste host.
+- `requirements.lock`, CI e Docker: instalação controlada, matriz sem cancelamento entre versões, logs de ambiente/testes e usuário Docker sem privilégios. A imagem foi construída e executada no CI Linux; o host Windows não dispõe de Docker.
 - `run_pipeline.ps1`: falha de comando nativo interrompe o fluxo e restaura o diretório. A antiga limpeza automática de dados/modelos versionados foi desativada para preservar evidências científicas.
 
 ## Modelos, dados e documentação

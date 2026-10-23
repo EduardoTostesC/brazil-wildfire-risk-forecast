@@ -246,3 +246,28 @@ stages:
           cache: false
       - reports/figures/lstm_vs_lgbm.png:
           cache: false
+
+  artifact_bundle:
+    cmd: python -m src.models.artifacts
+    deps:
+      - src/models/artifacts.py
+      - src/data/manifest.py
+      - src/data/quality.py
+      - src/config.py
+      - models/feature_cols.joblib
+      - models/lightgbm_model.joblib
+      - models/lightgbm_1d.joblib
+      - models/lightgbm_3d.joblib
+      - models/platt_calibrator.joblib
+      - models/platt_calibrator_1d.joblib
+      - models/platt_calibrator_3d.joblib
+      - models/logistic_regression.joblib
+      - models/logistic_calibrator.joblib
+      - models/scaler.joblib
+      - models/lstm_model.pt
+      - models/lstm_calibrator.joblib
+      - models/lstm_preprocessing.joblib
+      - models/training_metadata.json
+    outs:
+      - models/artifact_manifest.json:
+          cache: false

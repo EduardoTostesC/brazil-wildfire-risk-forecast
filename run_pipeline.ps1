@@ -72,15 +72,20 @@ try { switch ($Task) {
         Invoke-Python -m src.models.train
         Write-Host "Step 4: Generating SHAP explanations..." -ForegroundColor Yellow
         Invoke-Python -m src.models.explain
-        Write-Host "Step 5: Running tests..." -ForegroundColor Yellow
+        Write-Host "Step 5: Running research and refreshing derived artifacts..." -ForegroundColor Yellow
         Invoke-Python -m src.models.research
         Invoke-Python -m src.models.train_lstm
         Invoke-Python -m src.monitoring.drift_detector
+        Invoke-Python -m src.reporting.decision_diagnostics
+        Invoke-Python -m src.reporting.plot_research
         Invoke-Python -m src.data.build_sample
         Invoke-Python -m src.data.manifest --generate
         Invoke-Python -m src.data.manifest --verify
         Invoke-Python -m src.reporting.generate_readme_metrics
         Invoke-Python -m src.reporting.generate_research_tables
+        Invoke-Python -m src.models.artifacts
+        Invoke-Python -m src.models.artifacts --verify
+        Write-Host "Step 6: Running tests..." -ForegroundColor Yellow
         Invoke-Python -m pytest tests/ -v
         Write-Host "Pipeline execution finished successfully!" -ForegroundColor Green
     }

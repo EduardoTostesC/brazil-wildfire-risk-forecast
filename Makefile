@@ -1,4 +1,5 @@
-.PHONY: install data features train research explain drift dvc-repro mlflow-ui lint api app test all clean
+.PHONY: install data features train research finalize explain drift dvc-repro mlflow-ui lint api app test all clean
+.NOTPARALLEL: all
 
 install:
 	python -m pip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock
@@ -25,7 +26,7 @@ dvc-repro:
 	dvc repro
 
 mlflow-ui:
-	mlflow ui
+	python -m mlflow ui --backend-store-uri sqlite:///mlflow-audit.db
 
 lint:
 	ruff check .
@@ -42,10 +43,19 @@ test:
 research:
 	python -m src.models.research
 	python -m src.models.train_lstm
+
+finalize:
+	python -m src.reporting.decision_diagnostics
+	python -m src.reporting.plot_research
+	python -m src.data.build_sample
+	python -m src.data.manifest --generate
+	python -m src.data.manifest --verify
 	python -m src.reporting.generate_readme_metrics
 	python -m src.reporting.generate_research_tables
+	python -m src.models.artifacts
+	python -m src.models.artifacts --verify
 
-all: data features train explain drift research
+all: data features train explain drift research finalize test
 
 clean:
 	@echo "Automatic deletion disabled: raw data and versioned artifacts must be preserved. Remove only explicitly reviewed generated files."

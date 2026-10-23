@@ -1,0 +1,93 @@
+[
+    {
+        "Id": "sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b",
+        "RepoTags": [
+            "wildfire-audit:ci"
+        ],
+        "RepoDigests": [],
+        "Parent": "",
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-10-23T20:58:24.424185598Z",
+        "DockerVersion": "",
+        "Author": "",
+        "Config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "appuser",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8000/tcp": {},
+                "8501/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=C.UTF-8",
+                "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+                "PYTHON_VERSION=3.12.15",
+                "PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
+                "PYTHONDONTWRITEBYTECODE=1",
+                "PYTHONUNBUFFERED=1"
+            ],
+            "Cmd": [
+                "uvicorn",
+                "api.main:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000"
+            ],
+            "Healthcheck": {
+                "Test": [
+                    "CMD-SHELL",
+                    "curl --fail --silent http://localhost:8000/health || exit 1"
+                ],
+                "Interval": 30000000000,
+                "Timeout": 10000000000,
+                "StartPeriod": 5000000000,
+                "Retries": 3
+            },
+            "ArgsEscaped": true,
+            "Image": "",
+            "Volumes": null,
+            "WorkingDir": "/app",
+            "Entrypoint": null,
+            "OnBuild": null,
+            "Labels": null
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 2803225623,
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/frfptw2mjauxuq8r6jsx0h7ip/diff:/var/lib/docker/overlay2/wvj9hvhvupvypumrgcjjps6kz/diff:/var/lib/docker/overlay2/xovc4t7i190b5lz2mxd7slb60/diff:/var/lib/docker/overlay2/wdvf7f1fkdyb2jpqc2h8hxez9/diff:/var/lib/docker/overlay2/kzedn56qyo19xrx1u6rsrfkaz/diff:/var/lib/docker/overlay2/447b8d7a72f4ee423e2707e3ce9499e2bcc74636b35ccd32dcaf5cd4325be169/diff:/var/lib/docker/overlay2/ab92eaa3a4029cda653d07a350f405bad2f216d2f3459be35b27d9b6f3982963/diff:/var/lib/docker/overlay2/47cd070dbdf820f657567153a97df3559f7156c9eb708e45bbc3c02f43a053b9/diff:/var/lib/docker/overlay2/a0852b9fe756cfcfc62ba73778f38f01157bba82b6c424408bd57ab7f55cd241/diff",
+                "MergedDir": "/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/merged",
+                "UpperDir": "/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/diff",
+                "WorkDir": "/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/work"
+            },
+            "Name": "overlay2"
+        },
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:a70f6272827f64e1427d048ced77491aab5d64ab95725e56920802ff391197d7",
+                "sha256:33d3a946838548b1885b1068b960a88e41537b6996342c8fc2c767a6879e62f4",
+                "sha256:500ecb68a701ad0437ae759f35178f2ddbc48e10a0bc6dc345548054f737df6a",
+                "sha256:93881a54803b57e0039f40fd78de98b41b69b55d025c431544788fd84f0904cd",
+                "sha256:1fb30f05ea9d29ac31c250f1bb18482c417e058f7ce7940ff1c1a9875381c0d5",
+                "sha256:1596bb6a9cec2398e81bbc50b7b4f35834f4be6d0f6b85190223d211b9c5c762",
+                "sha256:082f5d8df1f51aac64ebe90bf43432e5a7a30385969fd64bb6598a1a954be02c",
+                "sha256:80749e8b9db458422c3f5999191be900ac2ec13b2e7b00874f2937ad94771ec5",
+                "sha256:849a45f00c18cd1ff2fcb65d9b39a98ee9080c278bb9ae75931df270ca331f34",
+                "sha256:6505338aa69d0d19cd28d7f094d4611149290826dee963991b2100486850b175"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-10-23T20:58:34.526838512Z"
+        }
+    }
+]

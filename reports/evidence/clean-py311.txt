@@ -1,7 +1,7 @@
 ============================= test session starts =============================
 platform win32 -- Python 3.11.17, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py311\Scripts\python.exe
 cachedir: .pytest_cache
-rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\release-429c46f6fd
+rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\release-de081a0430
 configfile: pyproject.toml
 plugins: anyio-4.15.1, hydra-core-1.3.7, platformdirs-4.13.5
 collecting ... collected 87 items
@@ -95,4 +95,4 @@ tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_z
 tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
 
 - generated xml file: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\reports\evidence\clean-py311.xml -
-============================= 87 passed in 5.29s ==============================
+============================= 87 passed in 5.09s ==============================

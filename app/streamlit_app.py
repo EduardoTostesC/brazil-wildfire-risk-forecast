@@ -1,4 +1,4 @@
-"""Streamlit dashboard — Brazil Wildfire Risk Forecast (Block D).
+"""Streamlit dashboard — retrospective satellite hotspot risk in Mato Grosso.
 
 Multi-tab interactive dashboard featuring:
 - Tab 1: Interactive Folium risk map with horizon selector and date picker.

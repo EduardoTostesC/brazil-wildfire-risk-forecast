@@ -12,7 +12,7 @@ python -m pip install --require-hashes --extra-index-url https://download.pytorc
 python -m pip check
 ```
 
-`requirements.txt` fixa dependências diretas. `requirements.lock` preserva a resolução genérica que fundamenta a execução científica local, incluindo dependências CUDA em Linux. `requirements-cpu.lock` é a variante recomendada para CI, Docker e demonstração: inclui hashes dos wheels CPU e evita instalar bibliotecas CUDA sem uso. A versão pública dos pacotes científicos é a mesma; a variante CPU explicita o sufixo do wheel por plataforma. Todas as entradas instaladas por esse comando estão sujeitas à verificação de hashes.
+`requirements.txt` fixa dependências diretas. `requirements.lock` preserva a resolução genérica que fundamenta a execução científica local, incluindo dependências CUDA em Linux. `requirements-cpu.lock` é a variante recomendada para CI, Docker e demonstração: inclui hashes dos wheels CPU e evita instalar bibliotecas CUDA sem uso. A versão pública dos pacotes científicos é a mesma; a variante CPU explicita o sufixo do wheel por plataforma. Todas as entradas instaladas por esse comando estão sujeitas à verificação de hashes. O lock declara os dois índices explicitamente: uma linha `--index-url` no arquivo de requisitos redefine os índices do pip e descarta um índice extra passado somente pela linha de comando. A falha foi observada no CI e reproduzida com um probe isolado; o lock corrigido mantém PyPI e o índice CPU no próprio arquivo.
 
 Atualização deliberada do lock:
 
@@ -109,4 +109,6 @@ A suíte padrão usa fixtures sintéticas explícitas, artefatos versionados e a
 
 Para repetir a captura visual: instale `playwright` como ferramenta de verificação opcional e execute `python scripts/smoke_dashboard.py` com Chrome disponível. O script cria um servidor local temporário, visita cinco abas, captura dois viewports e encerra seu processo. Não é um deploy público.
 
-Docker não estava disponível no host; o Dockerfile foi revisado e usa lock e usuário sem privilégios, mas construção e execução precisam de um ambiente com Docker. Consulte [PUBLICACAO](../docs/PUBLICACAO.md).
+O Docker não está disponível no host Windows, mas a imagem foi construída e executada no CI Linux. A validação inclui hashes dos artefatos, usuário UID 1000, healthcheck da API, 12 requisições reais e inicialização HTTP do Streamlit. O browser das cinco abas foi validado localmente, em uma execução separada. O Dockerfile fixa o digest da imagem base efetivamente usada, além do lock CPU; pacotes do sistema apt ainda dependem do repositório no momento da construção. Consulte [TESTES_E_CI](TESTES_E_CI.md) e [PUBLICACAO](../docs/PUBLICACAO.md).
+
+`make all` e `run_pipeline.ps1 -Task all` regeneram também diagnósticos, figuras, amostra, manifesto de dados, tabelas e manifesto do bundle antes dos testes. Após um novo treinamento, não se deve reutilizar fingerprints antigos. O DVC inclui `artifact_bundle`, dependente de todos os modelos admissíveis e dos metadados, para atualizar esse manifesto automaticamente. A execução desse estágio e o estado final vazio estão em [dvc-artifact-bundle.json](evidence/dvc-artifact-bundle.json).

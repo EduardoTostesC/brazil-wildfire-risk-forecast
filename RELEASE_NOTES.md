@@ -10,6 +10,7 @@ Esta versão local corrige instalação, contratos de inferência, tratamento de
 - Experimentos sem fogo recente, regiões retidas, ablação corrigida, clima futuro perfeito identificado como ORACLE e LSTM pareada.
 - Bootstrap pareado reporta diferença e intervalo; a fração empírica de diferenças negativas não é apresentada como p-valor.
 - Documentação gerada das métricas verificadas; histórico preservado.
+- CI Linux confirmado nas duas versões Python; imagem Docker construída com API e Streamlit exercitados. Bytes de artefatos preservados entre plataformas e manifesto do bundle integrado ao fechamento do pipeline.
 
 Evidências: [auditoria](reports/AUDITORIA_FINAL.md), [resultados](reports/VALIDACAO_CIENTIFICA.md), [testes](reports/TESTES_E_CI.md), [pendências](reports/PENDENCIAS_REAIS.md).
 

@@ -1,0 +1,507 @@
+[
+    {
+        "Id": "954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7",
+        "Created": "2026-10-23T20:58:34.581496682Z",
+        "Path": "uvicorn",
+        "Args": [
+            "api.main:app",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "8000"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 3342,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-10-23T20:58:34.604764031Z",
+            "FinishedAt": "0001-01-01T00:00:00Z",
+            "Health": {
+                "Status": "healthy",
+                "FailingStreak": 0,
+                "Log": [
+                    {
+                        "Start": "2026-10-23T20:58:40.088610788Z",
+                        "End": "2026-10-23T20:58:40.117790783Z",
+                        "ExitCode": 0,
+                        "Output": "{\"status\":\"ok\",\"model_loaded\":true,\"available_horizons\":[1,3,7],\"supported_inference_modes\":{\"historical_replay\":\"Exact cell/date lookup; publication time unknown\",\"operational_forecast\":\"Unavailable; not implemented\"}}"
+                    }
+                ]
+            }
+        },
+        "Image": "sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b",
+        "ResolvConfPath": "/var/lib/docker/containers/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7/hostname",
+        "HostsPath": "/var/lib/docker/containers/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7/hosts",
+        "LogPath": "/var/lib/docker/containers/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7-json.log",
+        "Name": "/wildfire-api",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "bridge",
+            "PortBindings": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "127.0.0.1",
+                        "HostPort": "8000"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": [],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/asound",
+                "/proc/acpi",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware",
+                "/sys/devices/virtual/powercap"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "ID": "954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7",
+                "LowerDir": "/var/lib/docker/overlay2/c72bf4d5c7fdb8bf02423846ddd9785e85b6ec0f7c47e8753279db2c3d9aaa26-init/diff:/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/diff:/var/lib/docker/overlay2/frfptw2mjauxuq8r6jsx0h7ip/diff:/var/lib/docker/overlay2/wvj9hvhvupvypumrgcjjps6kz/diff:/var/lib/docker/overlay2/xovc4t7i190b5lz2mxd7slb60/diff:/var/lib/docker/overlay2/wdvf7f1fkdyb2jpqc2h8hxez9/diff:/var/lib/docker/overlay2/kzedn56qyo19xrx1u6rsrfkaz/diff:/var/lib/docker/overlay2/447b8d7a72f4ee423e2707e3ce9499e2bcc74636b35ccd32dcaf5cd4325be169/diff:/var/lib/docker/overlay2/ab92eaa3a4029cda653d07a350f405bad2f216d2f3459be35b27d9b6f3982963/diff:/var/lib/docker/overlay2/47cd070dbdf820f657567153a97df3559f7156c9eb708e45bbc3c02f43a053b9/diff:/var/lib/docker/overlay2/a0852b9fe756cfcfc62ba73778f38f01157bba82b6c424408bd57ab7f55cd241/diff",
+                "MergedDir": "/var/lib/docker/overlay2/c72bf4d5c7fdb8bf02423846ddd9785e85b6ec0f7c47e8753279db2c3d9aaa26/merged",
+                "UpperDir": "/var/lib/docker/overlay2/c72bf4d5c7fdb8bf02423846ddd9785e85b6ec0f7c47e8753279db2c3d9aaa26/diff",
+                "WorkDir": "/var/lib/docker/overlay2/c72bf4d5c7fdb8bf02423846ddd9785e85b6ec0f7c47e8753279db2c3d9aaa26/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "954a7dce3ece",
+            "Domainname": "",
+            "User": "appuser",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8000/tcp": {},
+                "8501/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=C.UTF-8",
+                "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+                "PYTHON_VERSION=3.12.15",
+                "PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
+                "PYTHONDONTWRITEBYTECODE=1",
+                "PYTHONUNBUFFERED=1"
+            ],
+            "Cmd": [
+                "uvicorn",
+                "api.main:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000"
+            ],
+            "Healthcheck": {
+                "Test": [
+                    "CMD-SHELL",
+                    "curl --fail --silent http://localhost:8000/health || exit 1"
+                ],
+                "Interval": 30000000000,
+                "Timeout": 10000000000,
+                "StartPeriod": 5000000000,
+                "Retries": 3
+            },
+            "Image": "wildfire-audit:ci",
+            "Volumes": null,
+            "WorkingDir": "/app",
+            "Entrypoint": null,
+            "OnBuild": null,
+            "Labels": {}
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "ab88fd03f3735cab549c877d1d247635bcfbe28ec9146b0f7ca228e5cf77d15a",
+            "SandboxKey": "/var/run/docker/netns/ab88fd03f373",
+            "Ports": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "127.0.0.1",
+                        "HostPort": "8000"
+                    }
+                ],
+                "8501/tcp": null
+            },
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "4ad81a0a51009ef59e0554408cd2f1ab20af22fb0895af60e4d294edd7893eb3",
+            "Gateway": "172.17.0.1",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "172.17.0.2",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "MacAddress": "52:9c:8f:74:3b:10",
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "MacAddress": "52:9c:8f:74:3b:10",
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "861cdf95167dd3a54f8442c5fe5789b25f9200214b4eb05215db35a1724b8c8f",
+                    "EndpointID": "4ad81a0a51009ef59e0554408cd2f1ab20af22fb0895af60e4d294edd7893eb3",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        }
+    },
+    {
+        "Id": "2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a",
+        "Created": "2026-10-23T20:58:40.25006448Z",
+        "Path": "python",
+        "Args": [
+            "-m",
+            "streamlit",
+            "run",
+            "app/streamlit_app.py",
+            "--server.address",
+            "0.0.0.0"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 3602,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-10-23T20:58:40.274096175Z",
+            "FinishedAt": "0001-01-01T00:00:00Z",
+            "Health": {
+                "Status": "starting",
+                "FailingStreak": 0,
+                "Log": []
+            }
+        },
+        "Image": "sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b",
+        "ResolvConfPath": "/var/lib/docker/containers/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a/hostname",
+        "HostsPath": "/var/lib/docker/containers/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a/hosts",
+        "LogPath": "/var/lib/docker/containers/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a-json.log",
+        "Name": "/wildfire-dashboard",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "bridge",
+            "PortBindings": {
+                "8501/tcp": [
+                    {
+                        "HostIp": "127.0.0.1",
+                        "HostPort": "8501"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": [],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/asound",
+                "/proc/acpi",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware",
+                "/sys/devices/virtual/powercap"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "ID": "2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a",
+                "LowerDir": "/var/lib/docker/overlay2/7a4c784dc4bef9054036819cdcdc200b3a98bbec3f6a570c750fdd306fd69cc7-init/diff:/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/diff:/var/lib/docker/overlay2/frfptw2mjauxuq8r6jsx0h7ip/diff:/var/lib/docker/overlay2/wvj9hvhvupvypumrgcjjps6kz/diff:/var/lib/docker/overlay2/xovc4t7i190b5lz2mxd7slb60/diff:/var/lib/docker/overlay2/wdvf7f1fkdyb2jpqc2h8hxez9/diff:/var/lib/docker/overlay2/kzedn56qyo19xrx1u6rsrfkaz/diff:/var/lib/docker/overlay2/447b8d7a72f4ee423e2707e3ce9499e2bcc74636b35ccd32dcaf5cd4325be169/diff:/var/lib/docker/overlay2/ab92eaa3a4029cda653d07a350f405bad2f216d2f3459be35b27d9b6f3982963/diff:/var/lib/docker/overlay2/47cd070dbdf820f657567153a97df3559f7156c9eb708e45bbc3c02f43a053b9/diff:/var/lib/docker/overlay2/a0852b9fe756cfcfc62ba73778f38f01157bba82b6c424408bd57ab7f55cd241/diff",
+                "MergedDir": "/var/lib/docker/overlay2/7a4c784dc4bef9054036819cdcdc200b3a98bbec3f6a570c750fdd306fd69cc7/merged",
+                "UpperDir": "/var/lib/docker/overlay2/7a4c784dc4bef9054036819cdcdc200b3a98bbec3f6a570c750fdd306fd69cc7/diff",
+                "WorkDir": "/var/lib/docker/overlay2/7a4c784dc4bef9054036819cdcdc200b3a98bbec3f6a570c750fdd306fd69cc7/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "2cafe6e4d597",
+            "Domainname": "",
+            "User": "appuser",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8000/tcp": {},
+                "8501/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=C.UTF-8",
+                "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+                "PYTHON_VERSION=3.12.15",
+                "PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
+                "PYTHONDONTWRITEBYTECODE=1",
+                "PYTHONUNBUFFERED=1"
+            ],
+            "Cmd": [
+                "python",
+                "-m",
+                "streamlit",
+                "run",
+                "app/streamlit_app.py",
+                "--server.address",
+                "0.0.0.0"
+            ],
+            "Healthcheck": {
+                "Test": [
+                    "CMD-SHELL",
+                    "curl --fail --silent http://localhost:8501/_stcore/health"
+                ],
+                "Interval": 2000000000,
+                "Timeout": 10000000000,
+                "StartPeriod": 5000000000,
+                "Retries": 3
+            },
+            "Image": "wildfire-audit:ci",
+            "Volumes": null,
+            "WorkingDir": "/app",
+            "Entrypoint": null,
+            "OnBuild": null,
+            "Labels": {}
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "c0e817a19ff2df91127b8065c91835c3f5752a4d268a862e7e012a8c3b743878",
+            "SandboxKey": "/var/run/docker/netns/c0e817a19ff2",
+            "Ports": {
+                "8000/tcp": null,
+                "8501/tcp": [
+                    {
+                        "HostIp": "127.0.0.1",
+                        "HostPort": "8501"
+                    }
+                ]
+            },
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "c7b5ad1689992033a70243e0b16bfbe39264619925bf4ea046681c0e075a0be8",
+            "Gateway": "172.17.0.1",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "172.17.0.3",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "MacAddress": "ba:09:02:fc:fd:92",
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "MacAddress": "ba:09:02:fc:fd:92",
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "861cdf95167dd3a54f8442c5fe5789b25f9200214b4eb05215db35a1724b8c8f",
+                    "EndpointID": "c7b5ad1689992033a70243e0b16bfbe39264619925bf4ea046681c0e075a0be8",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.3",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        }
+    }
+]

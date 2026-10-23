@@ -88,6 +88,11 @@ jobs:
           wildfire-audit:ci python -m streamlit run app/streamlit_app.py --server.address 0.0.0.0
         curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8501/_stcore/health
         curl --fail http://127.0.0.1:8501/ > reports/evidence/docker-streamlit.html
+        for attempt in $(seq 1 30); do
+          if test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-dashboard)" = healthy; then break; fi
+          sleep 2
+        done
+        test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-dashboard)" = healthy
 
     - name: Collect container evidence
       if: always()

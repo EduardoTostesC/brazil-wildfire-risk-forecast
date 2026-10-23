@@ -34,22 +34,39 @@ Os logs finais, XMLs por versão, manifesto, notebooks, execução DVC e eventua
 
 <!-- BEGIN FINAL VALIDATION -->
 
-Snapshot Git `429c46f`, extra?do por `git archive`, sem diret?rios de dados privados. Verifica??o em dois interpretadores isolados:
+Snapshot Git `de081a0`, extraído por `git archive`, sem diretórios de dados privados. Verificação em dois interpretadores isolados, repetida após corrigir o lock CPU e preservar bytes dos artefatos:
 
 | Ambiente | Testes | Falhas | Erros | Skips | Segundos |
 |---|---|---|---|---|---|
-| py311 | 87 | 0 | 0 | 0 | 5.288 |
-| py312 | 87 | 0 | 0 | 0 | 4.940 |
+| py311 | 87 | 0 | 0 | 0 | 5.090 |
+| py312 | 87 | 0 | 0 | 0 | 5.026 |
 
 Logs: [3.11](evidence/clean-py311.txt), [3.12](evidence/clean-py312.txt), [snapshot e comandos](evidence/clean-snapshot-validation.json). Ruff aprovado; bundle de artefatos e ambos os geradores conferidos no snapshot.
 
-A reprodu??o DVC executou os oito est?gios cient?ficos originais expandidos e dois est?gios finais de diagn?stico/figuras; `dvc repro` e `dvc status --json` retornaram c?digo 0, com estado final `{}`. Evid?ncia: [dvc-verified.json](evidence/dvc-verified.json), [execu??o completa](evidence/dvc-repro-locked.txt), [est?gios complementares](evidence/dvc-repro-final-stages.txt). As entradas brutas j? estavam no disco; n?o ? uma reaquisi??o independente.
+A reprodução DVC executou os oito estágios científicos originais expandidos e dois estágios finais de diagnóstico/figuras; `dvc repro` e `dvc status --json` retornaram código 0, com estado final `{}`. Evidência: [dvc-verified.json](evidence/dvc-verified.json), [execução completa](evidence/dvc-repro-locked.txt), [estágios complementares](evidence/dvc-repro-final-stages.txt). As entradas brutas já estavam no disco; não é uma reaquisição independente.
 
-Os dois notebooks foram executados sem erros de c?lula: [log](evidence/executed-notebooks.txt). A API respondeu 12 requisi??es HTTP reais nos cen?rios documentados: [exemplos](evidence/real-http-examples.json). O manifesto final foi verificado: [log](evidence/final-manifest-verification.txt). Links locais foram verificados nos documentos atuais; snapshots hist?ricos s?o exclu?dos dessa checagem.
+Os dois notebooks foram executados sem erros de célula: [log](evidence/executed-notebooks.txt). A API respondeu 12 requisições HTTP reais nos cenários documentados: [exemplos](evidence/real-http-examples.json). O manifesto final foi verificado: [log](evidence/final-manifest-verification.txt). Links locais foram verificados em 23 documentos atuais; snapshots históricos são excluídos dessa checagem.
 
-CI remoto do candidato: pendente de execu??o no GitHub Actions. A falha do commit inicial permanece registrada acima.
+CI remoto do candidato: consultar as execuções e os logs abaixo. A falha do commit inicial permanece registrada acima.
 
 <!-- END FINAL VALIDATION -->
+
+## CI remoto confirmado
+
+O [run 40022557955](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022557955), do commit `de081a0`, terminou com **success** nos dois jobs Ubuntu 24.04.5. Cada job instalou o lock CPU com hashes, executou `pip check`, Ruff, pytest e os dois geradores em modo `--check`.
+
+| Ambiente remoto | Aprovados | Reprovados | Tempo pytest | Log preservado |
+|---|---|---|---|---|
+| CPython 3.11.17 / Linux | 87 | 0 | 5,61 s | [py311](evidence/ci-linux-py311.txt) |
+| CPython 3.12.15 / Linux | 87 | 0 | 7,12 s | [py312](evidence/ci-linux-py312.txt) |
+
+Falhas intermediárias permanecem disponíveis: [hash de metadados convertido por Git](evidence/ci-first-candidate-failure.txt), com 86 aprovados/1 reprovado; [índice CPU descartado pelo pip](evidence/ci-cpu-index-failure.txt), que interrompeu a instalação. A correção preserva os bytes científicos e emite os dois índices no lock. A aprovação acima pertence à branch de auditoria; `main` não foi atualizada por merge.
+
+O [run 40022809405](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022809405), do commit `0c125c3`, também terminou com **success**: ambos os jobs Python e o job Docker. O job [120652253266](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022809405/job/120652253266) construiu a imagem CPU, conferiu o bundle, confirmou UID 1000 e API saudável, executou 12 requisições HTTP e iniciou o Streamlit com respostas 200 no health e na página inicial. Não equivale a testar todas as abas no navegador dentro do container.
+
+Evidência Docker: [log selecionado](evidence/ci-docker.txt), [inspeção da imagem](evidence/docker-ci/docker-image.json), [containers](evidence/docker-ci/docker-containers.json), [12 respostas](evidence/docker-ci/docker-http-examples.json). ZIP original do artefato 12530669540: SHA256 `9121ad69ed6137c9c781bbb2209d3ec30a1ba4ae07f96f32b36cde3f73fddc40`. Imagem medida: 2.803.225.623 bytes, ID `sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b`; inclui ambiente de pesquisa, não somente dependências mínimas de serving. O estado capturado do dashboard era `starting`, embora os endpoints HTTP já respondessem; o workflow subsequente passa a aguardar também seu healthcheck Docker.
+
+O estágio complementar `artifact_bundle` do DVC foi executado após essa revisão: [comandos, saídas e exit codes](evidence/dvc-artifact-bundle.json). O DAG atual tem onze estágios e `dvc status --json` continuou `{}`. O runner PowerShell revisado executou a suíte com **87 aprovados**, [log](evidence/powershell-runner-final.txt). O treinamento integral registrado anteriormente não foi repetido por uma mudança de orquestração; os modelos e resultados científicos permanecem os mesmos.
 
 ## Comandos
 
@@ -63,4 +80,4 @@ python -m src.data.manifest --verify
 python -m dvc status
 ```
 
-Docker não foi executado porque o host não oferece o binário. Deploy público e benchmark operacional não foram executados. Testes locais Windows não comprovam por si só compatibilidade Linux/macOS; o CI remoto precisa confirmar seu próprio ambiente.
+Docker foi executado no CI Linux; o host Windows continua sem o binário. Deploy público e benchmark operacional não foram executados. A inferência e os testes foram verificados em Windows/Linux; macOS e treinamento bit a bit idêntico entre plataformas não foram verificados.
