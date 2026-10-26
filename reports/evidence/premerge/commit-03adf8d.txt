@@ -1,0 +1,2296 @@
+commit 03adf8d667f97d5e83a5a44b47c33e9a26d15f99
+Author:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+AuthorDate: Fri Oct 23 18:01:27 2026 -0300
+Commit:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+CommitDate: Fri Oct 23 18:01:27 2026 -0300
+
+    verify: record green Linux and Docker CI and finalize reproducible artifact bundle workflow
+
+diff --git a/.dockerignore b/.dockerignore
+index be56f64..5a79ce3 100644
+--- a/.dockerignore
++++ b/.dockerignore
+@@ -9,6 +9,8 @@ __pycache__
+ mlruns
+ *.db
+ *.log
++.env
++.env.*
+ data/raw
+ data/processed
+ reports/evidence
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index e137814..bb60db3 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -88,6 +88,11 @@ jobs:
+           wildfire-audit:ci python -m streamlit run app/streamlit_app.py --server.address 0.0.0.0
+         curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8501/_stcore/health
+         curl --fail http://127.0.0.1:8501/ > reports/evidence/docker-streamlit.html
++        for attempt in $(seq 1 30); do
++          if test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-dashboard)" = healthy; then break; fi
++          sleep 2
++        done
++        test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-dashboard)" = healthy
+ 
+     - name: Collect container evidence
+       if: always()
+diff --git a/Dockerfile b/Dockerfile
+index ee840ed..31aa9cd 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -1,4 +1,5 @@
+-FROM python:3.12-slim
++# Exact multi-platform base resolved and exercised by the audit CI.
++FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+ 
+ # Prevent Python from writing .pyc files and buffer stdout/stderr
+ ENV PYTHONDONTWRITEBYTECODE=1 \
+diff --git a/Makefile b/Makefile
+index 8b07ec8..3880b35 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,5 @@
+-.PHONY: install data features train research explain drift dvc-repro mlflow-ui lint api app test all clean
++.PHONY: install data features train research finalize explain drift dvc-repro mlflow-ui lint api app test all clean
++.NOTPARALLEL: all
+ 
+ install:
+ 	python -m pip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock
+@@ -25,7 +26,7 @@ dvc-repro:
+ 	dvc repro
+ 
+ mlflow-ui:
+-	mlflow ui
++	python -m mlflow ui --backend-store-uri sqlite:///mlflow-audit.db
+ 
+ lint:
+ 	ruff check .
+@@ -42,10 +43,19 @@ test:
+ research:
+ 	python -m src.models.research
+ 	python -m src.models.train_lstm
++
++finalize:
++	python -m src.reporting.decision_diagnostics
++	python -m src.reporting.plot_research
++	python -m src.data.build_sample
++	python -m src.data.manifest --generate
++	python -m src.data.manifest --verify
+ 	python -m src.reporting.generate_readme_metrics
+ 	python -m src.reporting.generate_research_tables
++	python -m src.models.artifacts
++	python -m src.models.artifacts --verify
+ 
+-all: data features train explain drift research
++all: data features train explain drift research finalize test
+ 
+ clean:
+ 	@echo "Automatic deletion disabled: raw data and versioned artifacts must be preserved. Remove only explicitly reviewed generated files."
+diff --git a/RELEASE_NOTES.md b/RELEASE_NOTES.md
+index 37e3ac2..04141cc 100644
+--- a/RELEASE_NOTES.md
++++ b/RELEASE_NOTES.md
+@@ -10,6 +10,7 @@ Esta versão local corrige instalação, contratos de inferência, tratamento de
+ - Experimentos sem fogo recente, regiões retidas, ablação corrigida, clima futuro perfeito identificado como ORACLE e LSTM pareada.
+ - Bootstrap pareado reporta diferença e intervalo; a fração empírica de diferenças negativas não é apresentada como p-valor.
+ - Documentação gerada das métricas verificadas; histórico preservado.
++- CI Linux confirmado nas duas versões Python; imagem Docker construída com API e Streamlit exercitados. Bytes de artefatos preservados entre plataformas e manifesto do bundle integrado ao fechamento do pipeline.
+ 
+ Evidências: [auditoria](reports/AUDITORIA_FINAL.md), [resultados](reports/VALIDACAO_CIENTIFICA.md), [testes](reports/TESTES_E_CI.md), [pendências](reports/PENDENCIAS_REAIS.md).
+ 
+diff --git a/app/streamlit_app.py b/app/streamlit_app.py
+index df2201f..5e56118 100644
+--- a/app/streamlit_app.py
++++ b/app/streamlit_app.py
+@@ -1,4 +1,4 @@
+-"""Streamlit dashboard — Brazil Wildfire Risk Forecast (Block D).
++"""Streamlit dashboard — retrospective satellite hotspot risk in Mato Grosso.
+ 
+ Multi-tab interactive dashboard featuring:
+ - Tab 1: Interactive Folium risk map with horizon selector and date picker.
+diff --git a/docs/PUBLICACAO.md b/docs/PUBLICACAO.md
+index 711611e..c80ee14 100644
+--- a/docs/PUBLICACAO.md
++++ b/docs/PUBLICACAO.md
+@@ -17,7 +17,7 @@ A branch `audit/reproducibility-2026-10-23` foi enviada. A criação de PR pela
+ 
+ O dashboard foi exercitado localmente com a amostra real; veja os screenshots e o log de navegador em reports/evidence. Não há URL pública validada nesta auditoria.
+ 
+-Para Streamlit Community Cloud, selecionar este repositório, a branch aprovada e `app/streamlit_app.py`; a configuração de dependências deve instalar o lock. A instalação padrão de `requirements.txt` fixa apenas dependências diretas. Validar o log da plataforma, inferência dos três horizontes, cinco abas, amostra e erros antes de divulgar o endereço.
++Para Streamlit Community Cloud, preparar uma branch específica de deploy a partir do candidato revisado e substituir nela o conteúdo de `requirements.txt` por uma única linha `-r requirements-cpu.lock`. Esse arquivo é a entrada de instalação da plataforma; o lock versionado contém os índices e hashes. Selecionar a branch de deploy e `app/streamlit_app.py`, com Python 3.12. A branch científica mantém seu `requirements.txt` original para regeneração dos locks. Validar o log da plataforma, inferência dos três horizontes, cinco abas, amostra e erros antes de divulgar o endereço. Esse procedimento ainda não foi executado na plataforma.
+ 
+ Para um Space Docker, copiar os metadados de `README.hf.md` para o README da raiz do Space e usar um Dockerfile de demonstração com o seguinte comando final e healthcheck:
+ 
+@@ -33,4 +33,6 @@ docker build -t wildfire-risk:2.1.0-rc .
+ docker run --rm -p 8000:8000 wildfire-risk:2.1.0-rc
+ ```
+ 
++Construção e execução da imagem foram verificadas no CI Linux; veja [TESTES_E_CI](../reports/TESTES_E_CI.md). A mesma imagem pode executar somente o dashboard com `docker run --rm -p 8501:8501 --health-cmd 'curl --fail http://localhost:8501/_stcore/health' wildfire-risk:2.1.0-rc python -m streamlit run app/streamlit_app.py --server.address 0.0.0.0`. Esse comando também foi exercitado no executor remoto. O teste não publica uma demo permanente.
++
+ Exercitar `/health`, `/predict`, `/explain`, 404 para registro ausente e 503 para modo operacional. O healthcheck HTTP 200 demonstra liveness; examinar o campo `status` para readiness. Não divulgar uma URL ou alegar operação em tempo real antes desses testes na plataforma.
+diff --git a/dvc.lock b/dvc.lock
+index 8db5531..458c60c 100644
+--- a/dvc.lock
++++ b/dvc.lock
+@@ -627,3 +627,83 @@ stages:
+       hash: md5
+       md5: 93e2e0f6898843ceff5161830781b711
+       size: 67139
++  artifact_bundle:
++    cmd: python -m src.models.artifacts
++    deps:
++    - path: models/feature_cols.joblib
++      hash: md5
++      md5: edaf888ea393516d35bfa265a82aea90
++      size: 593
++    - path: models/lightgbm_1d.joblib
++      hash: md5
++      md5: b70030ba330805511217fe65f401619d
++      size: 988412
++    - path: models/lightgbm_3d.joblib
++      hash: md5
++      md5: 18f5b5a851ca1ee070d230c40b447684
++      size: 994220
++    - path: models/lightgbm_model.joblib
++      hash: md5
++      md5: 57c9a9c606520e7e866b8be67e09a8cb
++      size: 997004
++    - path: models/logistic_calibrator.joblib
++      hash: md5
++      md5: 397c6c011fe8da9d35314392c7037f72
++      size: 138
++    - path: models/logistic_regression.joblib
++      hash: md5
++      md5: fba7a7480d7e08d369ce1953f61921d8
++      size: 1343
++    - path: models/lstm_calibrator.joblib
++      hash: md5
++      md5: ab01877abe485bcf0031956e8f8878b3
++      size: 138
++    - path: models/lstm_model.pt
++      hash: md5
++      md5: a3ace4afbc293259cbf682a4010dc493
++      size: 89508
++    - path: models/lstm_preprocessing.joblib
++      hash: md5
++      md5: b1098e0c2e5ed3307d4ca50239297576
++      size: 1761
++    - path: models/platt_calibrator.joblib
++      hash: md5
++      md5: f42b8aaf1d10d93c6c944b7c0235dd07
++      size: 138
++    - path: models/platt_calibrator_1d.joblib
++      hash: md5
++      md5: 6eca0a14780f88e592b1938859039933
++      size: 138
++    - path: models/platt_calibrator_3d.joblib
++      hash: md5
++      md5: 38dddeac882e3ff0360d7f3722c8dd38
++      size: 138
++    - path: models/scaler.joblib
++      hash: md5
++      md5: 17119f6b29b036ab75c3e195e7856f6e
++      size: 3137
++    - path: models/training_metadata.json
++      hash: md5
++      md5: e61cc0d75b9eff625191582de6ff154f
++      size: 36206
++    - path: src/config.py
++      hash: md5
++      md5: 7a0ebaf7e7205114cf889eae3bcb397c
++      size: 751
++    - path: src/data/manifest.py
++      hash: md5
++      md5: 6b8b6e0426e90fcc5789ff9417f60a30
++      size: 5584
++    - path: src/data/quality.py
++      hash: md5
++      md5: 755112cff122fc4bfce15928d03fe035
++      size: 3199
++    - path: src/models/artifacts.py
++      hash: md5
++      md5: f562a29c4cd7e3e9363f084b00feda61
++      size: 1460
++    outs:
++    - path: models/artifact_manifest.json
++      hash: md5
++      md5: 0f9a7b8c72d8827ec5983884d31e7438
++      size: 2166
+diff --git a/dvc.yaml b/dvc.yaml
+index 50ad016..df57d21 100644
+--- a/dvc.yaml
++++ b/dvc.yaml
+@@ -246,3 +246,28 @@ stages:
+           cache: false
+       - reports/figures/lstm_vs_lgbm.png:
+           cache: false
++
++  artifact_bundle:
++    cmd: python -m src.models.artifacts
++    deps:
++      - src/models/artifacts.py
++      - src/data/manifest.py
++      - src/data/quality.py
++      - src/config.py
++      - models/feature_cols.joblib
++      - models/lightgbm_model.joblib
++      - models/lightgbm_1d.joblib
++      - models/lightgbm_3d.joblib
++      - models/platt_calibrator.joblib
++      - models/platt_calibrator_1d.joblib
++      - models/platt_calibrator_3d.joblib
++      - models/logistic_regression.joblib
++      - models/logistic_calibrator.joblib
++      - models/scaler.joblib
++      - models/lstm_model.pt
++      - models/lstm_calibrator.joblib
++      - models/lstm_preprocessing.joblib
++      - models/training_metadata.json
++    outs:
++      - models/artifact_manifest.json:
++          cache: false
+diff --git a/reports/ALTERACOES_IMPLEMENTADAS.md b/reports/ALTERACOES_IMPLEMENTADAS.md
+index 123821d..13bd043 100644
+--- a/reports/ALTERACOES_IMPLEMENTADAS.md
++++ b/reports/ALTERACOES_IMPLEMENTADAS.md
+@@ -1,6 +1,6 @@
+ # Alterações implementadas
+ 
+-Registro desta sessão, iniciada em 23/10/2026 a partir de `0f05555`. Os hashes dos commits são locais até a publicação explicitamente registrada no relatório de testes.
++Registro desta sessão, iniciada em 23/10/2026 a partir de `0f05555`. Os commits abaixo foram enviados à branch `audit/reproducibility-2026-10-23`; não houve merge em `main`. A criação de PR pela integração retornou 403, registrada em docs/PUBLICACAO.md.
+ 
+ | Commit | Mudança concreta | Evidências e limites |
+ |---|---|---|
+@@ -9,6 +9,14 @@ Registro desta sessão, iniciada em 23/10/2026 a partir de `0f05555`. Os hashes
+ | `1dc4629` | Manifesto verificável, qualidade exaustiva das fontes, NaN preservado, rolling/dry-spell explícitos, estatística pareada e arquivo histórico | 77 testes naquela etapa; falhas de metadados de satélite foram identificadas, sem inventar coluna |
+ | `3a7e902` | Experimentos predefinidos, LSTM pareada, gerador de tabelas, DVC expandido e calibração com estado validado | 79 testes naquela etapa; scripts científicos separados dos testes rápidos |
+ | `dbbc21b` | Novos pesos e calibradores, resultados completos, amostra real contígua, screenshots, tracking estrito, pins transitivos MLflow/DVC | 83 testes antes do fechamento; tracking recuperado após falha explícita; ver resultados negativos nos relatórios |
++| `c59dbeb` | READMEs bilíngues, 13 relatórios, API documentada e limites de publicação | Números derivados dos arquivos atuais; resultados negativos e ausência de operação divulgados |
++| `429c46f` | Reprodução DVC, notebooks executados, diagnósticos de limiares e figuras | Dez estágios registrados; estado final DVC sem mudanças; API e navegador reais |
++| `e359aef` | Validação do snapshot Git sem arquivos privados nos dois interpretadores | 87 aprovados por ambiente; logs e XMLs versionados |
++| `3b680f4` | CI por push em audit/**, independente da permissão de criar PR | Primeira execução Linux detectou conversão de quebras de linha nos metadados |
++| `bb845bf` | Lock CPU com hashes e verificação exaustiva do calendário dos focos | 290.019 timestamps sem mudança de data sob offsets regionais; primeiro lock CPU ainda omitia o índice extra |
++| `62aaa47` | Regras .gitattributes para dados/modelos identificados por hash | A regra exigiu renormalização seletiva posterior para atualizar blobs já no índice |
++| `de081a0` | Índice CPU emitido no lock e bytes científicos reaplicados ao índice Git | CI Linux verde: 87 aprovados em cada Python; snapshot Windows repetido com 87 por ambiente |
++| `0c125c3` | Job Docker com imagem CPU, usuário sem privilégios, hashes, 12 HTTPs e health Streamlit | Smoke local repetido; resultado Docker remoto em TESTES_E_CI |
+ 
+ Consulte `git log --reverse 0f05555..HEAD` para os commits de fechamento posteriores a esta tabela. Não houve reescrita ou remoção de commits anteriores.
+ 
+@@ -24,7 +32,7 @@ Consulte `git log --reverse 0f05555..HEAD` para os commits de fechamento posteri
+ - `src/models/train_lstm.py`: inclui D na sequência, contexto através das fronteiras sem ajuste sobre teste, chaves/rótulos iguais, calibração independente, cinco épocas fixas e controle LightGBM pareado.
+ - `src/models/tracking.py`: registro/verificação explícitos; apenas a lista admissível de artefatos é registrada. O banco legado é preservado.
+ - `app/streamlit_app.py`: amostra identificada, faixas centralizadas, inferência sem zeros arbitrários, explicação por registro exato, mapa OpenStreetMap e polígono estadual.
+-- `requirements.lock`, CI e Docker: instalação controlada, matriz sem cancelamento entre versões, logs de ambiente/testes e usuário Docker sem privilégios. Docker runtime permanece não verificado neste host.
++- `requirements.lock`, CI e Docker: instalação controlada, matriz sem cancelamento entre versões, logs de ambiente/testes e usuário Docker sem privilégios. A imagem foi construída e executada no CI Linux; o host Windows não dispõe de Docker.
+ - `run_pipeline.ps1`: falha de comando nativo interrompe o fluxo e restaura o diretório. A antiga limpeza automática de dados/modelos versionados foi desativada para preservar evidências científicas.
+ 
+ ## Modelos, dados e documentação
+diff --git a/reports/AUDITORIA_FINAL.md b/reports/AUDITORIA_FINAL.md
+index 8389e43..465846f 100644
+--- a/reports/AUDITORIA_FINAL.md
++++ b/reports/AUDITORIA_FINAL.md
+@@ -42,10 +42,13 @@ Status “testado” refere-se à evidência indicada, não à conclusão integr
+ | O01 | P1 | Seed Optuna ausente | TPESampler com seed, parâmetros determinísticos e limite de threads | Novos treinamentos e metadados; treino bit a bit entre sistemas não alegado | Corrigido e executado localmente |
+ | O02 | P1 | Tracking falhava silenciosamente; SQLAlchemy resolvido também quebrou em runtime | tracking.py estrito, pin transitivo e recuperação explícita | Runs FINISHED e métricas consultados; logs da falha inicial preservados | Corrigido e testado |
+ | O03 | P1 | DVC omitia entradas brutas/imports e pathspec incompatível | DAG expandido e pin; execução no PATH do ambiente correto | Logs de dag/repro e dvc.lock quando produzido | Consultar execução final, sem equiparar DAG a reprodução |
+-| O04 | P2 | Docker não comprovado e contexto incluía dados privados/venv | Lock, usuário sem privilégios e .dockerignore | Revisão estática; executável Docker ausente | Corrigido por inspeção; runtime pendente |
++| O04 | P2 | Docker não comprovado e contexto incluía dados privados/venv | Lock CPU, base com digest, usuário sem privilégios e .dockerignore | CI Linux construiu a imagem, verificou hashes/UID/health e exerceu 12 HTTPs na API e inicialização Streamlit | Corrigido e testado remotamente; logs em TESTES_E_CI |
+ | O05 | P1 | Script Windows ignorava código de saída nativo; clean apagava artefatos | Wrapper falha explicitamente; limpeza automática desativada | Verificações de script e comando de teste | Corrigido; evidência em TESTES_E_CI |
+ | C01 | P1 | READMEs misturavam métricas/protocolos e conclusões excessivas | Arquivo histórico, geradores de tabelas e relatórios proporcionais | Geradores --check e testes detectam divergência CSV/metadados | Corrigido e testado |
+ | C02 | P2 | Notebooks e figuras traziam resultados antigos como atuais | Notebooks somente de leitura reconstruídos e figuras derivadas dos CSVs atuais | Logs de execução dos notebooks e figuras | Verificação final em TESTES_E_CI |
++| C03 | P1 | Git convertia CRLF para LF em JSON/CSV identificados por hashes exatos, quebrando a validação Linux | .gitattributes e renormalização seletiva preservam bytes de modelos/metadados/dados | Falha remota com 86 aprovados/1 reprovado preservada em evidence/ci-first-candidate-failure.txt; hash do blob Git conferido com o manifesto | Correção aplicada; execução Linux em TESTES_E_CI |
++| O06 | P1 | --index-url no lock descartava o índice CPU passado somente pela CLI | requirements-cpu.lock regenerado com os dois índices emitidos | Falha de instalação em evidence/ci-cpu-index-failure.txt; probe pip do wheel Linux aprovado após correção | Correção aplicada; execução Linux em TESTES_E_CI |
++| O07 | P1 | Execução “all” não atualizava fingerprints dos modelos após retreino | Makefile/run_pipeline.ps1 finalizam artefatos; dvc.yaml inclui artifact_bundle | Estágio novo executado com sucesso, hash verificado e dvc status vazio; runner PowerShell executou 87 testes | Corrigido e verificado no fluxo de fechamento; retreino integral anterior registrado separadamente |
+ | P01 | P1 | Dashboard tinha legenda divergente, fallback e tiles com chave | Tiers centralizados, inferência compartilhada, dados exatos e OpenStreetMap | AppTest; navegador em cinco abas; screenshots desktop/mobile | Corrigido e testado |
+ 
+ ## Descobertas e limites
+diff --git a/reports/PENDENCIAS_REAIS.md b/reports/PENDENCIAS_REAIS.md
+index f95f197..800c182 100644
+--- a/reports/PENDENCIAS_REAIS.md
++++ b/reports/PENDENCIAS_REAIS.md
+@@ -7,7 +7,6 @@ Este documento diferencia limitações ainda abertas das verificações locais c
+ | Dependente de metadados de origem | Confirmar respostas climáticas originais | POWER legada usa o padrão LST, sem cabeçalhos arquivados. O calendário dos 290.019 focos foi verificado e não muda sob offsets regionais testados; não se presume erro de data. Recuperar metadados climáticos e versões de fonte, ou reaquiri-los com base temporal explícita, antes de afirmar proveniência diária integral |
+ | Dependente de dados históricos | Validar disponibilidade em D | Não foram arquivados horários de publicação. Obter fontes com versões/horários de emissão ou avaliar política explícita de atraso; separar testes de previsão meteorológica arquivada |
+ | Dependente de infraestrutura | Previsão operacional | Não existe ingestão contínua, validação em tempo de emissão, monitoramento de SLA e estudo operacional. A API retorna 503 |
+-| Dependente de infraestrutura | Docker runtime | Executável Docker ausente no host. Construir imagem, iniciar container e exercer endpoints/healthcheck em máquina com Docker |
+ | Dependente de plataforma externa | Demo pública | Sem deployment Streamlit/Space autenticado validado. Publicar o candidato, testar as cinco abas e os três horizontes e só então divulgar a URL |
+ | Dependente de permissão externa | Criar pull request | O push da branch de auditoria foi autorizado e concluído, mas a integração GitHub respondeu 403 ao criar PR. Abrir pelo comparador da branch ou conceder a permissão específica de pull requests. O CI da auditoria roda por push |
+ | Dependente de revisão externa | Submissão científica | Revisão atual é interna. Resolver proveniência temporal, auditar os novos resultados e buscar replicação/revisão independente antes de alegar prontidão acadêmica |
+@@ -19,6 +18,6 @@ Este documento diferencia limitações ainda abertas das verificações locais c
+ | Pendente de proveniência | Vintage/CRS explícitos do polígono | GeoJSON arquivado não inclui ano e CRS explícitos. Recuperar metadados oficiais correspondentes ao hash, sem substituir silenciosamente a geometria |
+ | Pendente de distribuição | Dados públicos versionados | Manifesto refere-se a arquivos locais. Definir arquivo público autorizado com licença/proveniência, hashes e controle de versão; um DAG não distribui as entradas |
+ 
+-Corrigidos e testados: contratos de inferência e dados ausentes; testes determinísticos; modelo/calibrador por horizonte; inferência de artefatos; validação de ponto; rótulos e embargo; tabelas contra metadados; comparação pareada e experimentos executados. A matriz detalhada está em [AUDITORIA_FINAL](AUDITORIA_FINAL.md).
++Corrigidos e testados: contratos de inferência e dados ausentes; testes determinísticos; modelo/calibrador por horizonte; inferência de artefatos; validação de ponto; rótulos e embargo; tabelas contra metadados; comparação pareada e experimentos executados; construção e execução Docker no CI Linux. A matriz detalhada está em [AUDITORIA_FINAL](AUDITORIA_FINAL.md).
+ 
+ CI remoto, reprodução DVC e testes finais devem ser lidos pelo status efetivamente registrado em [TESTES_E_CI](TESTES_E_CI.md), sem assumir que aprovação local equivale a aprovação no GitHub.
+diff --git a/reports/REPRODUCIBILIDADE.md b/reports/REPRODUCIBILIDADE.md
+index 26333c1..5fe4d89 100644
+--- a/reports/REPRODUCIBILIDADE.md
++++ b/reports/REPRODUCIBILIDADE.md
+@@ -12,7 +12,7 @@ python -m pip install --require-hashes --extra-index-url https://download.pytorc
+ python -m pip check
+ ```
+ 
+-`requirements.txt` fixa dependências diretas. `requirements.lock` preserva a resolução genérica que fundamenta a execução científica local, incluindo dependências CUDA em Linux. `requirements-cpu.lock` é a variante recomendada para CI, Docker e demonstração: inclui hashes dos wheels CPU e evita instalar bibliotecas CUDA sem uso. A versão pública dos pacotes científicos é a mesma; a variante CPU explicita o sufixo do wheel por plataforma. Todas as entradas instaladas por esse comando estão sujeitas à verificação de hashes.
++`requirements.txt` fixa dependências diretas. `requirements.lock` preserva a resolução genérica que fundamenta a execução científica local, incluindo dependências CUDA em Linux. `requirements-cpu.lock` é a variante recomendada para CI, Docker e demonstração: inclui hashes dos wheels CPU e evita instalar bibliotecas CUDA sem uso. A versão pública dos pacotes científicos é a mesma; a variante CPU explicita o sufixo do wheel por plataforma. Todas as entradas instaladas por esse comando estão sujeitas à verificação de hashes. O lock declara os dois índices explicitamente: uma linha `--index-url` no arquivo de requisitos redefine os índices do pip e descarta um índice extra passado somente pela linha de comando. A falha foi observada no CI e reproduzida com um probe isolado; o lock corrigido mantém PyPI e o índice CPU no próprio arquivo.
+ 
+ Atualização deliberada do lock:
+ 
+@@ -109,4 +109,6 @@ A suíte padrão usa fixtures sintéticas explícitas, artefatos versionados e a
+ 
+ Para repetir a captura visual: instale `playwright` como ferramenta de verificação opcional e execute `python scripts/smoke_dashboard.py` com Chrome disponível. O script cria um servidor local temporário, visita cinco abas, captura dois viewports e encerra seu processo. Não é um deploy público.
+ 
+-Docker não estava disponível no host; o Dockerfile foi revisado e usa lock e usuário sem privilégios, mas construção e execução precisam de um ambiente com Docker. Consulte [PUBLICACAO](../docs/PUBLICACAO.md).
++O Docker não está disponível no host Windows, mas a imagem foi construída e executada no CI Linux. A validação inclui hashes dos artefatos, usuário UID 1000, healthcheck da API, 12 requisições reais e inicialização HTTP do Streamlit. O browser das cinco abas foi validado localmente, em uma execução separada. O Dockerfile fixa o digest da imagem base efetivamente usada, além do lock CPU; pacotes do sistema apt ainda dependem do repositório no momento da construção. Consulte [TESTES_E_CI](TESTES_E_CI.md) e [PUBLICACAO](../docs/PUBLICACAO.md).
++
++`make all` e `run_pipeline.ps1 -Task all` regeneram também diagnósticos, figuras, amostra, manifesto de dados, tabelas e manifesto do bundle antes dos testes. Após um novo treinamento, não se deve reutilizar fingerprints antigos. O DVC inclui `artifact_bundle`, dependente de todos os modelos admissíveis e dos metadados, para atualizar esse manifesto automaticamente. A execução desse estágio e o estado final vazio estão em [dvc-artifact-bundle.json](evidence/dvc-artifact-bundle.json).
+diff --git a/reports/TESTES_E_CI.md b/reports/TESTES_E_CI.md
+index 7b2c982..92945a5 100644
+--- a/reports/TESTES_E_CI.md
++++ b/reports/TESTES_E_CI.md
+@@ -34,23 +34,40 @@ Os logs finais, XMLs por versão, manifesto, notebooks, execução DVC e eventua
+ 
+ <!-- BEGIN FINAL VALIDATION -->
+ 
+-Snapshot Git `429c46f`, extra?do por `git archive`, sem diret?rios de dados privados. Verifica??o em dois interpretadores isolados:
++Snapshot Git `de081a0`, extraído por `git archive`, sem diretórios de dados privados. Verificação em dois interpretadores isolados, repetida após corrigir o lock CPU e preservar bytes dos artefatos:
+ 
+ | Ambiente | Testes | Falhas | Erros | Skips | Segundos |
+ |---|---|---|---|---|---|
+-| py311 | 87 | 0 | 0 | 0 | 5.288 |
+-| py312 | 87 | 0 | 0 | 0 | 4.940 |
++| py311 | 87 | 0 | 0 | 0 | 5.090 |
++| py312 | 87 | 0 | 0 | 0 | 5.026 |
+ 
+ Logs: [3.11](evidence/clean-py311.txt), [3.12](evidence/clean-py312.txt), [snapshot e comandos](evidence/clean-snapshot-validation.json). Ruff aprovado; bundle de artefatos e ambos os geradores conferidos no snapshot.
+ 
+-A reprodu??o DVC executou os oito est?gios cient?ficos originais expandidos e dois est?gios finais de diagn?stico/figuras; `dvc repro` e `dvc status --json` retornaram c?digo 0, com estado final `{}`. Evid?ncia: [dvc-verified.json](evidence/dvc-verified.json), [execu??o completa](evidence/dvc-repro-locked.txt), [est?gios complementares](evidence/dvc-repro-final-stages.txt). As entradas brutas j? estavam no disco; n?o ? uma reaquisi??o independente.
++A reprodução DVC executou os oito estágios científicos originais expandidos e dois estágios finais de diagnóstico/figuras; `dvc repro` e `dvc status --json` retornaram código 0, com estado final `{}`. Evidência: [dvc-verified.json](evidence/dvc-verified.json), [execução completa](evidence/dvc-repro-locked.txt), [estágios complementares](evidence/dvc-repro-final-stages.txt). As entradas brutas já estavam no disco; não é uma reaquisição independente.
+ 
+-Os dois notebooks foram executados sem erros de c?lula: [log](evidence/executed-notebooks.txt). A API respondeu 12 requisi??es HTTP reais nos cen?rios documentados: [exemplos](evidence/real-http-examples.json). O manifesto final foi verificado: [log](evidence/final-manifest-verification.txt). Links locais foram verificados nos documentos atuais; snapshots hist?ricos s?o exclu?dos dessa checagem.
++Os dois notebooks foram executados sem erros de célula: [log](evidence/executed-notebooks.txt). A API respondeu 12 requisições HTTP reais nos cenários documentados: [exemplos](evidence/real-http-examples.json). O manifesto final foi verificado: [log](evidence/final-manifest-verification.txt). Links locais foram verificados em 23 documentos atuais; snapshots históricos são excluídos dessa checagem.
+ 
+-CI remoto do candidato: pendente de execu??o no GitHub Actions. A falha do commit inicial permanece registrada acima.
++CI remoto do candidato: consultar as execuções e os logs abaixo. A falha do commit inicial permanece registrada acima.
+ 
+ <!-- END FINAL VALIDATION -->
+ 
++## CI remoto confirmado
++
++O [run 40022557955](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022557955), do commit `de081a0`, terminou com **success** nos dois jobs Ubuntu 24.04.5. Cada job instalou o lock CPU com hashes, executou `pip check`, Ruff, pytest e os dois geradores em modo `--check`.
++
++| Ambiente remoto | Aprovados | Reprovados | Tempo pytest | Log preservado |
++|---|---|---|---|---|
++| CPython 3.11.17 / Linux | 87 | 0 | 5,61 s | [py311](evidence/ci-linux-py311.txt) |
++| CPython 3.12.15 / Linux | 87 | 0 | 7,12 s | [py312](evidence/ci-linux-py312.txt) |
++
++Falhas intermediárias permanecem disponíveis: [hash de metadados convertido por Git](evidence/ci-first-candidate-failure.txt), com 86 aprovados/1 reprovado; [índice CPU descartado pelo pip](evidence/ci-cpu-index-failure.txt), que interrompeu a instalação. A correção preserva os bytes científicos e emite os dois índices no lock. A aprovação acima pertence à branch de auditoria; `main` não foi atualizada por merge.
++
++O [run 40022809405](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022809405), do commit `0c125c3`, também terminou com **success**: ambos os jobs Python e o job Docker. O job [120652253266](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022809405/job/120652253266) construiu a imagem CPU, conferiu o bundle, confirmou UID 1000 e API saudável, executou 12 requisições HTTP e iniciou o Streamlit com respostas 200 no health e na página inicial. Não equivale a testar todas as abas no navegador dentro do container.
++
++Evidência Docker: [log selecionado](evidence/ci-docker.txt), [inspeção da imagem](evidence/docker-ci/docker-image.json), [containers](evidence/docker-ci/docker-containers.json), [12 respostas](evidence/docker-ci/docker-http-examples.json). ZIP original do artefato 12530669540: SHA256 `9121ad69ed6137c9c781bbb2209d3ec30a1ba4ae07f96f32b36cde3f73fddc40`. Imagem medida: 2.803.225.623 bytes, ID `sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b`; inclui ambiente de pesquisa, não somente dependências mínimas de serving. O estado capturado do dashboard era `starting`, embora os endpoints HTTP já respondessem; o workflow subsequente passa a aguardar também seu healthcheck Docker.
++
++O estágio complementar `artifact_bundle` do DVC foi executado após essa revisão: [comandos, saídas e exit codes](evidence/dvc-artifact-bundle.json). O DAG atual tem onze estágios e `dvc status --json` continuou `{}`. O runner PowerShell revisado executou a suíte com **87 aprovados**, [log](evidence/powershell-runner-final.txt). O treinamento integral registrado anteriormente não foi repetido por uma mudança de orquestração; os modelos e resultados científicos permanecem os mesmos.
++
+ ## Comandos
+ 
+ ```bash
+@@ -63,4 +80,4 @@ python -m src.data.manifest --verify
+ python -m dvc status
+ ```
+ 
+-Docker não foi executado porque o host não oferece o binário. Deploy público e benchmark operacional não foram executados. Testes locais Windows não comprovam por si só compatibilidade Linux/macOS; o CI remoto precisa confirmar seu próprio ambiente.
++Docker foi executado no CI Linux; o host Windows continua sem o binário. Deploy público e benchmark operacional não foram executados. A inferência e os testes foram verificados em Windows/Linux; macOS e treinamento bit a bit idêntico entre plataformas não foram verificados.
+diff --git a/reports/evidence/api-server.txt b/reports/evidence/api-server.txt
+index 732d7f7..a05e4da 100644
+--- a/reports/evidence/api-server.txt
++++ b/reports/evidence/api-server.txt
+@@ -1,41 +1,41 @@
+-INFO:     Started server process [21516]
++INFO:     Started server process [15400]
+ INFO:     Waiting for application startup.
+ INFO:     Application startup complete.
+ INFO:     Uvicorn running on http://127.0.0.1:8005 (Press CTRL+C to quit)
+-INFO:     127.0.0.1:49512 - "GET /health HTTP/1.1" 200 OK
+-INFO:     127.0.0.1:49514 - "GET / HTTP/1.1" 200 OK
+-INFO:     127.0.0.1:49515 - "GET /health HTTP/1.1" 200 OK
+-INFO:     127.0.0.1:49516 - "GET /drift HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50477 - "GET /health HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50478 - "GET / HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50479 - "GET /health HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50480 - "GET /drift HTTP/1.1" 200 OK
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+-INFO:     127.0.0.1:49517 - "POST /predict HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50481 - "POST /predict HTTP/1.1" 200 OK
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+-INFO:     127.0.0.1:49518 - "POST /explain HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50482 - "POST /explain HTTP/1.1" 200 OK
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+-INFO:     127.0.0.1:49519 - "POST /predict HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50483 - "POST /predict HTTP/1.1" 200 OK
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+-INFO:     127.0.0.1:49520 - "POST /explain HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50484 - "POST /explain HTTP/1.1" 200 OK
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+-INFO:     127.0.0.1:49521 - "POST /predict HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50485 - "POST /predict HTTP/1.1" 200 OK
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+   warnings.warn(
+-INFO:     127.0.0.1:49522 - "POST /explain HTTP/1.1" 200 OK
+-INFO:     127.0.0.1:49523 - "POST /predict HTTP/1.1" 404 Not Found
+-INFO:     127.0.0.1:49524 - "POST /predict HTTP/1.1" 422 Unprocessable Entity
+-INFO:     127.0.0.1:49525 - "POST /predict HTTP/1.1" 503 Service Unavailable
++INFO:     127.0.0.1:50486 - "POST /explain HTTP/1.1" 200 OK
++INFO:     127.0.0.1:50487 - "POST /predict HTTP/1.1" 404 Not Found
++INFO:     127.0.0.1:50488 - "POST /predict HTTP/1.1" 422 Unprocessable Entity
++INFO:     127.0.0.1:50489 - "POST /predict HTTP/1.1" 503 Service Unavailable
+diff --git a/reports/evidence/ci-docker.txt b/reports/evidence/ci-docker.txt
+new file mode 100644
+index 0000000..9e6bf4a
+--- /dev/null
++++ b/reports/evidence/ci-docker.txt
+@@ -0,0 +1,100 @@
++Source: https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022809405
++Commit: 0c125c3c7a1f9d705bcddd4006758cac5a30f863
++Job: 120652253266, completed/success
++Selected verbatim log excerpts:
++2026-10-23T20:58:20.3864538Z #10 88.05 No broken requirements found.
++2026-10-23T20:58:34.5488635Z #13 writing image sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b done
++Run mkdir -p reports/evidence
++2026-10-23T20:58:34.5567080Z [36;1mmkdir -p reports/evidence[0m
++2026-10-23T20:58:34.5567342Z [36;1mdocker run --detach --name wildfire-api --publish 127.0.0.1:8000:8000 wildfire-audit:ci[0m
++2026-10-23T20:58:34.5567703Z [36;1mcurl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8000/health[0m
++2026-10-23T20:58:34.5568004Z [36;1mdocker exec wildfire-api python -m src.models.artifacts --verify[0m
++2026-10-23T20:58:34.5568645Z [36;1mdocker exec wildfire-api python scripts/smoke_api.py --base-url http://127.0.0.1:8000[0m
++2026-10-23T20:58:34.5569044Z [36;1mdocker cp wildfire-api:/app/reports/evidence/real-http-examples.json reports/evidence/docker-http-examples.json[0m
++2026-10-23T20:58:34.5569364Z [36;1mtest "$(docker exec wildfire-api id -u)" = 1000[0m
++2026-10-23T20:58:34.5569543Z [36;1mfor attempt in $(seq 1 30); do[0m
++2026-10-23T20:58:34.5569838Z [36;1m  if test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-api)" = healthy; then break; fi[0m
++2026-10-23T20:58:34.5570099Z [36;1m  sleep 2[0m
++2026-10-23T20:58:34.5570214Z [36;1mdone[0m
++2026-10-23T20:58:34.5570412Z [36;1mtest "$(docker inspect --format '{{.State.Health.Status}}' wildfire-api)" = healthy[0m
++2026-10-23T20:58:34.5570724Z [36;1mdocker image inspect wildfire-audit:ci > reports/evidence/docker-image.json[0m
++2026-10-23T20:58:34.5625060Z shell: /usr/bin/bash -e {0}
++2026-10-23T20:58:34.5625228Z ##[endgroup]
++2026-10-23T20:58:34.5976059Z 954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7
++2026-10-23T20:58:35.0962210Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
++2026-10-23T20:58:35.0962617Z                                  Dload  Upload   Total   Spent    Left  Speed
++2026-10-23T20:58:35.0962836Z 
++2026-10-23T20:58:35.0968323Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
++2026-10-23T20:58:35.0968913Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
++2026-10-23T20:58:35.0969164Z curl: (56) Recv failure: Connection reset by peer
++2026-10-23T20:58:35.0969401Z Warning: Problem (retrying all errors). Will retry in 2 seconds. 30 retries 
++2026-10-23T20:58:35.0969608Z Warning: left.
++2026-10-23T20:58:37.0990224Z 
++2026-10-23T20:58:37.1079283Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
++2026-10-23T20:58:37.1079700Z 100   219  100   219    0     0  24559      0 --:--:-- --:--:-- --:--:-- 27375
++2026-10-23T20:58:37.6926864Z {"status":"ok","model_loaded":true,"available_horizons":[1,3,7],"supported_inference_modes":{"historical_replay":"Exact cell/date lookup; publication time unknown","operational_forecast":"Unavailable; not implemented"}}Model bundle verified
++2026-10-23T20:58:38.1259001Z Verified 12 actual HTTP responses
++2026-10-23T20:58:40.2296699Z ##[group]Run docker run --detach --name wildfire-dashboard --publish 127.0.0.1:8501:8501 \
++2026-10-23T20:58:40.2297067Z [36;1mdocker run --detach --name wildfire-dashboard --publish 127.0.0.1:8501:8501 \[0m
++2026-10-23T20:58:40.2297390Z [36;1m  --health-cmd 'curl --fail --silent http://localhost:8501/_stcore/health' \[0m
++2026-10-23T20:58:40.2297653Z [36;1m  --health-interval 2s --health-start-period 5s \[0m
++2026-10-23T20:58:40.2297943Z [36;1m  wildfire-audit:ci python -m streamlit run app/streamlit_app.py --server.address 0.0.0.0[0m
++2026-10-23T20:58:40.2298537Z [36;1mcurl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8501/_stcore/health[0m
++2026-10-23T20:58:40.2298875Z [36;1mcurl --fail http://127.0.0.1:8501/ > reports/evidence/docker-streamlit.html[0m
++2026-10-23T20:58:40.2352005Z shell: /usr/bin/bash -e {0}
++2026-10-23T20:58:40.2352149Z ##[endgroup]
++2026-10-23T20:58:40.2681040Z 2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a
++2026-10-23T20:58:40.3581186Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
++2026-10-23T20:58:40.3581855Z                                  Dload  Upload   Total   Spent    Left  Speed
++2026-10-23T20:58:40.3582193Z 
++2026-10-23T20:58:40.3598888Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
++2026-10-23T20:58:40.3599548Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
++2026-10-23T20:58:40.3600001Z curl: (56) Recv failure: Connection reset by peer
++2026-10-23T20:58:40.3600263Z Warning: Problem (retrying all errors). Will retry in 2 seconds. 30 retries 
++2026-10-23T20:58:40.3600725Z Warning: left.
++2026-10-23T20:58:42.3614601Z 
++2026-10-23T20:58:42.3633266Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
++2026-10-23T20:58:42.3633758Z 100     2  100     2    0     0   1034      0 --:--:-- --:--:-- --:--:--  2000
++2026-10-23T20:58:42.3686317Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
++2026-10-23T20:58:42.3686707Z                                  Dload  Upload   Total   Spent    Left  Speed
++2026-10-23T20:58:42.3686919Z 
++2026-10-23T20:58:42.3699432Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
++2026-10-23T20:58:42.3700085Z 100   891  100   891    0     0   636k      0 --:--:-- --:--:-- --:--:--  870k
++2026-10-23T20:58:42.3708044Z ok
++2026-10-23T20:58:42.3734539Z ##[group]Run mkdir -p reports/evidence
++2026-10-23T20:58:42.3734752Z [36;1mmkdir -p reports/evidence[0m
++2026-10-23T20:58:42.3734971Z [36;1mdocker logs wildfire-api > reports/evidence/docker-api.log 2>&1 || true[0m
++2026-10-23T20:58:42.3735291Z [36;1mdocker logs wildfire-dashboard > reports/evidence/docker-dashboard.log 2>&1 || true[0m
++2026-10-23T20:58:42.3735642Z [36;1mdocker inspect wildfire-api wildfire-dashboard > reports/evidence/docker-containers.json || true[0m
++2026-10-23T20:58:42.3789543Z shell: /usr/bin/bash -e {0}
++2026-10-23T20:58:42.3789685Z ##[endgroup]
++2026-10-23T20:58:42.4198581Z ##[group]Run actions/upload-artifact@v4
++2026-10-23T20:58:42.4198750Z with:
++2026-10-23T20:58:42.4198873Z   name: validation-docker
++2026-10-23T20:58:42.4199016Z   path: reports/evidence/docker-*
++2026-10-23T20:58:42.4199164Z   if-no-files-found: warn
++2026-10-23T20:58:42.4199296Z   compression-level: 6
++2026-10-23T20:58:42.4199425Z   overwrite: false
++2026-10-23T20:58:42.4199549Z   include-hidden-files: false
++2026-10-23T20:58:42.4199687Z ##[endgroup]
++2026-10-23T20:58:42.5248706Z (node:3679) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
++2026-10-23T20:58:42.5249190Z (Use `node --trace-deprecation ...` to show where the warning was created)
++2026-10-23T20:58:42.5350870Z With the provided path, there will be 6 files uploaded
++2026-10-23T20:58:42.5352607Z Artifact name is valid!
++2026-10-23T20:58:42.5353283Z Root directory input is valid!
++2026-10-23T20:58:42.8000885Z Beginning upload of artifact content to blob storage
++2026-10-23T20:58:42.8167465Z (node:3679) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
++2026-10-23T20:58:42.9791017Z Uploaded bytes 10413
++2026-10-23T20:58:43.0271559Z Finished uploading artifact content to blob storage!
++2026-10-23T20:58:43.0272145Z SHA256 digest of uploaded artifact zip is 9121ad69ed6137c9c781bbb2209d3ec30a1ba4ae07f96f32b36cde3f73fddc40
++2026-10-23T20:58:43.0273363Z Finalizing artifact upload
++2026-10-23T20:58:43.4348634Z Artifact validation-docker.zip successfully finalized. Artifact ID 12530669540
++2026-10-23T20:58:43.4349194Z Artifact validation-docker has been successfully uploaded! Final size is 10413 bytes. Artifact ID is 12530669540
++2026-10-23T20:58:43.4354527Z Artifact download URL: https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022809405/artifacts/12530669540
++2026-10-23T20:58:43.4460362Z ##[group]Run docker rm --force wildfire-api wildfire-dashboard || true
++2026-10-23T20:58:43.4460644Z [36;1mdocker rm --force wildfire-api wildfire-dashboard || true[0m
++2026-10-23T20:58:43.4512850Z shell: /usr/bin/bash -e {0}
++2026-10-23T20:58:43.4512997Z ##[endgroup]
++2026-10-23T20:58:43.6222905Z wildfire-api
++2026-10-23T20:58:43.6223161Z wildfire-dashboard
++2026-10-23T20:58:43.6311485Z 
+diff --git a/reports/evidence/ci-linux-py311.txt b/reports/evidence/ci-linux-py311.txt
+new file mode 100644
+index 0000000..006151d
+--- /dev/null
++++ b/reports/evidence/ci-linux-py311.txt
+@@ -0,0 +1,120 @@
++Source: https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022557955
++Commit: de081a04302eb6f5a196123082ebfd9e3953c000
++Job: 120650504551, py311, completed/success (GitHub API verified)
++Selected verbatim log excerpts:
++2026-10-23T20:52:32.3482177Z Successfully set up CPython (3.11.17)
++2026-10-23T20:54:32.8056405Z No broken requirements found.
++2026-10-23T20:54:33.1835340Z All checks passed!
++2026-10-23T20:54:40.1397436Z ============================== 87 passed in 5.61s ==============================
++2026-10-23T20:54:41.0846028Z Documentation metrics verified
++2026-10-23T20:54:41.5053547Z Research documentation verified
++Run python -m pytest tests/ -v --junitxml=test-results.xml
++2026-10-23T20:54:33.1875644Z [36;1mpython -m pytest tests/ -v --junitxml=test-results.xml[0m
++2026-10-23T20:54:33.1937649Z shell: /usr/bin/bash -e {0}
++2026-10-23T20:54:33.1937896Z env:
++2026-10-23T20:54:33.1938178Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
++2026-10-23T20:54:33.1938629Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
++2026-10-23T20:54:33.1939059Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
++2026-10-23T20:54:33.1939445Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
++2026-10-23T20:54:33.1939863Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
++2026-10-23T20:54:33.1940246Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
++2026-10-23T20:54:33.1940568Z ##[endgroup]
++2026-10-23T20:54:34.5275625Z ============================= test session starts ==============================
++2026-10-23T20:54:34.5277054Z platform linux -- Python 3.11.17, pytest-8.3.4, pluggy-1.7.0 -- /opt/hostedtoolcache/Python/3.11.17/x64/bin/python
++2026-10-23T20:54:34.5277955Z cachedir: .pytest_cache
++2026-10-23T20:54:34.5278664Z rootdir: /home/runner/work/brazil-wildfire-risk-forecast/brazil-wildfire-risk-forecast
++2026-10-23T20:54:34.5279526Z configfile: pyproject.toml
++2026-10-23T20:54:34.5280127Z plugins: hydra-core-1.3.7, platformdirs-4.13.5, anyio-4.15.1
++2026-10-23T20:54:35.6820435Z collecting ... collected 87 items
++2026-10-23T20:54:35.6820906Z 
++2026-10-23T20:54:36.1183182Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[1] PASSED [  1%]
++2026-10-23T20:54:36.1373578Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[3] PASSED [  2%]
++2026-10-23T20:54:36.1550174Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[7] PASSED [  3%]
++2026-10-23T20:54:36.1617680Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_polygon] PASSED [  4%]
++2026-10-23T20:54:36.1686733Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_grid_cells] PASSED [  5%]
++2026-10-23T20:54:36.1751737Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_calibrators] PASSED [  6%]
++2026-10-23T20:54:36.1818672Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_models] PASSED [  8%]
++2026-10-23T20:54:36.1884689Z tests/test_api_contract.py::test_point_outside_partial_cell_is_rejected PASSED [  9%]
++2026-10-23T20:54:36.1998811Z tests/test_api_contract.py::test_exact_polygon_boundary_included PASSED  [ 10%]
++2026-10-23T20:54:36.2085322Z tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid0] PASSED [ 11%]
++2026-10-23T20:54:36.2171289Z tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid1] PASSED [ 12%]
++2026-10-23T20:54:36.2291579Z tests/test_api_contract.py::test_invalid_archive_is_not_404[corrupt] PASSED [ 13%]
++2026-10-23T20:54:36.3025265Z tests/test_api_contract.py::test_invalid_archive_is_not_404[missing_column] PASSED [ 14%]
++2026-10-23T20:54:36.3162914Z tests/test_api_contract.py::test_invalid_archive_is_not_404[duplicate] PASSED [ 16%]
++2026-10-23T20:54:36.3295180Z tests/test_api_contract.py::test_invalid_archive_is_not_404[infinite] PASSED [ 17%]
++2026-10-23T20:54:36.3449892Z tests/test_api_contract.py::test_missing_values_preserved PASSED         [ 18%]
++2026-10-23T20:54:36.3581736Z tests/test_api_contract.py::test_internal_error_controlled PASSED        [ 19%]
++2026-10-23T20:54:36.3735165Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[1] PASSED [ 20%]
++2026-10-23T20:54:36.3856912Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[3] PASSED [ 21%]
++2026-10-23T20:54:36.4004787Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[7] PASSED [ 22%]
++2026-10-23T20:54:39.2812447Z tests/test_api_contract.py::test_linear_and_recurrent_bundles_infer PASSED [ 24%]
++2026-10-23T20:54:39.2860099Z tests/test_api_contract.py::test_model_bundle_hashes_match PASSED        [ 25%]
++2026-10-23T20:54:39.3019887Z tests/test_data_integrity.py::test_climate_cache_rejects_incomplete_duplicates_and_fill PASSED [ 26%]
++2026-10-23T20:54:39.3208659Z tests/test_data_integrity.py::test_manifest_verify_does_not_rewrite_and_detects_mutation PASSED [ 27%]
++2026-10-23T20:54:39.3220192Z tests/test_data_integrity.py::test_missing_boundary_does_not_create_unmasked_grid PASSED [ 28%]
++2026-10-23T20:54:39.3233640Z tests/test_data_integrity.py::test_invalid_boundary_fails_explicitly PASSED [ 29%]
++2026-10-23T20:54:39.3299752Z tests/test_pipeline.py::TestGrid::test_grid_has_required_columns PASSED  [ 31%]
++2026-10-23T20:54:39.3362309Z tests/test_pipeline.py::TestGrid::test_grid_cell_count PASSED            [ 32%]
++2026-10-23T20:54:39.3478836Z tests/test_pipeline.py::TestGrid::test_grid_center_within_bounds PASSED  [ 33%]
++2026-10-23T20:54:39.3486673Z tests/test_pipeline.py::TestGrid::test_assign_to_grid PASSED             [ 34%]
++2026-10-23T20:54:39.5502211Z tests/test_pipeline.py::TestGrid::test_grid_ids_unique PASSED            [ 35%]
++2026-10-23T20:54:39.5561337Z tests/test_pipeline.py::TestLeakDetection::test_no_future_leak_in_fire_features PASSED [ 36%]
++2026-10-23T20:54:39.5581449Z tests/test_pipeline.py::TestLeakDetection::test_target_uses_future_data PASSED [ 37%]
++2026-10-23T20:54:39.5589410Z tests/test_pipeline.py::TestLeakDetection::test_temporal_purging_embargo_prevents_leak PASSED [ 39%]
++2026-10-23T20:54:39.5668597Z tests/test_pipeline.py::TestAPI::test_root_endpoint PASSED               [ 40%]
++2026-10-23T20:54:39.5740390Z tests/test_pipeline.py::TestAPI::test_health_endpoint PASSED             [ 41%]
++2026-10-23T20:54:39.5864224Z tests/test_pipeline.py::TestAPI::test_predict_endpoint_schema PASSED     [ 42%]
++2026-10-23T20:54:39.5929311Z tests/test_pipeline.py::TestAPI::test_predict_invalid_coordinates PASSED [ 43%]
++2026-10-23T20:54:39.5996211Z tests/test_pipeline.py::TestAPI::test_predict_outside_mato_grosso PASSED [ 44%]
++2026-10-23T20:54:39.6212024Z tests/test_pipeline.py::TestAPI::test_predict_multi_horizon PASSED       [ 45%]
++2026-10-23T20:54:39.6277851Z tests/test_pipeline.py::TestAPI::test_predict_invalid_horizon PASSED     [ 47%]
++2026-10-23T20:54:39.6403663Z tests/test_pipeline.py::TestAPI::test_explain_endpoint_schema PASSED     [ 48%]
++2026-10-23T20:54:39.6520738Z tests/test_pipeline.py::TestAPI::test_predict_temporal_contract PASSED   [ 49%]
++2026-10-23T20:54:39.6613362Z tests/test_pipeline.py::TestAPI::test_predict_operational_forecast_returns_503 PASSED [ 50%]
++2026-10-23T20:54:39.6711435Z tests/test_pipeline.py::TestAPI::test_predict_missing_record_returns_404 PASSED [ 51%]
++2026-10-23T20:54:39.6747904Z tests/test_pipeline.py::TestDriftDetector::test_psi_identical_distributions PASSED [ 52%]
++2026-10-23T20:54:39.6761765Z tests/test_pipeline.py::TestDriftDetector::test_psi_shifted_distributions PASSED [ 54%]
++2026-10-23T20:54:39.6831920Z tests/test_pipeline.py::TestDriftDetector::test_drift_api_endpoint PASSED [ 55%]
++2026-10-23T20:54:39.7002480Z tests/test_pipeline.py::TestSequentialModel::test_lstm_forward_shape PASSED [ 56%]
++2026-10-23T20:54:39.7029519Z tests/test_pipeline.py::TestDataProcessing::test_config_loads PASSED     [ 57%]
++2026-10-23T20:54:39.7055849Z tests/test_pipeline.py::TestDataProcessing::test_config_has_required_fields PASSED [ 58%]
++2026-10-23T20:54:39.7144633Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_platt_calibrator_fit_and_predict PASSED [ 59%]
++2026-10-23T20:54:39.7154715Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_ece_computation PASSED [ 60%]
++2026-10-23T20:54:39.7163144Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_operational_decision_metrics PASSED [ 62%]
++2026-10-23T20:54:39.9128193Z tests/test_pipeline.py::TestTerritorialMasking::test_grid_status_values PASSED [ 63%]
++2026-10-23T20:54:39.9136713Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_vpd PASSED [ 64%]
++2026-10-23T20:54:39.9144401Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_dtr PASSED [ 65%]
++2026-10-23T20:54:39.9152286Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_fwi_proxy PASSED [ 66%]
++2026-10-23T20:54:39.9206185Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_validate_meteorological_variables PASSED [ 67%]
++2026-10-23T20:54:39.9213615Z tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_classification_ranges PASSED [ 68%]
++2026-10-23T20:54:39.9221368Z tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_metadata_matches_config PASSED [ 70%]
++2026-10-23T20:54:39.9239055Z tests/test_pipeline.py::TestOutOfSampleThresholds::test_threshold_selection_and_application PASSED [ 71%]
++2026-10-23T20:54:39.9249202Z tests/test_pipeline.py::TestArtifactCompatibility::test_platt_calibrator_serialization PASSED [ 72%]
++2026-10-23T20:54:39.9345310Z tests/test_pipeline.py::TestArtifactCompatibility::test_loaded_artifacts_predict_successfully PASSED [ 73%]
++2026-10-23T20:54:39.9556591Z tests/test_reporting.py::test_generated_docs_are_current PASSED          [ 74%]
++2026-10-23T20:54:39.9619974Z tests/test_reporting.py::test_reporting_rejects_conflicting_metrics PASSED [ 75%]
++2026-10-23T20:54:39.9628776Z tests/test_reporting.py::test_no_climate_ablation_excludes_rainfall_accumulations PASSED [ 77%]
++2026-10-23T20:54:39.9649165Z tests/test_reporting.py::test_matched_lstm_report_records_identical_evaluation_rows PASSED [ 78%]
++2026-10-23T20:54:39.9781096Z tests/test_reporting.py::test_research_tables_are_current PASSED         [ 79%]
++2026-10-23T20:54:39.9813866Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-1] PASSED [ 80%]
++2026-10-23T20:54:39.9844073Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-3] PASSED [ 81%]
++2026-10-23T20:54:39.9872872Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-7] PASSED [ 82%]
++2026-10-23T20:54:39.9901582Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-1] PASSED [ 83%]
++2026-10-23T20:54:39.9930003Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-3] PASSED [ 85%]
++2026-10-23T20:54:39.9957946Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-7] PASSED [ 86%]
++2026-10-23T20:54:39.9986796Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-1] PASSED [ 87%]
++2026-10-23T20:54:40.0014836Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-3] PASSED [ 88%]
++2026-10-23T20:54:40.0042834Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-7] PASSED [ 89%]
++2026-10-23T20:54:40.0071157Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-1] PASSED [ 90%]
++2026-10-23T20:54:40.0098399Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-3] PASSED [ 91%]
++2026-10-23T20:54:40.0126161Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-7] PASSED [ 93%]
++2026-10-23T20:54:40.1170869Z tests/test_scientific_contracts.py::test_actual_features_ignore_future_and_preserve_unknown_weather PASSED [ 94%]
++2026-10-23T20:54:40.1181089Z tests/test_scientific_contracts.py::test_unknown_spell_never_becomes_observed_dryness PASSED [ 95%]
++2026-10-23T20:54:40.1217208Z tests/test_scientific_contracts.py::test_sequence_endpoint_includes_issue_day_and_returns_exact_keys PASSED [ 96%]
++2026-10-23T20:54:40.1249497Z tests/test_scientific_contracts.py::test_weighted_bootstrap_metrics_match_expanded_rows PASSED [ 97%]
++2026-10-23T20:54:40.1309715Z tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_zero_difference PASSED [ 98%]
++2026-10-23T20:54:40.1395077Z tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
++2026-10-23T20:54:40.1395905Z 
++2026-10-23T20:54:40.1396672Z - generated xml file: /home/runner/work/brazil-wildfire-risk-forecast/brazil-wildfire-risk-forecast/test-results.xml -
++2026-10-23T20:54:40.1397436Z ============================== 87 passed in 5.61s ==============================
++2026-10-23T20:54:40.6860191Z ##[group]
+diff --git a/reports/evidence/ci-linux-py312.txt b/reports/evidence/ci-linux-py312.txt
+new file mode 100644
+index 0000000..f88a83e
+--- /dev/null
++++ b/reports/evidence/ci-linux-py312.txt
+@@ -0,0 +1,120 @@
++Source: https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40022557955
++Commit: de081a04302eb6f5a196123082ebfd9e3953c000
++Job: 120650504293, py312, completed/success (GitHub API verified)
++Selected verbatim log excerpts:
++2026-10-23T20:52:31.5253116Z Successfully set up CPython (3.12.15)
++2026-10-23T20:54:22.5327858Z No broken requirements found.
++2026-10-23T20:54:22.9923881Z All checks passed!
++2026-10-23T20:54:31.9608480Z ============================== 87 passed in 7.12s ==============================
++2026-10-23T20:54:33.1838611Z Documentation metrics verified
++2026-10-23T20:54:33.7052688Z Research documentation verified
++Run python -m pytest tests/ -v --junitxml=test-results.xml
++2026-10-23T20:54:22.9968219Z [36;1mpython -m pytest tests/ -v --junitxml=test-results.xml[0m
++2026-10-23T20:54:23.0038371Z shell: /usr/bin/bash -e {0}
++2026-10-23T20:54:23.0038663Z env:
++2026-10-23T20:54:23.0038971Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
++2026-10-23T20:54:23.0039472Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
++2026-10-23T20:54:23.0039962Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
++2026-10-23T20:54:23.0040393Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
++2026-10-23T20:54:23.0040827Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
++2026-10-23T20:54:23.0041276Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
++2026-10-23T20:54:23.0041641Z ##[endgroup]
++2026-10-23T20:54:24.8452626Z ============================= test session starts ==============================
++2026-10-23T20:54:24.8454242Z platform linux -- Python 3.12.15, pytest-8.3.4, pluggy-1.7.0 -- /opt/hostedtoolcache/Python/3.12.15/x64/bin/python
++2026-10-23T20:54:24.8455001Z cachedir: .pytest_cache
++2026-10-23T20:54:24.8455594Z rootdir: /home/runner/work/brazil-wildfire-risk-forecast/brazil-wildfire-risk-forecast
++2026-10-23T20:54:24.8456263Z configfile: pyproject.toml
++2026-10-23T20:54:24.8456714Z plugins: hydra-core-1.3.7, platformdirs-4.13.5, anyio-4.15.1
++2026-10-23T20:54:26.2072276Z collecting ... collected 87 items
++2026-10-23T20:54:26.2072730Z 
++2026-10-23T20:54:26.6887091Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[1] PASSED [  1%]
++2026-10-23T20:54:26.7111265Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[3] PASSED [  2%]
++2026-10-23T20:54:26.7335206Z tests/test_api_contract.py::test_exact_record_and_additive_explanation[7] PASSED [  3%]
++2026-10-23T20:54:26.7416238Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_polygon] PASSED [  4%]
++2026-10-23T20:54:26.7490517Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_grid_cells] PASSED [  5%]
++2026-10-23T20:54:26.7566361Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_calibrators] PASSED [  6%]
++2026-10-23T20:54:26.7645575Z tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_models] PASSED [  8%]
++2026-10-23T20:54:26.7719269Z tests/test_api_contract.py::test_point_outside_partial_cell_is_rejected PASSED [  9%]
++2026-10-23T20:54:26.7853000Z tests/test_api_contract.py::test_exact_polygon_boundary_included PASSED  [ 10%]
++2026-10-23T20:54:26.7952175Z tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid0] PASSED [ 11%]
++2026-10-23T20:54:26.8054021Z tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid1] PASSED [ 12%]
++2026-10-23T20:54:26.8199560Z tests/test_api_contract.py::test_invalid_archive_is_not_404[corrupt] PASSED [ 13%]
++2026-10-23T20:54:26.8360469Z tests/test_api_contract.py::test_invalid_archive_is_not_404[missing_column] PASSED [ 14%]
++2026-10-23T20:54:26.8503654Z tests/test_api_contract.py::test_invalid_archive_is_not_404[duplicate] PASSED [ 16%]
++2026-10-23T20:54:26.8654959Z tests/test_api_contract.py::test_invalid_archive_is_not_404[infinite] PASSED [ 17%]
++2026-10-23T20:54:26.8828409Z tests/test_api_contract.py::test_missing_values_preserved PASSED         [ 18%]
++2026-10-23T20:54:26.8973536Z tests/test_api_contract.py::test_internal_error_controlled PASSED        [ 19%]
++2026-10-23T20:54:26.9153750Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[1] PASSED [ 20%]
++2026-10-23T20:54:26.9265913Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[3] PASSED [ 21%]
++2026-10-23T20:54:26.9403815Z tests/test_api_contract.py::test_all_versioned_artifacts_infer[7] PASSED [ 22%]
++2026-10-23T20:54:30.9776185Z tests/test_api_contract.py::test_linear_and_recurrent_bundles_infer PASSED [ 24%]
++2026-10-23T20:54:30.9830628Z tests/test_api_contract.py::test_model_bundle_hashes_match PASSED        [ 25%]
++2026-10-23T20:54:31.0008661Z tests/test_data_integrity.py::test_climate_cache_rejects_incomplete_duplicates_and_fill PASSED [ 26%]
++2026-10-23T20:54:31.0240235Z tests/test_data_integrity.py::test_manifest_verify_does_not_rewrite_and_detects_mutation PASSED [ 27%]
++2026-10-23T20:54:31.0253180Z tests/test_data_integrity.py::test_missing_boundary_does_not_create_unmasked_grid PASSED [ 28%]
++2026-10-23T20:54:31.0269927Z tests/test_data_integrity.py::test_invalid_boundary_fails_explicitly PASSED [ 29%]
++2026-10-23T20:54:31.0342070Z tests/test_pipeline.py::TestGrid::test_grid_has_required_columns PASSED  [ 31%]
++2026-10-23T20:54:31.0406403Z tests/test_pipeline.py::TestGrid::test_grid_cell_count PASSED            [ 32%]
++2026-10-23T20:54:31.0532710Z tests/test_pipeline.py::TestGrid::test_grid_center_within_bounds PASSED  [ 33%]
++2026-10-23T20:54:31.0541428Z tests/test_pipeline.py::TestGrid::test_assign_to_grid PASSED             [ 34%]
++2026-10-23T20:54:31.2704535Z tests/test_pipeline.py::TestGrid::test_grid_ids_unique PASSED            [ 35%]
++2026-10-23T20:54:31.2775255Z tests/test_pipeline.py::TestLeakDetection::test_no_future_leak_in_fire_features PASSED [ 36%]
++2026-10-23T20:54:31.2798881Z tests/test_pipeline.py::TestLeakDetection::test_target_uses_future_data PASSED [ 37%]
++2026-10-23T20:54:31.2808073Z tests/test_pipeline.py::TestLeakDetection::test_temporal_purging_embargo_prevents_leak PASSED [ 39%]
++2026-10-23T20:54:31.2902526Z tests/test_pipeline.py::TestAPI::test_root_endpoint PASSED               [ 40%]
++2026-10-23T20:54:31.2984064Z tests/test_pipeline.py::TestAPI::test_health_endpoint PASSED             [ 41%]
++2026-10-23T20:54:31.3132097Z tests/test_pipeline.py::TestAPI::test_predict_endpoint_schema PASSED     [ 42%]
++2026-10-23T20:54:31.3210026Z tests/test_pipeline.py::TestAPI::test_predict_invalid_coordinates PASSED [ 43%]
++2026-10-23T20:54:31.3287574Z tests/test_pipeline.py::TestAPI::test_predict_outside_mato_grosso PASSED [ 44%]
++2026-10-23T20:54:31.3553141Z tests/test_pipeline.py::TestAPI::test_predict_multi_horizon PASSED       [ 45%]
++2026-10-23T20:54:31.3646856Z tests/test_pipeline.py::TestAPI::test_predict_invalid_horizon PASSED     [ 47%]
++2026-10-23T20:54:31.3818222Z tests/test_pipeline.py::TestAPI::test_explain_endpoint_schema PASSED     [ 48%]
++2026-10-23T20:54:31.3989221Z tests/test_pipeline.py::TestAPI::test_predict_temporal_contract PASSED   [ 49%]
++2026-10-23T20:54:31.4114400Z tests/test_pipeline.py::TestAPI::test_predict_operational_forecast_returns_503 PASSED [ 50%]
++2026-10-23T20:54:31.4270865Z tests/test_pipeline.py::TestAPI::test_predict_missing_record_returns_404 PASSED [ 51%]
++2026-10-23T20:54:31.4317747Z tests/test_pipeline.py::TestDriftDetector::test_psi_identical_distributions PASSED [ 52%]
++2026-10-23T20:54:31.4335213Z tests/test_pipeline.py::TestDriftDetector::test_psi_shifted_distributions PASSED [ 54%]
++2026-10-23T20:54:31.4435102Z tests/test_pipeline.py::TestDriftDetector::test_drift_api_endpoint PASSED [ 55%]
++2026-10-23T20:54:31.4617734Z tests/test_pipeline.py::TestSequentialModel::test_lstm_forward_shape PASSED [ 56%]
++2026-10-23T20:54:31.4649277Z tests/test_pipeline.py::TestDataProcessing::test_config_loads PASSED     [ 57%]
++2026-10-23T20:54:31.4679115Z tests/test_pipeline.py::TestDataProcessing::test_config_has_required_fields PASSED [ 58%]
++2026-10-23T20:54:31.4790927Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_platt_calibrator_fit_and_predict PASSED [ 59%]
++2026-10-23T20:54:31.4804017Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_ece_computation PASSED [ 60%]
++2026-10-23T20:54:31.4813923Z tests/test_pipeline.py::TestCalibrationAndMetrics::test_operational_decision_metrics PASSED [ 62%]
++2026-10-23T20:54:31.6940688Z tests/test_pipeline.py::TestTerritorialMasking::test_grid_status_values PASSED [ 63%]
++2026-10-23T20:54:31.6949832Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_vpd PASSED [ 64%]
++2026-10-23T20:54:31.6958412Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_dtr PASSED [ 65%]
++2026-10-23T20:54:31.6967793Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_fwi_proxy PASSED [ 66%]
++2026-10-23T20:54:31.7031561Z tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_validate_meteorological_variables PASSED [ 67%]
++2026-10-23T20:54:31.7040094Z tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_classification_ranges PASSED [ 68%]
++2026-10-23T20:54:31.7051767Z tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_metadata_matches_config PASSED [ 70%]
++2026-10-23T20:54:31.7074524Z tests/test_pipeline.py::TestOutOfSampleThresholds::test_threshold_selection_and_application PASSED [ 71%]
++2026-10-23T20:54:31.7085704Z tests/test_pipeline.py::TestArtifactCompatibility::test_platt_calibrator_serialization PASSED [ 72%]
++2026-10-23T20:54:31.7204568Z tests/test_pipeline.py::TestArtifactCompatibility::test_loaded_artifacts_predict_successfully PASSED [ 73%]
++2026-10-23T20:54:31.7435561Z tests/test_reporting.py::test_generated_docs_are_current PASSED          [ 74%]
++2026-10-23T20:54:31.7513740Z tests/test_reporting.py::test_reporting_rejects_conflicting_metrics PASSED [ 75%]
++2026-10-23T20:54:31.7522657Z tests/test_reporting.py::test_no_climate_ablation_excludes_rainfall_accumulations PASSED [ 77%]
++2026-10-23T20:54:31.7547015Z tests/test_reporting.py::test_matched_lstm_report_records_identical_evaluation_rows PASSED [ 78%]
++2026-10-23T20:54:31.7704996Z tests/test_reporting.py::test_research_tables_are_current PASSED         [ 79%]
++2026-10-23T20:54:31.7742533Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-1] PASSED [ 80%]
++2026-10-23T20:54:31.7775943Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-3] PASSED [ 81%]
++2026-10-23T20:54:31.7808263Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-7] PASSED [ 82%]
++2026-10-23T20:54:31.7840156Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-1] PASSED [ 83%]
++2026-10-23T20:54:31.7871832Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-3] PASSED [ 85%]
++2026-10-23T20:54:31.7903513Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-7] PASSED [ 86%]
++2026-10-23T20:54:31.7934778Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-1] PASSED [ 87%]
++2026-10-23T20:54:31.7966015Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-3] PASSED [ 88%]
++2026-10-23T20:54:31.7998406Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-7] PASSED [ 89%]
++2026-10-23T20:54:31.8030067Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-1] PASSED [ 90%]
++2026-10-23T20:54:31.8062672Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-3] PASSED [ 91%]
++2026-10-23T20:54:31.8095029Z tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-7] PASSED [ 93%]
++2026-10-23T20:54:31.9334220Z tests/test_scientific_contracts.py::test_actual_features_ignore_future_and_preserve_unknown_weather PASSED [ 94%]
++2026-10-23T20:54:31.9345200Z tests/test_scientific_contracts.py::test_unknown_spell_never_becomes_observed_dryness PASSED [ 95%]
++2026-10-23T20:54:31.9388040Z tests/test_scientific_contracts.py::test_sequence_endpoint_includes_issue_day_and_returns_exact_keys PASSED [ 96%]
++2026-10-23T20:54:31.9426220Z tests/test_scientific_contracts.py::test_weighted_bootstrap_metrics_match_expanded_rows PASSED [ 97%]
++2026-10-23T20:54:31.9499477Z tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_zero_difference PASSED [ 98%]
++2026-10-23T20:54:31.9605180Z tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
++2026-10-23T20:54:31.9606042Z 
++2026-10-23T20:54:31.9607249Z - generated xml file: /home/runner/work/brazil-wildfire-risk-forecast/brazil-wildfire-risk-forecast/test-results.xml -
++2026-10-23T20:54:31.9608480Z ============================== 87 passed in 7.12s ==============================
++2026-10-23T20:54:32.7216158Z ##[group]
+diff --git a/reports/evidence/clean-py311.txt b/reports/evidence/clean-py311.txt
+index 22c6587..798f6a1 100644
+--- a/reports/evidence/clean-py311.txt
++++ b/reports/evidence/clean-py311.txt
+@@ -1,7 +1,7 @@
+ ============================= test session starts =============================
+ platform win32 -- Python 3.11.17, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py311\Scripts\python.exe
+ cachedir: .pytest_cache
+-rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\release-429c46f6fd
++rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\release-de081a0430
+ configfile: pyproject.toml
+ plugins: anyio-4.15.1, hydra-core-1.3.7, platformdirs-4.13.5
+ collecting ... collected 87 items
+@@ -95,4 +95,4 @@ tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_z
+ tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
+ 
+ - generated xml file: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\reports\evidence\clean-py311.xml -
+-============================= 87 passed in 5.29s ==============================
++============================= 87 passed in 5.09s ==============================
+diff --git a/reports/evidence/clean-py311.xml b/reports/evidence/clean-py311.xml
+index 942e08f..69eaafc 100644
+--- a/reports/evidence/clean-py311.xml
++++ b/reports/evidence/clean-py311.xml
+@@ -1 +1 @@
+-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="87" time="5.288" timestamp="2026-10-23T17:38:29.513464-03:00" hostname="EduardoPc"><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[1]" time="0.527" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[3]" time="0.022" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[7]" time="0.019" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_polygon]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_grid_cells]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_calibrators]" time="0.007" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_models]" time="0.007" /><testcase classname="tests.test_api_contract" name="test_point_outside_partial_cell_is_rejected" time="0.007" /><testcase classname="tests.test_api_contract" name="test_exact_polygon_boundary_included" time="0.013" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid0]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid1]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[corrupt]" time="0.014" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[missing_column]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[duplicate]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[infinite]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_missing_values_preserved" time="0.018" /><testcase classname="tests.test_api_contract" name="test_internal_error_controlled" time="0.014" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[1]" time="0.018" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[3]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[7]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_linear_and_recurrent_bundles_infer" time="2.132" /><testcase classname="tests.test_api_contract" name="test_model_bundle_hashes_match" time="0.023" /><testcase classname="tests.test_data_integrity" name="test_climate_cache_rejects_incomplete_duplicates_and_fill" time="0.012" /><testcase classname="tests.test_data_integrity" name="test_manifest_verify_does_not_rewrite_and_detects_mutation" time="0.036" /><testcase classname="tests.test_data_integrity" name="test_missing_boundary_does_not_create_unmasked_grid" time="0.002" /><testcase classname="tests.test_data_integrity" name="test_invalid_boundary_fails_explicitly" time="0.003" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_has_required_columns" time="0.085" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_cell_count" time="0.005" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_center_within_bounds" time="0.010" /><testcase classname="tests.test_pipeline.TestGrid" name="test_assign_to_grid" time="0.000" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_ids_unique" time="0.150" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_no_future_leak_in_fire_features" time="0.004" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_target_uses_future_data" time="0.001" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_temporal_purging_embargo_prevents_leak" time="0.000" /><testcase classname="tests.test_pipeline.TestAPI" name="test_root_endpoint" time="0.017" /><testcase classname="tests.test_pipeline.TestAPI" name="test_health_endpoint" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_coordinates" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_outside_mato_grosso" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_multi_horizon" time="0.022" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_horizon" time="0.007" /><testcase classname="tests.test_pipeline.TestAPI" name="test_explain_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_temporal_contract" time="0.013" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_operational_forecast_returns_503" time="0.009" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_missing_record_returns_404" time="0.011" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_identical_distributions" time="0.016" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_shifted_distributions" time="0.001" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_drift_api_endpoint" time="0.009" /><testcase classname="tests.test_pipeline.TestSequentialModel" name="test_lstm_forward_shape" time="0.014" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_loads" time="0.003" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_has_required_fields" time="0.002" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_platt_calibrator_fit_and_predict" time="0.009" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_ece_computation" time="0.001" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_operational_decision_metrics" time="0.001" /><testcase classname="tests.test_pipeline.TestTerritorialMasking" name="test_grid_status_values" time="0.187" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_vpd" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_dtr" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_fwi_proxy" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_validate_meteorological_variables" time="0.004" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_classification_ranges" time="0.000" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_metadata_matches_config" time="0.000" /><testcase classname="tests.test_pipeline.TestOutOfSampleThresholds" name="test_threshold_selection_and_application" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_platt_calibrator_serialization" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_loaded_artifacts_predict_successfully" time="0.008" /><testcase classname="tests.test_reporting" name="test_generated_docs_are_current" time="0.026" /><testcase classname="tests.test_reporting" name="test_reporting_rejects_conflicting_metrics" time="0.026" /><testcase classname="tests.test_reporting" name="test_no_climate_ablation_excludes_rainfall_accumulations" time="0.005" /><testcase classname="tests.test_reporting" name="test_matched_lstm_report_records_identical_evaluation_rows" time="0.008" /><testcase classname="tests.test_reporting" name="test_research_tables_are_current" time="0.026" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_features_ignore_future_and_preserve_unknown_weather" time="0.082" /><testcase classname="tests.test_scientific_contracts" name="test_unknown_spell_never_becomes_observed_dryness" time="0.001" /><testcase classname="tests.test_scientific_contracts" name="test_sequence_endpoint_includes_issue_day_and_returns_exact_keys" time="0.003" /><testcase classname="tests.test_scientific_contracts" name="test_weighted_bootstrap_metrics_match_expanded_rows" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_paired_bootstrap_identical_models_has_zero_difference" time="0.004" /><testcase classname="tests.test_scientific_contracts" name="test_calibrators_require_fit_and_preserve_extreme_numerics" time="0.007" /></testsuite></testsuites>
+\ No newline at end of file
++<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="87" time="5.090" timestamp="2026-10-23T17:52:31.268981-03:00" hostname="EduardoPc"><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[1]" time="0.504" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[3]" time="0.020" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[7]" time="0.019" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_polygon]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_grid_cells]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_calibrators]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_models]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_point_outside_partial_cell_is_rejected" time="0.008" /><testcase classname="tests.test_api_contract" name="test_exact_polygon_boundary_included" time="0.014" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid0]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid1]" time="0.010" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[corrupt]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[missing_column]" time="0.016" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[duplicate]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[infinite]" time="0.016" /><testcase classname="tests.test_api_contract" name="test_missing_values_preserved" time="0.019" /><testcase classname="tests.test_api_contract" name="test_internal_error_controlled" time="0.015" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[1]" time="0.017" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[3]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[7]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_linear_and_recurrent_bundles_infer" time="2.160" /><testcase classname="tests.test_api_contract" name="test_model_bundle_hashes_match" time="0.019" /><testcase classname="tests.test_data_integrity" name="test_climate_cache_rejects_incomplete_duplicates_and_fill" time="0.012" /><testcase classname="tests.test_data_integrity" name="test_manifest_verify_does_not_rewrite_and_detects_mutation" time="0.024" /><testcase classname="tests.test_data_integrity" name="test_missing_boundary_does_not_create_unmasked_grid" time="0.001" /><testcase classname="tests.test_data_integrity" name="test_invalid_boundary_fails_explicitly" time="0.003" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_has_required_columns" time="0.007" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_cell_count" time="0.007" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_center_within_bounds" time="0.010" /><testcase classname="tests.test_pipeline.TestGrid" name="test_assign_to_grid" time="0.000" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_ids_unique" time="0.154" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_no_future_leak_in_fire_features" time="0.004" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_target_uses_future_data" time="0.001" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_temporal_purging_embargo_prevents_leak" time="0.000" /><testcase classname="tests.test_pipeline.TestAPI" name="test_root_endpoint" time="0.016" /><testcase classname="tests.test_pipeline.TestAPI" name="test_health_endpoint" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_endpoint_schema" time="0.020" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_coordinates" time="0.007" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_outside_mato_grosso" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_multi_horizon" time="0.022" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_horizon" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_explain_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_temporal_contract" time="0.013" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_operational_forecast_returns_503" time="0.010" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_missing_record_returns_404" time="0.012" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_identical_distributions" time="0.006" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_shifted_distributions" time="0.001" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_drift_api_endpoint" time="0.009" /><testcase classname="tests.test_pipeline.TestSequentialModel" name="test_lstm_forward_shape" time="0.014" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_loads" time="0.002" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_has_required_fields" time="0.002" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_platt_calibrator_fit_and_predict" time="0.008" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_ece_computation" time="0.001" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_operational_decision_metrics" time="0.001" /><testcase classname="tests.test_pipeline.TestTerritorialMasking" name="test_grid_status_values" time="0.180" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_vpd" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_dtr" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_fwi_proxy" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_validate_meteorological_variables" time="0.004" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_classification_ranges" time="0.000" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_metadata_matches_config" time="0.000" /><testcase classname="tests.test_pipeline.TestOutOfSampleThresholds" name="test_threshold_selection_and_application" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_platt_calibrator_serialization" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_loaded_artifacts_predict_successfully" time="0.008" /><testcase classname="tests.test_reporting" name="test_generated_docs_are_current" time="0.042" /><testcase classname="tests.test_reporting" name="test_reporting_rejects_conflicting_metrics" time="0.024" /><testcase classname="tests.test_reporting" name="test_no_climate_ablation_excludes_rainfall_accumulations" time="0.006" /><testcase classname="tests.test_reporting" name="test_matched_lstm_report_records_identical_evaluation_rows" time="0.007" /><testcase classname="tests.test_reporting" name="test_research_tables_are_current" time="0.032" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_features_ignore_future_and_preserve_unknown_weather" time="0.076" /><testcase classname="tests.test_scientific_contracts" name="test_unknown_spell_never_becomes_observed_dryness" time="0.001" /><testcase classname="tests.test_scientific_contracts" name="test_sequence_endpoint_includes_issue_day_and_returns_exact_keys" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_weighted_bootstrap_metrics_match_expanded_rows" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_paired_bootstrap_identical_models_has_zero_difference" time="0.004" /><testcase classname="tests.test_scientific_contracts" name="test_calibrators_require_fit_and_preserve_extreme_numerics" time="0.007" /></testsuite></testsuites>
+\ No newline at end of file
+diff --git a/reports/evidence/clean-py312.txt b/reports/evidence/clean-py312.txt
+index f9d9721..4ce5e01 100644
+--- a/reports/evidence/clean-py312.txt
++++ b/reports/evidence/clean-py312.txt
+@@ -1,7 +1,7 @@
+ ============================= test session starts =============================
+ platform win32 -- Python 3.12.10, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Scripts\python.exe
+ cachedir: .pytest_cache
+-rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\release-429c46f6fd
++rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\release-de081a0430
+ configfile: pyproject.toml
+ plugins: anyio-4.15.1, hydra-core-1.3.7, platformdirs-4.13.5
+ collecting ... collected 87 items
+@@ -95,4 +95,4 @@ tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_z
+ tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
+ 
+ - generated xml file: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\reports\evidence\clean-py312.xml -
+-============================= 87 passed in 4.94s ==============================
++============================= 87 passed in 5.03s ==============================
+diff --git a/reports/evidence/clean-py312.xml b/reports/evidence/clean-py312.xml
+index 8bd2617..0ed4ffa 100644
+--- a/reports/evidence/clean-py312.xml
++++ b/reports/evidence/clean-py312.xml
+@@ -1 +1 @@
+-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="87" time="4.940" timestamp="2026-10-23T17:38:36.747566-03:00" hostname="EduardoPc"><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[1]" time="0.498" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[3]" time="0.020" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[7]" time="0.019" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_polygon]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_grid_cells]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_calibrators]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_models]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_point_outside_partial_cell_is_rejected" time="0.007" /><testcase classname="tests.test_api_contract" name="test_exact_polygon_boundary_included" time="0.014" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid0]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid1]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[corrupt]" time="0.014" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[missing_column]" time="0.017" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[duplicate]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[infinite]" time="0.017" /><testcase classname="tests.test_api_contract" name="test_missing_values_preserved" time="0.018" /><testcase classname="tests.test_api_contract" name="test_internal_error_controlled" time="0.015" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[1]" time="0.012" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[3]" time="0.010" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[7]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_linear_and_recurrent_bundles_infer" time="2.108" /><testcase classname="tests.test_api_contract" name="test_model_bundle_hashes_match" time="0.020" /><testcase classname="tests.test_data_integrity" name="test_climate_cache_rejects_incomplete_duplicates_and_fill" time="0.011" /><testcase classname="tests.test_data_integrity" name="test_manifest_verify_does_not_rewrite_and_detects_mutation" time="0.025" /><testcase classname="tests.test_data_integrity" name="test_missing_boundary_does_not_create_unmasked_grid" time="0.002" /><testcase classname="tests.test_data_integrity" name="test_invalid_boundary_fails_explicitly" time="0.003" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_has_required_columns" time="0.006" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_cell_count" time="0.006" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_center_within_bounds" time="0.010" /><testcase classname="tests.test_pipeline.TestGrid" name="test_assign_to_grid" time="0.000" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_ids_unique" time="0.158" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_no_future_leak_in_fire_features" time="0.004" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_target_uses_future_data" time="0.001" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_temporal_purging_embargo_prevents_leak" time="0.000" /><testcase classname="tests.test_pipeline.TestAPI" name="test_root_endpoint" time="0.010" /><testcase classname="tests.test_pipeline.TestAPI" name="test_health_endpoint" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_coordinates" time="0.007" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_outside_mato_grosso" time="0.007" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_multi_horizon" time="0.022" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_horizon" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_explain_endpoint_schema" time="0.013" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_temporal_contract" time="0.013" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_operational_forecast_returns_503" time="0.009" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_missing_record_returns_404" time="0.011" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_identical_distributions" time="0.005" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_shifted_distributions" time="0.001" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_drift_api_endpoint" time="0.008" /><testcase classname="tests.test_pipeline.TestSequentialModel" name="test_lstm_forward_shape" time="0.012" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_loads" time="0.002" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_has_required_fields" time="0.002" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_platt_calibrator_fit_and_predict" time="0.008" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_ece_computation" time="0.001" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_operational_decision_metrics" time="0.001" /><testcase classname="tests.test_pipeline.TestTerritorialMasking" name="test_grid_status_values" time="0.159" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_vpd" time="0.001" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_dtr" time="0.001" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_fwi_proxy" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_validate_meteorological_variables" time="0.004" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_classification_ranges" time="0.000" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_metadata_matches_config" time="0.000" /><testcase classname="tests.test_pipeline.TestOutOfSampleThresholds" name="test_threshold_selection_and_application" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_platt_calibrator_serialization" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_loaded_artifacts_predict_successfully" time="0.008" /><testcase classname="tests.test_reporting" name="test_generated_docs_are_current" time="0.019" /><testcase classname="tests.test_reporting" name="test_reporting_rejects_conflicting_metrics" time="0.017" /><testcase classname="tests.test_reporting" name="test_no_climate_ablation_excludes_rainfall_accumulations" time="0.001" /><testcase classname="tests.test_reporting" name="test_matched_lstm_report_records_identical_evaluation_rows" time="0.002" /><testcase classname="tests.test_reporting" name="test_research_tables_are_current" time="0.011" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_features_ignore_future_and_preserve_unknown_weather" time="0.079" /><testcase classname="tests.test_scientific_contracts" name="test_unknown_spell_never_becomes_observed_dryness" time="0.001" /><testcase classname="tests.test_scientific_contracts" name="test_sequence_endpoint_includes_issue_day_and_returns_exact_keys" time="0.003" /><testcase classname="tests.test_scientific_contracts" name="test_weighted_bootstrap_metrics_match_expanded_rows" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_paired_bootstrap_identical_models_has_zero_difference" time="0.004" /><testcase classname="tests.test_scientific_contracts" name="test_calibrators_require_fit_and_preserve_extreme_numerics" time="0.007" /></testsuite></testsuites>
+\ No newline at end of file
++<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="87" time="5.026" timestamp="2026-10-23T17:52:37.889652-03:00" hostname="EduardoPc"><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[1]" time="0.495" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[3]" time="0.023" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[7]" time="0.021" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_polygon]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_grid_cells]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_calibrators]" time="0.010" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_models]" time="0.010" /><testcase classname="tests.test_api_contract" name="test_point_outside_partial_cell_is_rejected" time="0.010" /><testcase classname="tests.test_api_contract" name="test_exact_polygon_boundary_included" time="0.015" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid0]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid1]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[corrupt]" time="0.014" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[missing_column]" time="0.016" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[duplicate]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[infinite]" time="0.017" /><testcase classname="tests.test_api_contract" name="test_missing_values_preserved" time="0.019" /><testcase classname="tests.test_api_contract" name="test_internal_error_controlled" time="0.016" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[1]" time="0.013" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[3]" time="0.012" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[7]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_linear_and_recurrent_bundles_infer" time="2.115" /><testcase classname="tests.test_api_contract" name="test_model_bundle_hashes_match" time="0.011" /><testcase classname="tests.test_data_integrity" name="test_climate_cache_rejects_incomplete_duplicates_and_fill" time="0.011" /><testcase classname="tests.test_data_integrity" name="test_manifest_verify_does_not_rewrite_and_detects_mutation" time="0.026" /><testcase classname="tests.test_data_integrity" name="test_missing_boundary_does_not_create_unmasked_grid" time="0.001" /><testcase classname="tests.test_data_integrity" name="test_invalid_boundary_fails_explicitly" time="0.003" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_has_required_columns" time="0.005" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_cell_count" time="0.005" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_center_within_bounds" time="0.010" /><testcase classname="tests.test_pipeline.TestGrid" name="test_assign_to_grid" time="0.000" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_ids_unique" time="0.159" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_no_future_leak_in_fire_features" time="0.004" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_target_uses_future_data" time="0.001" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_temporal_purging_embargo_prevents_leak" time="0.000" /><testcase classname="tests.test_pipeline.TestAPI" name="test_root_endpoint" time="0.017" /><testcase classname="tests.test_pipeline.TestAPI" name="test_health_endpoint" time="0.009" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_coordinates" time="0.007" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_outside_mato_grosso" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_multi_horizon" time="0.023" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_horizon" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_explain_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_temporal_contract" time="0.013" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_operational_forecast_returns_503" time="0.010" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_missing_record_returns_404" time="0.011" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_identical_distributions" time="0.006" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_shifted_distributions" time="0.001" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_drift_api_endpoint" time="0.009" /><testcase classname="tests.test_pipeline.TestSequentialModel" name="test_lstm_forward_shape" time="0.012" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_loads" time="0.002" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_has_required_fields" time="0.002" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_platt_calibrator_fit_and_predict" time="0.008" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_ece_computation" time="0.001" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_operational_decision_metrics" time="0.000" /><testcase classname="tests.test_pipeline.TestTerritorialMasking" name="test_grid_status_values" time="0.170" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_vpd" time="0.001" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_dtr" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_fwi_proxy" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_validate_meteorological_variables" time="0.005" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_classification_ranges" time="0.000" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_metadata_matches_config" time="0.000" /><testcase classname="tests.test_pipeline.TestOutOfSampleThresholds" name="test_threshold_selection_and_application" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_platt_calibrator_serialization" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_loaded_artifacts_predict_successfully" time="0.009" /><testcase classname="tests.test_reporting" name="test_generated_docs_are_current" time="0.015" /><testcase classname="tests.test_reporting" name="test_reporting_rejects_conflicting_metrics" time="0.016" /><testcase classname="tests.test_reporting" name="test_no_climate_ablation_excludes_rainfall_accumulations" time="0.001" /><testcase classname="tests.test_reporting" name="test_matched_lstm_report_records_identical_evaluation_rows" time="0.002" /><testcase classname="tests.test_reporting" name="test_research_tables_are_current" time="0.011" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_features_ignore_future_and_preserve_unknown_weather" time="0.081" /><testcase classname="tests.test_scientific_contracts" name="test_unknown_spell_never_becomes_observed_dryness" time="0.001" /><testcase classname="tests.test_scientific_contracts" name="test_sequence_endpoint_includes_issue_day_and_returns_exact_keys" time="0.003" /><testcase classname="tests.test_scientific_contracts" name="test_weighted_bootstrap_metrics_match_expanded_rows" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_paired_bootstrap_identical_models_has_zero_difference" time="0.004" /><testcase classname="tests.test_scientific_contracts" name="test_calibrators_require_fit_and_preserve_extreme_numerics" time="0.007" /></testsuite></testsuites>
+\ No newline at end of file
+diff --git a/reports/evidence/clean-snapshot-validation.json b/reports/evidence/clean-snapshot-validation.json
+index 38c4008..d72dbe2 100644
+--- a/reports/evidence/clean-snapshot-validation.json
++++ b/reports/evidence/clean-snapshot-validation.json
+@@ -1,6 +1,6 @@
+ {
+-  "commit": "429c46f6fda52c25f0356289be2edeefffa361dc",
+-  "snapshot": "release-429c46f6fd",
++  "commit": "de081a04302eb6f5a196123082ebfd9e3953c000",
++  "snapshot": "release-de081a0430",
+   "private_data_present": false,
+   "checks": [
+     {
+@@ -14,7 +14,7 @@
+         "--junitxml=C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\reports\\evidence\\clean-py311.xml"
+       ],
+       "exit_code": 0,
+-      "log_sha256": "50dd46d1a762ef68267adc8e933ab4e758abc2888cb5803cf7cfdfb067a057d4"
++      "log_sha256": "68b19371ba91893ff6fa12e39049b32907023c99e0e5ba78f9e0cb3ea07bf603"
+     },
+     {
+       "interpreter": "py312",
+@@ -27,7 +27,7 @@
+         "--junitxml=C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\reports\\evidence\\clean-py312.xml"
+       ],
+       "exit_code": 0,
+-      "log_sha256": "354de7fc9511652503790b461ce8e651381de790921000c62487054ce3720860"
++      "log_sha256": "59b0a4aef6e3374231813807bea9c32c4fbeb5c5eb38a89df00ca521832ea453"
+     },
+     {
+       "module": "src.models.artifacts",
+diff --git a/reports/evidence/docker-ci/docker-containers.json b/reports/evidence/docker-ci/docker-containers.json
+new file mode 100644
+index 0000000..5d60f23
+--- /dev/null
++++ b/reports/evidence/docker-ci/docker-containers.json
+@@ -0,0 +1,507 @@
++[
++    {
++        "Id": "954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7",
++        "Created": "2026-10-23T20:58:34.581496682Z",
++        "Path": "uvicorn",
++        "Args": [
++            "api.main:app",
++            "--host",
++            "0.0.0.0",
++            "--port",
++            "8000"
++        ],
++        "State": {
++            "Status": "running",
++            "Running": true,
++            "Paused": false,
++            "Restarting": false,
++            "OOMKilled": false,
++            "Dead": false,
++            "Pid": 3342,
++            "ExitCode": 0,
++            "Error": "",
++            "StartedAt": "2026-10-23T20:58:34.604764031Z",
++            "FinishedAt": "0001-01-01T00:00:00Z",
++            "Health": {
++                "Status": "healthy",
++                "FailingStreak": 0,
++                "Log": [
++                    {
++                        "Start": "2026-10-23T20:58:40.088610788Z",
++                        "End": "2026-10-23T20:58:40.117790783Z",
++                        "ExitCode": 0,
++                        "Output": "{\"status\":\"ok\",\"model_loaded\":true,\"available_horizons\":[1,3,7],\"supported_inference_modes\":{\"historical_replay\":\"Exact cell/date lookup; publication time unknown\",\"operational_forecast\":\"Unavailable; not implemented\"}}"
++                    }
++                ]
++            }
++        },
++        "Image": "sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b",
++        "ResolvConfPath": "/var/lib/docker/containers/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7/resolv.conf",
++        "HostnamePath": "/var/lib/docker/containers/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7/hostname",
++        "HostsPath": "/var/lib/docker/containers/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7/hosts",
++        "LogPath": "/var/lib/docker/containers/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7/954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7-json.log",
++        "Name": "/wildfire-api",
++        "RestartCount": 0,
++        "Driver": "overlay2",
++        "Platform": "linux",
++        "MountLabel": "",
++        "ProcessLabel": "",
++        "AppArmorProfile": "docker-default",
++        "ExecIDs": null,
++        "HostConfig": {
++            "Binds": null,
++            "ContainerIDFile": "",
++            "LogConfig": {
++                "Type": "json-file",
++                "Config": {}
++            },
++            "NetworkMode": "bridge",
++            "PortBindings": {
++                "8000/tcp": [
++                    {
++                        "HostIp": "127.0.0.1",
++                        "HostPort": "8000"
++                    }
++                ]
++            },
++            "RestartPolicy": {
++                "Name": "no",
++                "MaximumRetryCount": 0
++            },
++            "AutoRemove": false,
++            "VolumeDriver": "",
++            "VolumesFrom": null,
++            "ConsoleSize": [
++                0,
++                0
++            ],
++            "CapAdd": null,
++            "CapDrop": null,
++            "CgroupnsMode": "private",
++            "Dns": [],
++            "DnsOptions": [],
++            "DnsSearch": [],
++            "ExtraHosts": null,
++            "GroupAdd": null,
++            "IpcMode": "private",
++            "Cgroup": "",
++            "Links": null,
++            "OomScoreAdj": 0,
++            "PidMode": "",
++            "Privileged": false,
++            "PublishAllPorts": false,
++            "ReadonlyRootfs": false,
++            "SecurityOpt": null,
++            "UTSMode": "",
++            "UsernsMode": "",
++            "ShmSize": 67108864,
++            "Runtime": "runc",
++            "Isolation": "",
++            "CpuShares": 0,
++            "Memory": 0,
++            "NanoCpus": 0,
++            "CgroupParent": "",
++            "BlkioWeight": 0,
++            "BlkioWeightDevice": [],
++            "BlkioDeviceReadBps": [],
++            "BlkioDeviceWriteBps": [],
++            "BlkioDeviceReadIOps": [],
++            "BlkioDeviceWriteIOps": [],
++            "CpuPeriod": 0,
++            "CpuQuota": 0,
++            "CpuRealtimePeriod": 0,
++            "CpuRealtimeRuntime": 0,
++            "CpusetCpus": "",
++            "CpusetMems": "",
++            "Devices": [],
++            "DeviceCgroupRules": null,
++            "DeviceRequests": null,
++            "MemoryReservation": 0,
++            "MemorySwap": 0,
++            "MemorySwappiness": null,
++            "OomKillDisable": null,
++            "PidsLimit": null,
++            "Ulimits": [],
++            "CpuCount": 0,
++            "CpuPercent": 0,
++            "IOMaximumIOps": 0,
++            "IOMaximumBandwidth": 0,
++            "MaskedPaths": [
++                "/proc/asound",
++                "/proc/acpi",
++                "/proc/interrupts",
++                "/proc/kcore",
++                "/proc/keys",
++                "/proc/latency_stats",
++                "/proc/timer_list",
++                "/proc/timer_stats",
++                "/proc/sched_debug",
++                "/proc/scsi",
++                "/sys/firmware",
++                "/sys/devices/virtual/powercap"
++            ],
++            "ReadonlyPaths": [
++                "/proc/bus",
++                "/proc/fs",
++                "/proc/irq",
++                "/proc/sys",
++                "/proc/sysrq-trigger"
++            ]
++        },
++        "GraphDriver": {
++            "Data": {
++                "ID": "954a7dce3ece007b5751bc82c16b8db177368518f12770d573aeb3153de22df7",
++                "LowerDir": "/var/lib/docker/overlay2/c72bf4d5c7fdb8bf02423846ddd9785e85b6ec0f7c47e8753279db2c3d9aaa26-init/diff:/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/diff:/var/lib/docker/overlay2/frfptw2mjauxuq8r6jsx0h7ip/diff:/var/lib/docker/overlay2/wvj9hvhvupvypumrgcjjps6kz/diff:/var/lib/docker/overlay2/xovc4t7i190b5lz2mxd7slb60/diff:/var/lib/docker/overlay2/wdvf7f1fkdyb2jpqc2h8hxez9/diff:/var/lib/docker/overlay2/kzedn56qyo19xrx1u6rsrfkaz/diff:/var/lib/docker/overlay2/447b8d7a72f4ee423e2707e3ce9499e2bcc74636b35ccd32dcaf5cd4325be169/diff:/var/lib/docker/overlay2/ab92eaa3a4029cda653d07a350f405bad2f216d2f3459be35b27d9b6f3982963/diff:/var/lib/docker/overlay2/47cd070dbdf820f657567153a97df3559f7156c9eb708e45bbc3c02f43a053b9/diff:/var/lib/docker/overlay2/a0852b9fe756cfcfc62ba73778f38f01157bba82b6c424408bd57ab7f55cd241/diff",
++                "MergedDir": "/var/lib/docker/overlay2/c72bf4d5c7fdb8bf02423846ddd9785e85b6ec0f7c47e8753279db2c3d9aaa26/merged",
++                "UpperDir": "/var/lib/docker/overlay2/c72bf4d5c7fdb8bf02423846ddd9785e85b6ec0f7c47e8753279db2c3d9aaa26/diff",
++                "WorkDir": "/var/lib/docker/overlay2/c72bf4d5c7fdb8bf02423846ddd9785e85b6ec0f7c47e8753279db2c3d9aaa26/work"
++            },
++            "Name": "overlay2"
++        },
++        "Mounts": [],
++        "Config": {
++            "Hostname": "954a7dce3ece",
++            "Domainname": "",
++            "User": "appuser",
++            "AttachStdin": false,
++            "AttachStdout": false,
++            "AttachStderr": false,
++            "ExposedPorts": {
++                "8000/tcp": {},
++                "8501/tcp": {}
++            },
++            "Tty": false,
++            "OpenStdin": false,
++            "StdinOnce": false,
++            "Env": [
++                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
++                "LANG=C.UTF-8",
++                "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
++                "PYTHON_VERSION=3.12.15",
++                "PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
++                "PYTHONDONTWRITEBYTECODE=1",
++                "PYTHONUNBUFFERED=1"
++            ],
++            "Cmd": [
++                "uvicorn",
++                "api.main:app",
++                "--host",
++                "0.0.0.0",
++                "--port",
++                "8000"
++            ],
++            "Healthcheck": {
++                "Test": [
++                    "CMD-SHELL",
++                    "curl --fail --silent http://localhost:8000/health || exit 1"
++                ],
++                "Interval": 30000000000,
++                "Timeout": 10000000000,
++                "StartPeriod": 5000000000,
++                "Retries": 3
++            },
++            "Image": "wildfire-audit:ci",
++            "Volumes": null,
++            "WorkingDir": "/app",
++            "Entrypoint": null,
++            "OnBuild": null,
++            "Labels": {}
++        },
++        "NetworkSettings": {
++            "Bridge": "",
++            "SandboxID": "ab88fd03f3735cab549c877d1d247635bcfbe28ec9146b0f7ca228e5cf77d15a",
++            "SandboxKey": "/var/run/docker/netns/ab88fd03f373",
++            "Ports": {
++                "8000/tcp": [
++                    {
++                        "HostIp": "127.0.0.1",
++                        "HostPort": "8000"
++                    }
++                ],
++                "8501/tcp": null
++            },
++            "HairpinMode": false,
++            "LinkLocalIPv6Address": "",
++            "LinkLocalIPv6PrefixLen": 0,
++            "SecondaryIPAddresses": null,
++            "SecondaryIPv6Addresses": null,
++            "EndpointID": "4ad81a0a51009ef59e0554408cd2f1ab20af22fb0895af60e4d294edd7893eb3",
++            "Gateway": "172.17.0.1",
++            "GlobalIPv6Address": "",
++            "GlobalIPv6PrefixLen": 0,
++            "IPAddress": "172.17.0.2",
++            "IPPrefixLen": 16,
++            "IPv6Gateway": "",
++            "MacAddress": "52:9c:8f:74:3b:10",
++            "Networks": {
++                "bridge": {
++                    "IPAMConfig": null,
++                    "Links": null,
++                    "Aliases": null,
++                    "MacAddress": "52:9c:8f:74:3b:10",
++                    "DriverOpts": null,
++                    "GwPriority": 0,
++                    "NetworkID": "861cdf95167dd3a54f8442c5fe5789b25f9200214b4eb05215db35a1724b8c8f",
++                    "EndpointID": "4ad81a0a51009ef59e0554408cd2f1ab20af22fb0895af60e4d294edd7893eb3",
++                    "Gateway": "172.17.0.1",
++                    "IPAddress": "172.17.0.2",
++                    "IPPrefixLen": 16,
++                    "IPv6Gateway": "",
++                    "GlobalIPv6Address": "",
++                    "GlobalIPv6PrefixLen": 0,
++                    "DNSNames": null
++                }
++            }
++        }
++    },
++    {
++        "Id": "2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a",
++        "Created": "2026-10-23T20:58:40.25006448Z",
++        "Path": "python",
++        "Args": [
++            "-m",
++            "streamlit",
++            "run",
++            "app/streamlit_app.py",
++            "--server.address",
++            "0.0.0.0"
++        ],
++        "State": {
++            "Status": "running",
++            "Running": true,
++            "Paused": false,
++            "Restarting": false,
++            "OOMKilled": false,
++            "Dead": false,
++            "Pid": 3602,
++            "ExitCode": 0,
++            "Error": "",
++            "StartedAt": "2026-10-23T20:58:40.274096175Z",
++            "FinishedAt": "0001-01-01T00:00:00Z",
++            "Health": {
++                "Status": "starting",
++                "FailingStreak": 0,
++                "Log": []
++            }
++        },
++        "Image": "sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b",
++        "ResolvConfPath": "/var/lib/docker/containers/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a/resolv.conf",
++        "HostnamePath": "/var/lib/docker/containers/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a/hostname",
++        "HostsPath": "/var/lib/docker/containers/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a/hosts",
++        "LogPath": "/var/lib/docker/containers/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a/2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a-json.log",
++        "Name": "/wildfire-dashboard",
++        "RestartCount": 0,
++        "Driver": "overlay2",
++        "Platform": "linux",
++        "MountLabel": "",
++        "ProcessLabel": "",
++        "AppArmorProfile": "docker-default",
++        "ExecIDs": null,
++        "HostConfig": {
++            "Binds": null,
++            "ContainerIDFile": "",
++            "LogConfig": {
++                "Type": "json-file",
++                "Config": {}
++            },
++            "NetworkMode": "bridge",
++            "PortBindings": {
++                "8501/tcp": [
++                    {
++                        "HostIp": "127.0.0.1",
++                        "HostPort": "8501"
++                    }
++                ]
++            },
++            "RestartPolicy": {
++                "Name": "no",
++                "MaximumRetryCount": 0
++            },
++            "AutoRemove": false,
++            "VolumeDriver": "",
++            "VolumesFrom": null,
++            "ConsoleSize": [
++                0,
++                0
++            ],
++            "CapAdd": null,
++            "CapDrop": null,
++            "CgroupnsMode": "private",
++            "Dns": [],
++            "DnsOptions": [],
++            "DnsSearch": [],
++            "ExtraHosts": null,
++            "GroupAdd": null,
++            "IpcMode": "private",
++            "Cgroup": "",
++            "Links": null,
++            "OomScoreAdj": 0,
++            "PidMode": "",
++            "Privileged": false,
++            "PublishAllPorts": false,
++            "ReadonlyRootfs": false,
++            "SecurityOpt": null,
++            "UTSMode": "",
++            "UsernsMode": "",
++            "ShmSize": 67108864,
++            "Runtime": "runc",
++            "Isolation": "",
++            "CpuShares": 0,
++            "Memory": 0,
++            "NanoCpus": 0,
++            "CgroupParent": "",
++            "BlkioWeight": 0,
++            "BlkioWeightDevice": [],
++            "BlkioDeviceReadBps": [],
++            "BlkioDeviceWriteBps": [],
++            "BlkioDeviceReadIOps": [],
++            "BlkioDeviceWriteIOps": [],
++            "CpuPeriod": 0,
++            "CpuQuota": 0,
++            "CpuRealtimePeriod": 0,
++            "CpuRealtimeRuntime": 0,
++            "CpusetCpus": "",
++            "CpusetMems": "",
++            "Devices": [],
++            "DeviceCgroupRules": null,
++            "DeviceRequests": null,
++            "MemoryReservation": 0,
++            "MemorySwap": 0,
++            "MemorySwappiness": null,
++            "OomKillDisable": null,
++            "PidsLimit": null,
++            "Ulimits": [],
++            "CpuCount": 0,
++            "CpuPercent": 0,
++            "IOMaximumIOps": 0,
++            "IOMaximumBandwidth": 0,
++            "MaskedPaths": [
++                "/proc/asound",
++                "/proc/acpi",
++                "/proc/interrupts",
++                "/proc/kcore",
++                "/proc/keys",
++                "/proc/latency_stats",
++                "/proc/timer_list",
++                "/proc/timer_stats",
++                "/proc/sched_debug",
++                "/proc/scsi",
++                "/sys/firmware",
++                "/sys/devices/virtual/powercap"
++            ],
++            "ReadonlyPaths": [
++                "/proc/bus",
++                "/proc/fs",
++                "/proc/irq",
++                "/proc/sys",
++                "/proc/sysrq-trigger"
++            ]
++        },
++        "GraphDriver": {
++            "Data": {
++                "ID": "2cafe6e4d597bba905f0af734368ff477d2101260b21074702ab67bc45c1794a",
++                "LowerDir": "/var/lib/docker/overlay2/7a4c784dc4bef9054036819cdcdc200b3a98bbec3f6a570c750fdd306fd69cc7-init/diff:/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/diff:/var/lib/docker/overlay2/frfptw2mjauxuq8r6jsx0h7ip/diff:/var/lib/docker/overlay2/wvj9hvhvupvypumrgcjjps6kz/diff:/var/lib/docker/overlay2/xovc4t7i190b5lz2mxd7slb60/diff:/var/lib/docker/overlay2/wdvf7f1fkdyb2jpqc2h8hxez9/diff:/var/lib/docker/overlay2/kzedn56qyo19xrx1u6rsrfkaz/diff:/var/lib/docker/overlay2/447b8d7a72f4ee423e2707e3ce9499e2bcc74636b35ccd32dcaf5cd4325be169/diff:/var/lib/docker/overlay2/ab92eaa3a4029cda653d07a350f405bad2f216d2f3459be35b27d9b6f3982963/diff:/var/lib/docker/overlay2/47cd070dbdf820f657567153a97df3559f7156c9eb708e45bbc3c02f43a053b9/diff:/var/lib/docker/overlay2/a0852b9fe756cfcfc62ba73778f38f01157bba82b6c424408bd57ab7f55cd241/diff",
++                "MergedDir": "/var/lib/docker/overlay2/7a4c784dc4bef9054036819cdcdc200b3a98bbec3f6a570c750fdd306fd69cc7/merged",
++                "UpperDir": "/var/lib/docker/overlay2/7a4c784dc4bef9054036819cdcdc200b3a98bbec3f6a570c750fdd306fd69cc7/diff",
++                "WorkDir": "/var/lib/docker/overlay2/7a4c784dc4bef9054036819cdcdc200b3a98bbec3f6a570c750fdd306fd69cc7/work"
++            },
++            "Name": "overlay2"
++        },
++        "Mounts": [],
++        "Config": {
++            "Hostname": "2cafe6e4d597",
++            "Domainname": "",
++            "User": "appuser",
++            "AttachStdin": false,
++            "AttachStdout": false,
++            "AttachStderr": false,
++            "ExposedPorts": {
++                "8000/tcp": {},
++                "8501/tcp": {}
++            },
++            "Tty": false,
++            "OpenStdin": false,
++            "StdinOnce": false,
++            "Env": [
++                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
++                "LANG=C.UTF-8",
++                "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
++                "PYTHON_VERSION=3.12.15",
++                "PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
++                "PYTHONDONTWRITEBYTECODE=1",
++                "PYTHONUNBUFFERED=1"
++            ],
++            "Cmd": [
++                "python",
++                "-m",
++                "streamlit",
++                "run",
++                "app/streamlit_app.py",
++                "--server.address",
++                "0.0.0.0"
++            ],
++            "Healthcheck": {
++                "Test": [
++                    "CMD-SHELL",
++                    "curl --fail --silent http://localhost:8501/_stcore/health"
++                ],
++                "Interval": 2000000000,
++                "Timeout": 10000000000,
++                "StartPeriod": 5000000000,
++                "Retries": 3
++            },
++            "Image": "wildfire-audit:ci",
++            "Volumes": null,
++            "WorkingDir": "/app",
++            "Entrypoint": null,
++            "OnBuild": null,
++            "Labels": {}
++        },
++        "NetworkSettings": {
++            "Bridge": "",
++            "SandboxID": "c0e817a19ff2df91127b8065c91835c3f5752a4d268a862e7e012a8c3b743878",
++            "SandboxKey": "/var/run/docker/netns/c0e817a19ff2",
++            "Ports": {
++                "8000/tcp": null,
++                "8501/tcp": [
++                    {
++                        "HostIp": "127.0.0.1",
++                        "HostPort": "8501"
++                    }
++                ]
++            },
++            "HairpinMode": false,
++            "LinkLocalIPv6Address": "",
++            "LinkLocalIPv6PrefixLen": 0,
++            "SecondaryIPAddresses": null,
++            "SecondaryIPv6Addresses": null,
++            "EndpointID": "c7b5ad1689992033a70243e0b16bfbe39264619925bf4ea046681c0e075a0be8",
++            "Gateway": "172.17.0.1",
++            "GlobalIPv6Address": "",
++            "GlobalIPv6PrefixLen": 0,
++            "IPAddress": "172.17.0.3",
++            "IPPrefixLen": 16,
++            "IPv6Gateway": "",
++            "MacAddress": "ba:09:02:fc:fd:92",
++            "Networks": {
++                "bridge": {
++                    "IPAMConfig": null,
++                    "Links": null,
++                    "Aliases": null,
++                    "MacAddress": "ba:09:02:fc:fd:92",
++                    "DriverOpts": null,
++                    "GwPriority": 0,
++                    "NetworkID": "861cdf95167dd3a54f8442c5fe5789b25f9200214b4eb05215db35a1724b8c8f",
++                    "EndpointID": "c7b5ad1689992033a70243e0b16bfbe39264619925bf4ea046681c0e075a0be8",
++                    "Gateway": "172.17.0.1",
++                    "IPAddress": "172.17.0.3",
++                    "IPPrefixLen": 16,
++                    "IPv6Gateway": "",
++                    "GlobalIPv6Address": "",
++                    "GlobalIPv6PrefixLen": 0,
++                    "DNSNames": null
++                }
++            }
++        }
++    }
++]
+diff --git a/reports/evidence/docker-ci/docker-http-examples.json b/reports/evidence/docker-ci/docker-http-examples.json
+new file mode 100644
+index 0000000..705c587
+--- /dev/null
++++ b/reports/evidence/docker-ci/docker-http-examples.json
+@@ -0,0 +1,534 @@
++[
++  {
++    "method": "GET",
++    "endpoint": "/",
++    "status": 200,
++    "response": {
++      "message": "Brazil Wildfire Risk Forecast: historical replay",
++      "docs": "/docs",
++      "health": "/health",
++      "predict": "/predict",
++      "explain": "/explain",
++      "drift": "/drift"
++    }
++  },
++  {
++    "method": "GET",
++    "endpoint": "/health",
++    "status": 200,
++    "response": {
++      "status": "ok",
++      "model_loaded": true,
++      "available_horizons": [
++        1,
++        3,
++        7
++      ],
++      "supported_inference_modes": {
++        "historical_replay": "Exact cell/date lookup; publication time unknown",
++        "operational_forecast": "Unavailable; not implemented"
++      }
++    }
++  },
++  {
++    "method": "GET",
++    "endpoint": "/drift",
++    "status": 200,
++    "response": {
++      "total_monitored": 11,
++      "stable_count": 9,
++      "moderate_drift_count": 2,
++      "critical_drift_count": 0
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/predict",
++    "request": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 1
++    },
++    "status": 200,
++    "response": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 1,
++      "probability": 0.06147677370903422,
++      "risk_level": "low",
++      "grid_id": "011_013",
++      "issue_date": "2024-08-15",
++      "observation_cutoff": "2024-08-15",
++      "target_start": "2024-08-16",
++      "target_end": "2024-08-16",
++      "data_timestamp": null,
++      "availability_timestamp": null,
++      "processed_at": "2026-10-23T20:58:38.092463+00:00",
++      "data_source": "INPE BDQueimadas + NASA POWER; sample/features_sample.parquet",
++      "archive_scope": "demonstration_sample",
++      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
++      "inference_mode": "historical_replay"
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/explain",
++    "request": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 1
++    },
++    "status": 200,
++    "response": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 1,
++      "probability": 0.06147677370903422,
++      "risk_level": "low",
++      "grid_id": "011_013",
++      "issue_date": "2024-08-15",
++      "observation_cutoff": "2024-08-15",
++      "target_start": "2024-08-16",
++      "target_end": "2024-08-16",
++      "data_timestamp": null,
++      "availability_timestamp": null,
++      "processed_at": "2026-10-23T20:58:38.096665+00:00",
++      "data_source": "INPE BDQueimadas + NASA POWER; sample/features_sample.parquet",
++      "archive_scope": "demonstration_sample",
++      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
++      "inference_mode": "historical_replay",
++      "shap_values": {
++        "PRECTOTCORR": 0.25659264565157386,
++        "PRECTOTCORR_mean_14d": -0.019738436770285302,
++        "PRECTOTCORR_mean_7d": 0.001817511349281012,
++        "RH2M": -0.007314586456228349,
++        "RH2M_mean_14d": -0.013495557366090396,
++        "RH2M_mean_7d": 0.0029013687496258467,
++        "T2M_MAX": 0.005446621554062662,
++        "T2M_MAX_mean_14d": 0.0007712426979087844,
++        "T2M_MAX_mean_7d": 0.0023007148833760656,
++        "T2M_MIN": -0.0021762066638367043,
++        "T2M_MIN_mean_14d": -0.013515132524119781,
++        "T2M_MIN_mean_7d": 0.02671826956129058,
++        "WS10M": 0.011745512048899044,
++        "WS10M_mean_14d": 0.034773611274145334,
++        "WS10M_mean_7d": 0.025914009973858346,
++        "doy_cos": -0.043015011524701885,
++        "doy_sin": 0.025280438862521307,
++        "dry_days": 0.05048759116907802,
++        "dtr": 0.047042357592915085,
++        "dtr_mean_14d": 0.00902510244122545,
++        "dtr_mean_7d": 0.00018249312283499146,
++        "fire_count_14d": 0.08996031778096174,
++        "fire_count_30d": 0.01854591848027062,
++        "fire_count_7d": 0.06670472077477244,
++        "fire_count_lastyear": -0.170939260277222,
++        "fwi_proxy": -0.0012160534921558937,
++        "fwi_proxy_mean_14d": 0.012248606023689112,
++        "fwi_proxy_mean_7d": 0.0037683618271702126,
++        "lat_center": 0.13811716552760603,
++        "lon_center": 0.07319696731201067,
++        "month_cos": -0.01884013263679033,
++        "month_sin": -0.012975655585317124,
++        "neighbor_fire_7d": 0.16954773511024912,
++        "precip_sum_14d": -0.00727450631890521,
++        "precip_sum_30d": -0.01313758593671322,
++        "precip_sum_7d": -0.0010538947657797897,
++        "vpd": 0.008298055941765692,
++        "vpd_mean_14d": -0.00628718210480387,
++        "vpd_mean_7d": 0.005225307036689904
++      },
++      "top_positive": [
++        {
++          "feature": "PRECTOTCORR",
++          "shap": 0.25659264565157386
++        },
++        {
++          "feature": "neighbor_fire_7d",
++          "shap": 0.16954773511024912
++        },
++        {
++          "feature": "lat_center",
++          "shap": 0.13811716552760603
++        },
++        {
++          "feature": "fire_count_14d",
++          "shap": 0.08996031778096174
++        },
++        {
++          "feature": "lon_center",
++          "shap": 0.07319696731201067
++        }
++      ],
++      "top_negative": [
++        {
++          "feature": "fire_count_lastyear",
++          "shap": -0.170939260277222
++        },
++        {
++          "feature": "doy_cos",
++          "shap": -0.043015011524701885
++        },
++        {
++          "feature": "PRECTOTCORR_mean_14d",
++          "shap": -0.019738436770285302
++        },
++        {
++          "feature": "month_cos",
++          "shap": -0.01884013263679033
++        },
++        {
++          "feature": "T2M_MIN_mean_14d",
++          "shap": -0.013515132524119781
++        }
++      ],
++      "baseline_log_odds": -0.8841141580562293,
++      "raw_log_odds": -0.1284807137313969,
++      "explanation_scale": "raw_model_log_odds_before_calibration"
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/predict",
++    "request": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 3
++    },
++    "status": 200,
++    "response": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 3,
++      "probability": 0.16576281806852294,
++      "risk_level": "low",
++      "grid_id": "011_013",
++      "issue_date": "2024-08-15",
++      "observation_cutoff": "2024-08-15",
++      "target_start": "2024-08-16",
++      "target_end": "2024-08-18",
++      "data_timestamp": null,
++      "availability_timestamp": null,
++      "processed_at": "2026-10-23T20:58:38.102338+00:00",
++      "data_source": "INPE BDQueimadas + NASA POWER; sample/features_sample.parquet",
++      "archive_scope": "demonstration_sample",
++      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
++      "inference_mode": "historical_replay"
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/explain",
++    "request": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 3
++    },
++    "status": 200,
++    "response": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 3,
++      "probability": 0.16576281806852294,
++      "risk_level": "low",
++      "grid_id": "011_013",
++      "issue_date": "2024-08-15",
++      "observation_cutoff": "2024-08-15",
++      "target_start": "2024-08-16",
++      "target_end": "2024-08-18",
++      "data_timestamp": null,
++      "availability_timestamp": null,
++      "processed_at": "2026-10-23T20:58:38.105733+00:00",
++      "data_source": "INPE BDQueimadas + NASA POWER; sample/features_sample.parquet",
++      "archive_scope": "demonstration_sample",
++      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
++      "inference_mode": "historical_replay",
++      "shap_values": {
++        "PRECTOTCORR": 0.160637682402511,
++        "PRECTOTCORR_mean_14d": 0.009621479630974985,
++        "PRECTOTCORR_mean_7d": 0.0005999364736812701,
++        "RH2M": 0.004495466799743261,
++        "RH2M_mean_14d": -0.0029861571790247136,
++        "RH2M_mean_7d": -5.929529426266776e-05,
++        "T2M_MAX": -0.002589609663007467,
++        "T2M_MAX_mean_14d": -0.0013046121255033986,
++        "T2M_MAX_mean_7d": 0.006109028114505462,
++        "T2M_MIN": 0.0059556274122390725,
++        "T2M_MIN_mean_14d": -0.033900491070172054,
++        "T2M_MIN_mean_7d": 0.026383815173093485,
++        "WS10M": 0.0077451846989914095,
++        "WS10M_mean_14d": 0.046444742450494673,
++        "WS10M_mean_7d": 0.022783535374677394,
++        "doy_cos": -0.0021627768528151626,
++        "doy_sin": 0.02705170276627643,
++        "dry_days": 0.022967076685303008,
++        "dtr": 0.024477846989296975,
++        "dtr_mean_14d": 0.006468280062272307,
++        "dtr_mean_7d": 0.0039157814606424314,
++        "fire_count_14d": 0.0741139400732366,
++        "fire_count_30d": 0.004884062914765448,
++        "fire_count_7d": 0.04998669193809045,
++        "fire_count_lastyear": -0.18654545251529006,
++        "fwi_proxy": 0.004085505273422842,
++        "fwi_proxy_mean_14d": 0.028684436367770363,
++        "fwi_proxy_mean_7d": -0.008642122362803116,
++        "lat_center": 0.15415062314372874,
++        "lon_center": 0.07907316519423248,
++        "month_cos": -0.02575601735615166,
++        "month_sin": -0.014189832916855008,
++        "neighbor_fire_7d": 0.18844623702895308,
++        "precip_sum_14d": -0.001786720497820012,
++        "precip_sum_30d": -0.008394224748351995,
++        "precip_sum_7d": 5.248228173065606e-05,
++        "vpd": 0.0008293488308744931,
++        "vpd_mean_14d": -0.005153657845752786,
++        "vpd_mean_7d": 0.0011832033659573244
++      },
++      "top_positive": [
++        {
++          "feature": "neighbor_fire_7d",
++          "shap": 0.18844623702895308
++        },
++        {
++          "feature": "PRECTOTCORR",
++          "shap": 0.160637682402511
++        },
++        {
++          "feature": "lat_center",
++          "shap": 0.15415062314372874
++        },
++        {
++          "feature": "lon_center",
++          "shap": 0.07907316519423248
++        },
++        {
++          "feature": "fire_count_14d",
++          "shap": 0.0741139400732366
++        }
++      ],
++      "top_negative": [
++        {
++          "feature": "fire_count_lastyear",
++          "shap": -0.18654545251529006
++        },
++        {
++          "feature": "T2M_MIN_mean_14d",
++          "shap": -0.033900491070172054
++        },
++        {
++          "feature": "month_cos",
++          "shap": -0.02575601735615166
++        },
++        {
++          "feature": "month_sin",
++          "shap": -0.014189832916855008
++        },
++        {
++          "feature": "fwi_proxy_mean_7d",
++          "shap": -0.008642122362803116
++        }
++      ],
++      "baseline_log_odds": -0.6555589302472631,
++      "raw_log_odds": 0.012116982232390987,
++      "explanation_scale": "raw_model_log_odds_before_calibration"
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/predict",
++    "request": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 7
++    },
++    "status": 200,
++    "response": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 7,
++      "probability": 0.33802109596549995,
++      "risk_level": "medium",
++      "grid_id": "011_013",
++      "issue_date": "2024-08-15",
++      "observation_cutoff": "2024-08-15",
++      "target_start": "2024-08-16",
++      "target_end": "2024-08-22",
++      "data_timestamp": null,
++      "availability_timestamp": null,
++      "processed_at": "2026-10-23T20:58:38.111086+00:00",
++      "data_source": "INPE BDQueimadas + NASA POWER; sample/features_sample.parquet",
++      "archive_scope": "demonstration_sample",
++      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
++      "inference_mode": "historical_replay"
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/explain",
++    "request": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 7
++    },
++    "status": 200,
++    "response": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2024-08-15",
++      "horizon_days": 7,
++      "probability": 0.33802109596549995,
++      "risk_level": "medium",
++      "grid_id": "011_013",
++      "issue_date": "2024-08-15",
++      "observation_cutoff": "2024-08-15",
++      "target_start": "2024-08-16",
++      "target_end": "2024-08-22",
++      "data_timestamp": null,
++      "availability_timestamp": null,
++      "processed_at": "2026-10-23T20:58:38.114442+00:00",
++      "data_source": "INPE BDQueimadas + NASA POWER; sample/features_sample.parquet",
++      "archive_scope": "demonstration_sample",
++      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
++      "inference_mode": "historical_replay",
++      "shap_values": {
++        "PRECTOTCORR": 0.09578329309552597,
++        "PRECTOTCORR_mean_14d": 0.005971805426680569,
++        "PRECTOTCORR_mean_7d": 0.0005324731122718313,
++        "RH2M": 0.004897770266340829,
++        "RH2M_mean_14d": -0.007369425081970905,
++        "RH2M_mean_7d": -0.001020611291187066,
++        "T2M_MAX": -0.0030519218394708244,
++        "T2M_MAX_mean_14d": -0.0014939368495001106,
++        "T2M_MAX_mean_7d": -0.0015122269013486498,
++        "T2M_MIN": 0.00503024563993761,
++        "T2M_MIN_mean_14d": -0.0684218597398185,
++        "T2M_MIN_mean_7d": 0.019924814606158147,
++        "WS10M": 0.008172551369455603,
++        "WS10M_mean_14d": 0.06620452375667443,
++        "WS10M_mean_7d": 0.02595776358971018,
++        "doy_cos": 0.014131882858716164,
++        "doy_sin": 0.03777191469844935,
++        "dry_days": 0.008356173933632171,
++        "dtr": 0.010784420928669576,
++        "dtr_mean_14d": 0.011856405019676263,
++        "dtr_mean_7d": 0.0011185476316284335,
++        "fire_count_14d": 0.06442018421953108,
++        "fire_count_30d": 0.024657519991484054,
++        "fire_count_7d": 0.06026784591479221,
++        "fire_count_lastyear": -0.21053913335660857,
++        "fwi_proxy": 0.006717309438782511,
++        "fwi_proxy_mean_14d": 0.017788721114378705,
++        "fwi_proxy_mean_7d": 0.006395959869667934,
++        "lat_center": 0.1708675678173879,
++        "lon_center": 0.1004907169829786,
++        "month_cos": 0.015232127219006852,
++        "month_sin": -0.004556638281733359,
++        "neighbor_fire_7d": 0.18855388750045507,
++        "precip_sum_14d": 0.002512744082823577,
++        "precip_sum_30d": 0.006488385391422038,
++        "precip_sum_7d": -0.0005710161296214058,
++        "vpd": 0.002059764762573296,
++        "vpd_mean_14d": -0.0022163228530917506,
++        "vpd_mean_7d": 0.0018358152301632485
++      },
++      "top_positive": [
++        {
++          "feature": "neighbor_fire_7d",
++          "shap": 0.18855388750045507
++        },
++        {
++          "feature": "lat_center",
++          "shap": 0.1708675678173879
++        },
++        {
++          "feature": "lon_center",
++          "shap": 0.1004907169829786
++        },
++        {
++          "feature": "PRECTOTCORR",
++          "shap": 0.09578329309552597
++        },
++        {
++          "feature": "WS10M_mean_14d",
++          "shap": 0.06620452375667443
++        }
++      ],
++      "top_negative": [
++        {
++          "feature": "fire_count_lastyear",
++          "shap": -0.21053913335660857
++        },
++        {
++          "feature": "T2M_MIN_mean_14d",
++          "shap": -0.0684218597398185
++        },
++        {
++          "feature": "RH2M_mean_14d",
++          "shap": -0.007369425081970905
++        },
++        {
++          "feature": "month_sin",
++          "shap": -0.004556638281733359
++        },
++        {
++          "feature": "T2M_MAX",
++          "shap": -0.0030519218394708244
++        }
++      ],
++      "baseline_log_odds": -0.43565891411597735,
++      "raw_log_odds": 0.24837112902864616,
++      "explanation_scale": "raw_model_log_odds_before_calibration"
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/predict",
++    "request": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2026-08-15"
++    },
++    "status": 404,
++    "response": {
++      "detail": "Exact historical record not found: 011_013 on 2026-08-15"
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/predict",
++    "request": {
++      "latitude": -22,
++      "longitude": -40,
++      "date": "2024-08-15"
++    },
++    "status": 422,
++    "response": {
++      "detail": "Coordinates outside pilot coverage (Mato Grosso)"
++    }
++  },
++  {
++    "method": "POST",
++    "endpoint": "/predict",
++    "request": {
++      "latitude": -12.5,
++      "longitude": -55.0,
++      "date": "2026-08-15",
++      "inference_mode": "operational_forecast"
++    },
++    "status": 503,
++    "response": {
++      "detail": "Operational forecast mode is unavailable: live acquisition and historical publication-time validation are not implemented."
++    }
++  }
++]
+\ No newline at end of file
+diff --git a/reports/evidence/docker-ci/docker-image.json b/reports/evidence/docker-ci/docker-image.json
+new file mode 100644
+index 0000000..ca77e22
+--- /dev/null
++++ b/reports/evidence/docker-ci/docker-image.json
+@@ -0,0 +1,93 @@
++[
++    {
++        "Id": "sha256:1867b23eb60c833353fd19116cc64a40f7e50e2c29d21cc3bbd31f40c83acf3b",
++        "RepoTags": [
++            "wildfire-audit:ci"
++        ],
++        "RepoDigests": [],
++        "Parent": "",
++        "Comment": "buildkit.dockerfile.v0",
++        "Created": "2026-10-23T20:58:24.424185598Z",
++        "DockerVersion": "",
++        "Author": "",
++        "Config": {
++            "Hostname": "",
++            "Domainname": "",
++            "User": "appuser",
++            "AttachStdin": false,
++            "AttachStdout": false,
++            "AttachStderr": false,
++            "ExposedPorts": {
++                "8000/tcp": {},
++                "8501/tcp": {}
++            },
++            "Tty": false,
++            "OpenStdin": false,
++            "StdinOnce": false,
++            "Env": [
++                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
++                "LANG=C.UTF-8",
++                "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
++                "PYTHON_VERSION=3.12.15",
++                "PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
++                "PYTHONDONTWRITEBYTECODE=1",
++                "PYTHONUNBUFFERED=1"
++            ],
++            "Cmd": [
++                "uvicorn",
++                "api.main:app",
++                "--host",
++                "0.0.0.0",
++                "--port",
++                "8000"
++            ],
++            "Healthcheck": {
++                "Test": [
++                    "CMD-SHELL",
++                    "curl --fail --silent http://localhost:8000/health || exit 1"
++                ],
++                "Interval": 30000000000,
++                "Timeout": 10000000000,
++                "StartPeriod": 5000000000,
++                "Retries": 3
++            },
++            "ArgsEscaped": true,
++            "Image": "",
++            "Volumes": null,
++            "WorkingDir": "/app",
++            "Entrypoint": null,
++            "OnBuild": null,
++            "Labels": null
++        },
++        "Architecture": "amd64",
++        "Os": "linux",
++        "Size": 2803225623,
++        "GraphDriver": {
++            "Data": {
++                "LowerDir": "/var/lib/docker/overlay2/frfptw2mjauxuq8r6jsx0h7ip/diff:/var/lib/docker/overlay2/wvj9hvhvupvypumrgcjjps6kz/diff:/var/lib/docker/overlay2/xovc4t7i190b5lz2mxd7slb60/diff:/var/lib/docker/overlay2/wdvf7f1fkdyb2jpqc2h8hxez9/diff:/var/lib/docker/overlay2/kzedn56qyo19xrx1u6rsrfkaz/diff:/var/lib/docker/overlay2/447b8d7a72f4ee423e2707e3ce9499e2bcc74636b35ccd32dcaf5cd4325be169/diff:/var/lib/docker/overlay2/ab92eaa3a4029cda653d07a350f405bad2f216d2f3459be35b27d9b6f3982963/diff:/var/lib/docker/overlay2/47cd070dbdf820f657567153a97df3559f7156c9eb708e45bbc3c02f43a053b9/diff:/var/lib/docker/overlay2/a0852b9fe756cfcfc62ba73778f38f01157bba82b6c424408bd57ab7f55cd241/diff",
++                "MergedDir": "/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/merged",
++                "UpperDir": "/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/diff",
++                "WorkDir": "/var/lib/docker/overlay2/mz0cfc0z388j2okashpubvrsw/work"
++            },
++            "Name": "overlay2"
++        },
++        "RootFS": {
++            "Type": "layers",
++            "Layers": [
++                "sha256:a70f6272827f64e1427d048ced77491aab5d64ab95725e56920802ff391197d7",
++                "sha256:33d3a946838548b1885b1068b960a88e41537b6996342c8fc2c767a6879e62f4",
++                "sha256:500ecb68a701ad0437ae759f35178f2ddbc48e10a0bc6dc345548054f737df6a",
++                "sha256:93881a54803b57e0039f40fd78de98b41b69b55d025c431544788fd84f0904cd",
++                "sha256:1fb30f05ea9d29ac31c250f1bb18482c417e058f7ce7940ff1c1a9875381c0d5",
++                "sha256:1596bb6a9cec2398e81bbc50b7b4f35834f4be6d0f6b85190223d211b9c5c762",
++                "sha256:082f5d8df1f51aac64ebe90bf43432e5a7a30385969fd64bb6598a1a954be02c",
++                "sha256:80749e8b9db458422c3f5999191be900ac2ec13b2e7b00874f2937ad94771ec5",
++                "sha256:849a45f00c18cd1ff2fcb65d9b39a98ee9080c278bb9ae75931df270ca331f34",
++                "sha256:6505338aa69d0d19cd28d7f094d4611149290826dee963991b2100486850b175"
++            ]
++        },
++        "Metadata": {
++            "LastTagTime": "2026-10-23T20:58:34.526838512Z"
++        }
++    }
++]
+diff --git a/reports/evidence/docker-ci/docker-streamlit.html b/reports/evidence/docker-ci/docker-streamlit.html
+new file mode 100644
+index 0000000..b10787c
+--- /dev/null
++++ b/reports/evidence/docker-ci/docker-streamlit.html
+@@ -0,0 +1 @@
++<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no"/><link rel="shortcut icon" href="./favicon.png"/><link rel="preload" href="./static/media/SourceSansPro-Regular.0d69e5ff5e92ac64a0c9.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="./static/media/SourceSansPro-SemiBold.abed79cd0df1827e18cf.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="./static/media/SourceSansPro-Bold.118dea98980e20a81ced.woff2" as="font" type="font/woff2" crossorigin><title>Streamlit</title><script>window.prerenderReady=!1</script><script defer="defer" src="./static/js/main.dbbac55a.js"></script><link href="./static/css/main.23bdda6f.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+\ No newline at end of file
+diff --git a/reports/evidence/dvc-artifact-bundle.json b/reports/evidence/dvc-artifact-bundle.json
+new file mode 100644
+index 0000000..863ac49
+--- /dev/null
++++ b/reports/evidence/dvc-artifact-bundle.json
+@@ -0,0 +1,25 @@
++[
++  {
++    "command": [
++      "python",
++      "-m",
++      "dvc",
++      "repro"
++    ],
++    "exit_code": 0,
++    "stdout": "Stage 'build_grid' didn't change, skipping\nStage 'process_data' didn't change, skipping\nStage 'build_features' didn't change, skipping\nStage 'train' didn't change, skipping\nStage 'train_lstm' didn't change, skipping\nStage 'research' didn't change, skipping\nStage 'explain' didn't change, skipping\nStage 'drift' didn't change, skipping\nStage 'decision_diagnostics' didn't change, skipping\nStage 'research_figures' didn't change, skipping\nRunning stage 'artifact_bundle':\n> python -m src.models.artifacts\nModel bundle manifest generated\nUpdating lock file 'dvc.lock'\n\nTo track the changes with git, run:\n\n\tgit add dvc.lock\n\nTo enable auto staging, run:\n\n\tdvc config core.autostage true\nUse `dvc push` to send your updates to remote storage.\n",
++    "stderr": ""
++  },
++  {
++    "command": [
++      "python",
++      "-m",
++      "dvc",
++      "status",
++      "--json"
++    ],
++    "exit_code": 0,
++    "stdout": "{}\n",
++    "stderr": ""
++  }
++]
+\ No newline at end of file
+diff --git a/reports/evidence/powershell-runner-final.txt b/reports/evidence/powershell-runner-final.txt
+new file mode 100644
+index 0000000..2bfe32a
+--- /dev/null
++++ b/reports/evidence/powershell-runner-final.txt
+@@ -0,0 +1,103 @@
++==========================================================
++ brazil-wildfire-risk-forecast - PowerShell Pipeline Tool
++ Task: test
++==========================================================
++Running pytest test suite...
++============================= test session starts =============================
++platform win32 -- Python 3.12.10, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Scripts\python.exe
++cachedir: .pytest_cache
++rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast
++configfile: pyproject.toml
++plugins: anyio-4.15.1, hydra-core-1.3.7, platformdirs-4.13.5
++collecting ... collected 87 items
++
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[1] PASSED [  1%]
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[3] PASSED [  2%]
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[7] PASSED [  3%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_polygon] PASSED [  4%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_grid_cells] PASSED [  5%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_calibrators] PASSED [  6%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_models] PASSED [  8%]
++tests/test_api_contract.py::test_point_outside_partial_cell_is_rejected PASSED [  9%]
++tests/test_api_contract.py::test_exact_polygon_boundary_included PASSED  [ 10%]
++tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid0] PASSED [ 11%]
++tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid1] PASSED [ 12%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[corrupt] PASSED [ 13%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[missing_column] PASSED [ 14%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[duplicate] PASSED [ 16%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[infinite] PASSED [ 17%]
++tests/test_api_contract.py::test_missing_values_preserved PASSED         [ 18%]
++tests/test_api_contract.py::test_internal_error_controlled PASSED        [ 19%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[1] PASSED [ 20%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[3] PASSED [ 21%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[7] PASSED [ 22%]
++tests/test_api_contract.py::test_linear_and_recurrent_bundles_infer PASSED [ 24%]
++tests/test_api_contract.py::test_model_bundle_hashes_match PASSED        [ 25%]
++tests/test_data_integrity.py::test_climate_cache_rejects_incomplete_duplicates_and_fill PASSED [ 26%]
++tests/test_data_integrity.py::test_manifest_verify_does_not_rewrite_and_detects_mutation PASSED [ 27%]
++tests/test_data_integrity.py::test_missing_boundary_does_not_create_unmasked_grid PASSED [ 28%]
++tests/test_data_integrity.py::test_invalid_boundary_fails_explicitly PASSED [ 29%]
++tests/test_pipeline.py::TestGrid::test_grid_has_required_columns PASSED  [ 31%]
++tests/test_pipeline.py::TestGrid::test_grid_cell_count PASSED            [ 32%]
++tests/test_pipeline.py::TestGrid::test_grid_center_within_bounds PASSED  [ 33%]
++tests/test_pipeline.py::TestGrid::test_assign_to_grid PASSED             [ 34%]
++tests/test_pipeline.py::TestGrid::test_grid_ids_unique PASSED            [ 35%]
++tests/test_pipeline.py::TestLeakDetection::test_no_future_leak_in_fire_features PASSED [ 36%]
++tests/test_pipeline.py::TestLeakDetection::test_target_uses_future_data PASSED [ 37%]
++tests/test_pipeline.py::TestLeakDetection::test_temporal_purging_embargo_prevents_leak PASSED [ 39%]
++tests/test_pipeline.py::TestAPI::test_root_endpoint PASSED               [ 40%]
++tests/test_pipeline.py::TestAPI::test_health_endpoint PASSED             [ 41%]
++tests/test_pipeline.py::TestAPI::test_predict_endpoint_schema PASSED     [ 42%]
++tests/test_pipeline.py::TestAPI::test_predict_invalid_coordinates PASSED [ 43%]
++tests/test_pipeline.py::TestAPI::test_predict_outside_mato_grosso PASSED [ 44%]
++tests/test_pipeline.py::TestAPI::test_predict_multi_horizon PASSED       [ 45%]
++tests/test_pipeline.py::TestAPI::test_predict_invalid_horizon PASSED     [ 47%]
++tests/test_pipeline.py::TestAPI::test_explain_endpoint_schema PASSED     [ 48%]
++tests/test_pipeline.py::TestAPI::test_predict_temporal_contract PASSED   [ 49%]
++tests/test_pipeline.py::TestAPI::test_predict_operational_forecast_returns_503 PASSED [ 50%]
++tests/test_pipeline.py::TestAPI::test_predict_missing_record_returns_404 PASSED [ 51%]
++tests/test_pipeline.py::TestDriftDetector::test_psi_identical_distributions PASSED [ 52%]
++tests/test_pipeline.py::TestDriftDetector::test_psi_shifted_distributions PASSED [ 54%]
++tests/test_pipeline.py::TestDriftDetector::test_drift_api_endpoint PASSED [ 55%]
++tests/test_pipeline.py::TestSequentialModel::test_lstm_forward_shape PASSED [ 56%]
++tests/test_pipeline.py::TestDataProcessing::test_config_loads PASSED     [ 57%]
++tests/test_pipeline.py::TestDataProcessing::test_config_has_required_fields PASSED [ 58%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_platt_calibrator_fit_and_predict PASSED [ 59%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_ece_computation PASSED [ 60%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_operational_decision_metrics PASSED [ 62%]
++tests/test_pipeline.py::TestTerritorialMasking::test_grid_status_values PASSED [ 63%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_vpd PASSED [ 64%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_dtr PASSED [ 65%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_fwi_proxy PASSED [ 66%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_validate_meteorological_variables PASSED [ 67%]
++tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_classification_ranges PASSED [ 68%]
++tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_metadata_matches_config PASSED [ 70%]
++tests/test_pipeline.py::TestOutOfSampleThresholds::test_threshold_selection_and_application PASSED [ 71%]
++tests/test_pipeline.py::TestArtifactCompatibility::test_platt_calibrator_serialization PASSED [ 72%]
++tests/test_pipeline.py::TestArtifactCompatibility::test_loaded_artifacts_predict_successfully PASSED [ 73%]
++tests/test_reporting.py::test_generated_docs_are_current PASSED          [ 74%]
++tests/test_reporting.py::test_reporting_rejects_conflicting_metrics PASSED [ 75%]
++tests/test_reporting.py::test_no_climate_ablation_excludes_rainfall_accumulations PASSED [ 77%]
++tests/test_reporting.py::test_matched_lstm_report_records_identical_evaluation_rows PASSED [ 78%]
++tests/test_reporting.py::test_research_tables_are_current PASSED         [ 79%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-1] PASSED [ 80%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-3] PASSED [ 81%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-7] PASSED [ 82%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-1] PASSED [ 83%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-3] PASSED [ 85%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-7] PASSED [ 86%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-1] PASSED [ 87%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-3] PASSED [ 88%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-7] PASSED [ 89%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-1] PASSED [ 90%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-3] PASSED [ 91%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-7] PASSED [ 93%]
++tests/test_scientific_contracts.py::test_actual_features_ignore_future_and_preserve_unknown_weather PASSED [ 94%]
++tests/test_scientific_contracts.py::test_unknown_spell_never_becomes_observed_dryness PASSED [ 95%]
++tests/test_scientific_contracts.py::test_sequence_endpoint_includes_issue_day_and_returns_exact_keys PASSED [ 96%]
++tests/test_scientific_contracts.py::test_weighted_bootstrap_metrics_match_expanded_rows PASSED [ 97%]
++tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_zero_difference PASSED [ 98%]
++tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
++
++============================= 87 passed in 4.74s ==============================
++
+diff --git a/reports/evidence/real-http-examples.json b/reports/evidence/real-http-examples.json
+index 0ab9d5f..051519a 100644
+--- a/reports/evidence/real-http-examples.json
++++ b/reports/evidence/real-http-examples.json
+@@ -65,7 +65,7 @@
+       "target_end": "2024-08-16",
+       "data_timestamp": null,
+       "availability_timestamp": null,
+-      "processed_at": "2026-10-23T20:37:11.225628+00:00",
++      "processed_at": "2026-10-23T20:54:21.919940+00:00",
+       "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+       "archive_scope": "full_local_archive",
+       "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+@@ -96,7 +96,7 @@
+       "target_end": "2024-08-16",
+       "data_timestamp": null,
+       "availability_timestamp": null,
+-      "processed_at": "2026-10-23T20:37:11.232634+00:00",
++      "processed_at": "2026-10-23T20:54:21.926962+00:00",
+       "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+       "archive_scope": "full_local_archive",
+       "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+@@ -215,7 +215,7 @@
+       "target_end": "2024-08-18",
+       "data_timestamp": null,
+       "availability_timestamp": null,
+-      "processed_at": "2026-10-23T20:37:11.239639+00:00",
++      "processed_at": "2026-10-23T20:54:21.933473+00:00",
+       "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+       "archive_scope": "full_local_archive",
+       "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+@@ -246,7 +246,7 @@
+       "target_end": "2024-08-18",
+       "data_timestamp": null,
+       "availability_timestamp": null,
+-      "processed_at": "2026-10-23T20:37:11.244644+00:00",
++      "processed_at": "2026-10-23T20:54:21.938478+00:00",
+       "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+       "archive_scope": "full_local_archive",
+       "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+@@ -365,7 +365,7 @@
+       "target_end": "2024-08-22",
+       "data_timestamp": null,
+       "availability_timestamp": null,
+-      "processed_at": "2026-10-23T20:37:11.251650+00:00",
++      "processed_at": "2026-10-23T20:54:21.945484+00:00",
+       "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+       "archive_scope": "full_local_archive",
+       "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+@@ -396,7 +396,7 @@
+       "target_end": "2024-08-22",
+       "data_timestamp": null,
+       "availability_timestamp": null,
+-      "processed_at": "2026-10-23T20:37:11.256655+00:00",
++      "processed_at": "2026-10-23T20:54:21.950488+00:00",
+       "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+       "archive_scope": "full_local_archive",
+       "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+diff --git a/run_pipeline.ps1 b/run_pipeline.ps1
+index c8416ed..bcf19a1 100644
+--- a/run_pipeline.ps1
++++ b/run_pipeline.ps1
+@@ -72,15 +72,20 @@ try { switch ($Task) {
+         Invoke-Python -m src.models.train
+         Write-Host "Step 4: Generating SHAP explanations..." -ForegroundColor Yellow
+         Invoke-Python -m src.models.explain
+-        Write-Host "Step 5: Running tests..." -ForegroundColor Yellow
++        Write-Host "Step 5: Running research and refreshing derived artifacts..." -ForegroundColor Yellow
+         Invoke-Python -m src.models.research
+         Invoke-Python -m src.models.train_lstm
+         Invoke-Python -m src.monitoring.drift_detector
++        Invoke-Python -m src.reporting.decision_diagnostics
++        Invoke-Python -m src.reporting.plot_research
+         Invoke-Python -m src.data.build_sample
+         Invoke-Python -m src.data.manifest --generate
+         Invoke-Python -m src.data.manifest --verify
+         Invoke-Python -m src.reporting.generate_readme_metrics
+         Invoke-Python -m src.reporting.generate_research_tables
++        Invoke-Python -m src.models.artifacts
++        Invoke-Python -m src.models.artifacts --verify
++        Write-Host "Step 6: Running tests..." -ForegroundColor Yellow
+         Invoke-Python -m pytest tests/ -v
+         Write-Host "Pipeline execution finished successfully!" -ForegroundColor Green
+     }

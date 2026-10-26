@@ -1,0 +1,122 @@
+commit 0c125c3c7a1f9d705bcddd4006758cac5a30f863
+Author:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+AuthorDate: Fri Oct 23 17:54:22 2026 -0300
+Commit:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+CommitDate: Fri Oct 23 17:54:22 2026 -0300
+
+    ci: exercise Docker build, artifact hashes, real API requests and Streamlit health
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index b9316f4..e137814 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -53,3 +53,59 @@ jobs:
+           test-results.xml
+           environment.txt
+ 
++  docker:
++    name: Docker build and HTTP smoke
++    needs: test
++    runs-on: ubuntu-latest
++    timeout-minutes: 20
++    steps:
++    - uses: actions/checkout@v4
++
++    - name: Build CPU image
++      run: docker build --tag wildfire-audit:ci .
++
++    - name: Validate container API, artifacts and published port
++      run: |
++        mkdir -p reports/evidence
++        docker run --detach --name wildfire-api --publish 127.0.0.1:8000:8000 wildfire-audit:ci
++        curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8000/health
++        docker exec wildfire-api python -m src.models.artifacts --verify
++        docker exec wildfire-api python scripts/smoke_api.py --base-url http://127.0.0.1:8000
++        docker cp wildfire-api:/app/reports/evidence/real-http-examples.json reports/evidence/docker-http-examples.json
++        test "$(docker exec wildfire-api id -u)" = 1000
++        for attempt in $(seq 1 30); do
++          if test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-api)" = healthy; then break; fi
++          sleep 2
++        done
++        test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-api)" = healthy
++        docker image inspect wildfire-audit:ci > reports/evidence/docker-image.json
++
++    - name: Validate Streamlit container entrypoint
++      run: |
++        docker run --detach --name wildfire-dashboard --publish 127.0.0.1:8501:8501 \
++          --health-cmd 'curl --fail --silent http://localhost:8501/_stcore/health' \
++          --health-interval 2s --health-start-period 5s \
++          wildfire-audit:ci python -m streamlit run app/streamlit_app.py --server.address 0.0.0.0
++        curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8501/_stcore/health
++        curl --fail http://127.0.0.1:8501/ > reports/evidence/docker-streamlit.html
++
++    - name: Collect container evidence
++      if: always()
++      run: |
++        mkdir -p reports/evidence
++        docker logs wildfire-api > reports/evidence/docker-api.log 2>&1 || true
++        docker logs wildfire-dashboard > reports/evidence/docker-dashboard.log 2>&1 || true
++        docker inspect wildfire-api wildfire-dashboard > reports/evidence/docker-containers.json || true
++
++    - name: Preserve Docker evidence
++      if: always()
++      uses: actions/upload-artifact@v4
++      with:
++        name: validation-docker
++        path: reports/evidence/docker-*
++
++    - name: Stop temporary containers
++      if: always()
++      run: |
++        docker rm --force wildfire-api wildfire-dashboard || true
++
+diff --git a/scripts/smoke_api.py b/scripts/smoke_api.py
+index c5dc87a..e37a0b1 100644
+--- a/scripts/smoke_api.py
++++ b/scripts/smoke_api.py
+@@ -1,5 +1,6 @@
+ """Exercise the real HTTP server and retain exact response examples."""
+ 
++import argparse
+ import json
+ import os
+ import subprocess
+@@ -13,11 +14,18 @@ ROOT = Path(__file__).resolve().parents[1]
+ 
+ 
+ def main():
+-    logfile = (ROOT / "reports/evidence/api-server.txt").open("w", encoding="utf-8")
+-    process = subprocess.Popen([sys.executable, "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8005"],
+-                               cwd=ROOT, stdout=logfile, stderr=subprocess.STDOUT,
+-                               creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+-    base = "http://127.0.0.1:8005"
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--base-url", help="Exercise an existing server instead of starting a local process")
++    args = parser.parse_args()
++    (ROOT / "reports/evidence").mkdir(parents=True, exist_ok=True)
++    logfile = None
++    process = None
++    base = args.base_url.rstrip("/") if args.base_url else "http://127.0.0.1:8005"
++    if not args.base_url:
++        logfile = (ROOT / "reports/evidence/api-server.txt").open("w", encoding="utf-8")
++        process = subprocess.Popen([sys.executable, "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8005"],
++                                   cwd=ROOT, stdout=logfile, stderr=subprocess.STDOUT,
++                                   creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+     examples = []
+     try:
+         for _ in range(60):
+@@ -51,9 +59,11 @@ def main():
+         (ROOT / "reports/evidence/real-http-examples.json").write_text(json.dumps(examples, indent=2), encoding="utf-8")
+         print(f"Verified {len(examples)} actual HTTP responses")
+     finally:
+-        process.terminate()
+-        process.wait(timeout=20)
+-        logfile.close()
++        if process is not None:
++            process.terminate()
++            process.wait(timeout=20)
++        if logfile is not None:
++            logfile.close()
+ 
+ 
+ if __name__ == "__main__":
