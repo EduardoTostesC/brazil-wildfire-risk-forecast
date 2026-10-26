@@ -1,0 +1,142 @@
+{
+  "protocol_id": "future-2027-v1",
+  "frozen_on": "2026-10-26",
+  "status": "specified_not_executed_not_externally_preregistered",
+  "original_model_release": "03adf8d667f97d5e83a5a44b47c33e9a26d15f99",
+  "algorithm_reference": "eaef23b6d378d7f5fbfb5580a10940fdd88b4813",
+  "file_sha256": {
+    "models/feature_cols.joblib": "d162c45e571ad81730eadbe8c04274e4b23be9a1d8ae163b7d1edeabcfc58f11",
+    "models/lightgbm_model.joblib": "91c04f70ac586886ce8478744206845844eeb85d350a88dd7b1e375d7d7c22cd",
+    "models/lightgbm_1d.joblib": "975e4ba034b4074217905fbd776cf96ec8690240671221c50d584aa170e0ec6b",
+    "models/lightgbm_3d.joblib": "c7e7e22decc6bba557d9de66126fa8f21e37b991a96cdd3f60973d8c16e8afce",
+    "models/platt_calibrator.joblib": "6ec003697addb8f2948f86db193b84435ef1a13f382ef87e65b7eaf378e33adc",
+    "models/platt_calibrator_1d.joblib": "9b4ff8f0f66ba831f7cf538fca5e5e200aa55a9162db494c52ad6acb9fc41bfd",
+    "models/platt_calibrator_3d.joblib": "576b4c2ff7e68803c9d0f3b12903ee8c734574ae018748aee1233826556e4adf",
+    "models/logistic_regression.joblib": "189f34867a15ac67ea70c47abedde7e2920063495090ca0be29f13bc2c1834ee",
+    "models/logistic_calibrator.joblib": "8ccc988675c01a2112458946efbdd96e07f4dcbd03aaa999b9daf4e3df1d3e0e",
+    "models/scaler.joblib": "669b831c7c0770c5ac504d83b5079169e0c64c3f13588ae029f85bbf7b37b72b",
+    "reports/research/simple_logistic.joblib": "1a615a41ebd3cdf870fb30a2597168437218ba1dc8115472698b9faef5da5fdd",
+    "reports/research/simple_logistic_calibrator.joblib": "623e9d70a0fe796c147a80337d679bca0b8eed2049387d69714c71d8f3f806ef",
+    "data/geo/mato_grosso_ibge.geojson": "ffc4789c7518d5ff10882c18e1e1671a2a7de9187718e4b305f7735d04bcc554"
+  },
+  "feature_schema": [
+    "PRECTOTCORR",
+    "PRECTOTCORR_mean_14d",
+    "PRECTOTCORR_mean_7d",
+    "RH2M",
+    "RH2M_mean_14d",
+    "RH2M_mean_7d",
+    "T2M_MAX",
+    "T2M_MAX_mean_14d",
+    "T2M_MAX_mean_7d",
+    "T2M_MIN",
+    "T2M_MIN_mean_14d",
+    "T2M_MIN_mean_7d",
+    "WS10M",
+    "WS10M_mean_14d",
+    "WS10M_mean_7d",
+    "doy_cos",
+    "doy_sin",
+    "dry_days",
+    "dtr",
+    "dtr_mean_14d",
+    "dtr_mean_7d",
+    "fire_count_14d",
+    "fire_count_30d",
+    "fire_count_7d",
+    "fire_count_lastyear",
+    "fwi_proxy",
+    "fwi_proxy_mean_14d",
+    "fwi_proxy_mean_7d",
+    "lat_center",
+    "lon_center",
+    "month_cos",
+    "month_sin",
+    "neighbor_fire_7d",
+    "precip_sum_14d",
+    "precip_sum_30d",
+    "precip_sum_7d",
+    "vpd",
+    "vpd_mean_14d",
+    "vpd_mean_7d"
+  ],
+  "issue_date_range": [
+    "2027-01-01",
+    "2027-12-24"
+  ],
+  "label_observation_end": "2027-12-31",
+  "statistical_unit": "territorial cell-day, at least one reference-sensor detection in UTC dates D+1..D+H",
+  "primary_horizon_days": 7,
+  "secondary_horizons_days": [
+    1,
+    3
+  ],
+  "grid_resolution_degrees": 0.5,
+  "expected_cells": 352,
+  "expected_primary_cell_days": 126016,
+  "history_required_from": "2026-01-01",
+  "training_cutoff": "2022-12-24",
+  "calibration_period": [
+    "2023-01-01",
+    "2023-12-24"
+  ],
+  "thresholds_frozen_in_2023": {
+    "T_P50": 0.2687,
+    "T_F1": 0.2911,
+    "T_30": 0.3,
+    "T_50": 0.5
+  },
+  "refitting_allowed": false,
+  "recalibration_allowed": false,
+  "missing_policy": "native NaN in trees; stored training-only imputers/scalers for linear pipelines; missing schema or failed source completeness is an error",
+  "primary_comparison": "frozen 7-day LightGBM Platt minus original-training cell-month climatology",
+  "comparators": [
+    "original-training cell-month climatology",
+    "original-training empirical persistence",
+    "frozen full logistic Platt",
+    "frozen simple logistic Platt"
+  ],
+  "primary_metric": "Average Precision, not trapezoidal PR-AUC",
+  "secondary_metrics": [
+    "ROC-AUC",
+    "Brier",
+    "ECE with 10 uniform bins",
+    "fractional-tie Top5% and Top10% cell-day precision/recall",
+    "precision/recall/FPR at frozen 2023 thresholds"
+  ],
+  "subsets": [
+    "all eligible cell-days (primary)",
+    "no local detections in 7 days",
+    "no local detections in 14 days",
+    "no local detections in 30 days",
+    "no local detections in 30 days and no neighbor detections in 7 days",
+    "North/Central/South geographic latitude bands",
+    "May-October versus November-April"
+  ],
+  "statistics": {
+    "seed": 20261026,
+    "repetitions": 5000,
+    "primary_date_block_days": 14,
+    "secondary_block_days": [
+      7,
+      21,
+      30
+    ],
+    "resampling": "paired moving blocks of dates with all observed cells together",
+    "confidence_interval": "paired percentile 95%; conditional on fixed observed domain",
+    "minimum_valid_two_class_replicates": 4750,
+    "p_value": null,
+    "primary_success_rule": "lower endpoint of primary paired delta AP 95% interval exceeds zero",
+    "multiplicity": "one primary comparison; all remaining analyses secondary and interpreted without universal significance claims"
+  },
+  "gates": [
+    "complete reference-product calendar and compatible satellite/source definitions",
+    "versioned source metadata, units and UTC/LST mapping checked",
+    "all 352 fixed territorial cells and complete target windows",
+    "no inspection of future labels before recording the final evaluator source SHA",
+    "no replacement of failed/incomplete source days by zero",
+    "no operational availability claim without publication timestamps"
+  ],
+  "amendment_policy": "before outcome access only, by a new protocol version and recorded reason; after first outcome inspection, changes are exploratory",
+  "evaluation_runner": "future read-only evaluator must be implemented and reviewed before outcome access; current training/research commands are not the 2027 evaluator"
+}

@@ -17,8 +17,20 @@ Registro desta sessão, iniciada em 23/10/2026 a partir de `0f05555`. Os commits
 | `62aaa47` | Regras .gitattributes para dados/modelos identificados por hash | A regra exigiu renormalização seletiva posterior para atualizar blobs já no índice |
 | `de081a0` | Índice CPU emitido no lock e bytes científicos reaplicados ao índice Git | CI Linux verde: 87 aprovados em cada Python; snapshot Windows repetido com 87 por ambiente |
 | `0c125c3` | Job Docker com imagem CPU, usuário sem privilégios, hashes, 12 HTTPs e health Streamlit | Smoke local repetido; resultado Docker remoto em TESTES_E_CI |
+| `03adf8d` | Evidências Linux/Docker, base Docker por digest, esperas de health, fechamento Make/PS e artifact_bundle no DVC | CI 40023682295 verde; onze estágios; modelo científico não alterado por esse fechamento |
 
 Consulte `git log --reverse 0f05555..HEAD` para os commits de fechamento posteriores a esta tabela. Não houve reescrita ou remoção de commits anteriores.
+
+## Revisão pré-merge de 26/10/2026
+
+Branch de trabalho separada: `audit/pre-merge-2026-10-26`. A auditoria anterior permanece preservada.
+
+| Commit | Mudança concreta | Evidência |
+|---|---|---|
+| `cf47abc` | Consulta remota, diffs dos 25 commits e nova base de testes | Branch original 14 à frente; 87 aprovados em cada Python; sem commits remotos posteriores |
+| `eaef23b` | Configuração temporal coerente; entradas do processamento validadas; alvo funciona com uma célula; faixas neutras; drift histórico; snapshots de fonte antes da execução; Top-K fracionário; Actions oficiais por SHA | 98 testes locais após os novos casos; análises adicionais e reprodução em checkout separado têm logs próprios |
+
+Revisão por commit: [REVISAO_25_COMMITS](REVISAO_25_COMMITS.md). Problemas por arquivo/linha e testes: [MATRIZ_DE_RASTREABILIDADE](MATRIZ_DE_RASTREABILIDADE.md). Resultados desta rodada não transformam a revisão interna em replicação científica externa.
 
 ## Código e produto
 

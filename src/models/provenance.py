@@ -15,10 +15,16 @@ def capture_execution(root: Path, inputs=()) -> dict:
     sources = sorted({*root.glob("src/**/*.py"), *root.glob("api/*.py"), *root.glob("app/*.py"),
                       *(root / name for name in ["config.yaml", "requirements.txt", "requirements.lock",
                                                 "requirements-cpu.lock", "pyproject.toml"] if (root / name).is_file())})
-    tracked = set(git("ls-files").decode().splitlines())
+    tracked = set(git("ls-tree", "-r", "--name-only", commit).decode().splitlines())
+    sources = sorted(set(sources) | {root / name for name in tracked
+                                    if (name.startswith(("src/", "api/", "app/")) and name.endswith(".py"))
+                                    or name in {"config.yaml", "requirements.txt", "requirements.lock", "requirements-cpu.lock", "pyproject.toml"}})
     fingerprints = {}
     for path in sources:
         name = path.relative_to(root).as_posix()
+        if not path.is_file():
+            fingerprints[name] = {"missing": True, "matches_commit_after_eol_normalization": False}
+            continue
         raw = path.read_bytes()
         normalized = raw.replace(b"\r\n", b"\n")
         head = git("show", commit + ":" + name) if name in tracked else None

@@ -24,4 +24,23 @@ As métricas tabulares atuais coincidem com training_metadata, mas isso não pro
 
 ## Registro dos novos commits
 
-Os commits de auditoria desta sessão devem ser consultados com `git log --reverse 0f05555..HEAD`. Cada commit agrupa uma etapa revisável; logs reais ficam em `reports/evidence/`, e a matriz atual de problemas fica em `AUDITORIA_FINAL.md`. Não há reescrita do histórico anterior.
+Atualização pré-merge em 26/10/2026. A revisão individual dos 25 commits, com problema, arquivos, correção, método, evidência, possível regressão e ação atual, está em [REVISAO_25_COMMITS](REVISAO_25_COMMITS.md). As listas integrais de arquivos e os diffs byte a byte estão em [commits.json](evidence/premerge/commits.json).
+
+| Commit de auditoria | Efeito observado | Evidência / limite |
+|---|---|---|
+| `24dca38` | Inventário e preservação da referência | 11 commits; ambiente local distinto do CI |
+| `bee76c0` | Compatibilidade, fixtures e replay exato | 58 testes por ambiente naquela etapa |
+| `1dc4629` | Manifesto, qualidade, NaN e estatística pareada | 77 testes; processamento isolado ainda exigia validação adicional |
+| `3a7e902` | Pesquisa e LSTM com amostras pareadas | 79 testes; scripts não substituem execução |
+| `dbbc21b` | Pesos/resultados e amostra real regenerados | 83 testes; tracking recuperado e limitações de snapshot registradas |
+| `c59dbeb` | READMEs, relatórios e linguagem proporcional | Tabelas contra metadados; textos residuais encontrados depois |
+| `429c46f` | DVC, notebooks e HTTPs executados | Dez estágios; metadados referem o código do momento da execução |
+| `e359aef` | Snapshot Windows sem dados privados | 87 por ambiente; ainda faltava teste de checkout Linux |
+| `3b680f4` | CI de branches audit/** | Detectou divergência de bytes LF/CRLF |
+| `bb845bf` | Lock CPU e calendário dos focos | Datas verificadas; índice extra ainda omitido |
+| `62aaa47` | .gitattributes para artefatos | Exigiu atualização posterior dos blobs indexados |
+| `de081a0` | Dois índices e bytes preservados | 87/87 no Linux; sem mascarar falhas anteriores |
+| `0c125c3` | Construção/execução Docker e smoke remoto | 12 HTTPs, UID, health e entrada Streamlit |
+| `03adf8d` | Bundle DVC, executores completos e base por digest | Onze estágios e CI final 40023682295 verde |
+
+Os novos commits da revisão de 26/10 partem desse histórico, em `audit/pre-merge-2026-10-26`. `cf47abc` registra a base; `eaef23b` corrige configuração, qualidade de entrada, semântica visual/drift e captura de fontes. Não houve reescrita de commits nem modificação direta de `main`.

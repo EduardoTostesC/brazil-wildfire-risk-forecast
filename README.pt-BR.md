@@ -2,7 +2,9 @@
 
 [English](README.md) · [Auditoria](reports/AUDITORIA_FINAL.md) · [Relatório técnico](reports/technical_report.md) · [Reprodução](reports/REPRODUCIBILIDADE.md)
 
-[![CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions) · [Licença MIT](LICENSE)
+[![CI main](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions?query=branch%3Amain) · [![CI pré-merge](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg?branch=audit%2Fpre-merge-2026-10-26)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions?query=branch%3Aaudit%2Fpre-merge-2026-10-26) · [Licença MIT](LICENSE)
+
+[Revisão pré-merge de 26/10/2026](reports/REVISAO_PRE_MERGE.md): conferência de fontes, análises exploratórias de empates/calibração e protocolo de avaliação futura congelado. Os badges identificam separadamente a main e a candidata.
 
 Pesquisa retrospectiva de aprendizado de máquina sobre detecção de focos de calor em Mato Grosso. Modelos LightGBM estimam a probabilidade de **ao menos um foco detectável pelo sistema de referência em uma célula de 0,5° entre D+1 e D+H**, com H de 1, 3 ou 7 dias. A API e o dashboard Streamlit consultam observações históricas da célula e data exatas.
 

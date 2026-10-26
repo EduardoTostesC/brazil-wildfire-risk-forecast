@@ -66,6 +66,14 @@ def test_execution_snapshot_detects_uncommitted_source_without_relabeling_head(t
     assert after["commit_at_start"] == before["commit_at_start"]
     assert not after["sources_match_commit"]
     assert after["source_files"]["src/example.py"]["sha256"] != before["source_files"]["src/example.py"]["sha256"]
+    added = tmp_path / "src/new.py"
+    added.write_text("NEW = 1\n")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    assert not capture_execution(tmp_path)["sources_match_commit"]
+    path.unlink()
+    removed = capture_execution(tmp_path)
+    assert removed["source_files"]["src/example.py"]["missing"]
+    assert not removed["sources_match_commit"]
 
 
 @pytest.fixture
@@ -130,3 +138,27 @@ def test_drift_report_is_historical_and_does_not_assess_predictive_degradation(t
     assert report["continuous_monitoring"] is False
     assert report["performance_degradation_assessed"] is False
     assert report["baseline_samples"] == report["current_samples"] == 2
+
+
+def test_frozen_protocol_detects_model_and_specification_mutation(tmp_path):
+    import hashlib
+
+    from scripts.verify_frozen_protocol import verify_protocol
+    (tmp_path / "reports/protocol").mkdir(parents=True)
+    (tmp_path / "models").mkdir()
+    model = tmp_path / "models/model.bin"
+    model.write_bytes(b"frozen model")
+    protocol = {"file_sha256": {"models/model.bin": hashlib.sha256(model.read_bytes()).hexdigest()},
+                "feature_schema": ["x"]}
+    specification = tmp_path / "reports/protocol/future-2027-v1.json"
+    specification.write_text(json.dumps(protocol))
+    digest = hashlib.sha256(specification.read_bytes()).hexdigest()
+    (tmp_path / "reports/PROTOCOLO_CONFIRMATORIO_CONGELADO.md").write_text(f"Protocol JSON SHA256: `{digest}`")
+    (tmp_path / "models/training_metadata.json").write_text(json.dumps({"feature_cols": ["x"]}))
+    before = specification.read_bytes()
+    assert verify_protocol(tmp_path) == []
+    model.write_bytes(b"different model")
+    assert any("artifact mismatch" in error for error in verify_protocol(tmp_path))
+    assert specification.read_bytes() == before
+    specification.write_bytes(before + b"\n")
+    assert "Frozen protocol JSON digest mismatch" in verify_protocol(tmp_path)

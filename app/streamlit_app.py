@@ -389,9 +389,9 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
 
     st.markdown("### 🔍 Local SHAP Explanation — Why this cell is at risk?")
     st.markdown(
-        "Select any grid cell to see which variables are **pushing the fire probability up or down** "
-        "for a specific date. SHAP (SHapley Additive exPlanations) distributes the model's output "
-        "fairly among all features using cooperative game theory."
+        "Inspect feature contributions to the **raw model log-odds** for an exact cell/date. "
+        "This tab uses the dedicated **7-day model**; the map and ranking have their own horizon selectors. "
+        "Contributions are not a decomposition of calibrated probability or a causal effect."
     )
 
     model = models.get(7)

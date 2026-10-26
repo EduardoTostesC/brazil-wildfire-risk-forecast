@@ -5,3 +5,4 @@ models/*.pt -text
 models/training_metadata.json -text
 data/** -text
 reports/evidence/premerge/commit-*.txt -text
+reports/protocol/*.json -text

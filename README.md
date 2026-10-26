@@ -2,7 +2,9 @@
 
 [Português](README.pt-BR.md) · [Audit](reports/AUDITORIA_FINAL.md) · [Research report](reports/technical_report.md) · [Reproduction](reports/REPRODUCIBILIDADE.md)
 
-[![CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions) · [MIT license](LICENSE)
+[![main CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions?query=branch%3Amain) · [![Pre-merge CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg?branch=audit%2Fpre-merge-2026-10-26)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions?query=branch%3Aaudit%2Fpre-merge-2026-10-26) · [MIT license](LICENSE)
+
+[Pre-merge review, 26 October 2026](reports/REVISAO_PRE_MERGE.md): follow-up source-provenance checks, exploratory tie/calibration analyses and a frozen future evaluation protocol. Main and candidate CI badges refer to their named branches separately.
 
 Retrospective machine learning research on satellite hotspot detection in Mato Grosso, Brazil. LightGBM models estimate the probability of **at least one detectable reference-sensor hotspot in a 0.5° cell during D+1 through D+H**, for H = 1, 3 or 7 days. The API and Streamlit dashboard replay exact historical cell/date observations.
 

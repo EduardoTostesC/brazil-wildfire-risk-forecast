@@ -103,30 +103,11 @@ def explain_model(config: dict | None = None) -> None:
     print("INTERPRETATION (plain language)")
     print("=" * 50)
     top5 = importance_df.head(5)["feature"].tolist()
-    interpretations = {
-        "fire_count_7d": "Recent fire activity in the cell (last 7 days) is the strongest predictor — fires tend to persist and recur in the same area.",
-        "fire_count_14d": "Two-week fire history captures longer burning periods and areas with sustained activity.",
-        "fire_count_30d": "Monthly fire accumulation shows areas in active burning seasons.",
-        "neighbor_fire_7d": "Fire in surrounding cells indicates spatial spread risk — fires don't respect grid boundaries.",
-        "fire_count_lastyear": "Same period last year captures annual patterns — areas that burned before are likely to burn again.",
-        "dry_days": "Consecutive days without rain is a key risk factor — dry vegetation is more flammable.",
-        "precip_sum_7d": "Weekly precipitation (inversely related to risk) — rain reduces fire danger.",
-        "precip_sum_14d": "Two-week precipitation accumulation indicates soil moisture levels.",
-        "precip_sum_30d": "Monthly precipitation captures longer drought patterns.",
-        "RH2M_mean_7d": "Low humidity dries out vegetation, increasing fire risk.",
-        "T2M_MAX_mean_7d": "Higher temperatures accelerate drying and increase fire risk.",
-        "WS10M_mean_7d": "Wind speed affects fire spread rate and intensity.",
-        "doy_sin": "Day-of-year (sine component) captures the fire season cycle — peak around August-October.",
-        "doy_cos": "Day-of-year (cosine component) complements the sine to encode full annual cycle.",
-        "month_sin": "Monthly seasonality — fire season peaks in the dry months.",
-        "month_cos": "Monthly seasonality (cosine component).",
-        "lat_center": "Latitude captures north-south climate gradients across Mato Grosso.",
-        "lon_center": "Longitude captures east-west differences (Cerrado vs. Amazon).",
-    }
-
+    print("Mean absolute SHAP describes attribution magnitude on raw model log-odds.")
+    print("It does not establish effect direction, causality, propagation or transfer to new regions.")
     for feat in top5:
-        desc = interpretations.get(feat, "This feature captures patterns the model learned from the data.")
-        print(f"  • {feat}: {desc}")
+        value = importance_df.loc[importance_df.feature == feat, "mean_abs_shap"].iloc[0]
+        print(f"  {feat}: mean absolute raw-log-odds contribution={value:.6f}")
 
     print("\nExplainability complete!")
 

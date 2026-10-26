@@ -18,7 +18,7 @@ ROOT = Path.cwd().parent if Path.cwd().name == 'notebooks' else Path.cwd()
 sys.path.insert(0, str(ROOT))
 """
     eda = nbf.v4.new_notebook(cells=[
-        nbf.v4.new_markdown_cell("# Dados retrospectivos de focos detectáveis\n\nNotebook regenerado na auditoria de 23/10/2026. Não estima incêndios independentes, área queimada ou disponibilidade operacional. Resultados antigos continuam no histórico Git. POWER legada LST e focos UTC exigem revisão de alinhamento."),
+        nbf.v4.new_markdown_cell("# Dados retrospectivos de focos detectáveis\n\nNotebook da auditoria retrospectiva. Não estima incêndios independentes, área queimada ou disponibilidade operacional. Resultados antigos continuam no histórico Git. O calendário dos focos UTC foi verificado sob offsets regionais; metadados climáticos originais e horários de publicação permanecem limitados."),
         nbf.v4.new_code_cell(imports),
         nbf.v4.new_code_cell("""grid = pd.read_csv(ROOT / 'data/processed/grid.csv')
 df = pd.read_parquet(ROOT / 'data/processed/dataset.parquet')
@@ -65,7 +65,7 @@ print('Paired delta AP interval:', details['paired_AP_difference']['delta_AP_95C
         nbf.v4.new_code_cell("""for filename in ['calibration_curve.png', 'shap_summary.png', 'research_summary.png']:
     display(Image(filename=str(ROOT / 'reports/figures' / filename)))
 """),
-        nbf.v4.new_markdown_cell("SHAP descreve contribuições à margem bruta; não decompõe a probabilidade calibrada nem identifica causalidade. Esta é uma análise retrospectiva com limitações de horários de publicação e alinhamento LST/UTC, não um sistema operacional validado.")])
+        nbf.v4.new_markdown_cell("SHAP descreve contribuições à margem bruta; não decompõe a probabilidade calibrada nem identifica causalidade. O calendário dos focos foi verificado; os horários históricos de publicação e os metadados climáticos originais não foram recuperados integralmente. Esta análise retrospectiva não valida operação real.")])
     for name, notebook in [("01_eda", eda), ("02_modeling", modeling)]:
         notebook.metadata.kernelspec = {"display_name": "Wildfire audit", "language": "python", "name": "wildfire-audit"}
         nbf.write(notebook, ROOT / f"notebooks/{name}.ipynb")
