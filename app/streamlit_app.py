@@ -491,12 +491,12 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
 
 | SHAP value | Meaning |
 |---|---|
-| **Positive** 🔴 | This feature value **increases** the predicted fire probability for this cell/date |
-| **Negative** 🔵 | This feature value **decreases** the predicted fire probability for this cell/date |
+| **Positive** 🔴 | Positive contribution to the raw model log-odds for this cell/date |
+| **Negative** 🔵 | Negative contribution to the raw model log-odds for this cell/date |
 | **Magnitude** | Larger absolute value = stronger influence |
 
-**Example:** if `dry_days = 25` has SHAP = +0.15, it means the long dry spell is pushing
-the probability up by approximately +0.15 log-odds relative to the model baseline.
+**Example:** SHAP = +0.15 contributes +0.15 to the raw log-odds relative to the model
+baseline. It is not a +0.15 change in calibrated probability or evidence of causality.
         """)
 
 
@@ -506,9 +506,10 @@ the probability up by approximately +0.15 log-odds relative to the model baselin
 def tab_drift():
     st.markdown("### 🩺 Model & Data Health Dashboard")
     st.markdown(
-        "Compares historical input distributions in **2024–2025** "
-        "have shifted relative to the **training baseline (2016–2023)**. "
-        "Significant drift signals that retraining may be needed."
+        "Compares historical input distributions in **2024–2025** with a "
+        "**2016–2023 reference that includes training and calibration**. "
+        "This is a stored retrospective report, without continuous monitoring. "
+        "Covariate shift alone does not establish concept drift or worse predictions."
     )
 
     drift = _load_drift_report()
@@ -533,11 +534,13 @@ def tab_drift():
     c4.metric("🚨 Critical Drift", critical, delta=None)
 
     if critical > 0:
-        st.error(f"🚨 {critical} feature(s) with critical drift detected. Retraining is recommended.")
+        st.info(f"{critical} feature(s) exceed the conventional PSI 0.25 cutoff. This does not establish performance degradation.")
     elif moderate > 0:
-        st.warning(f"⚠️ {moderate} feature(s) with moderate drift. Monitor closely and consider retraining.")
+        st.info(f"{moderate} feature(s) fall in the conventional PSI 0.10–0.25 interval.")
     else:
-        st.success("✅ All monitored features are within stable distribution bounds.")
+        st.info("All compared features have PSI below 0.10; predictive stability is not established by this result.")
+
+    st.caption("PSI categories are descriptive conventions. KS reference p-values assume independent observations; dependent cell-days violate that assumption.")
 
     # Comparison metadata
     st.markdown(
@@ -576,15 +579,15 @@ def tab_drift():
         st.plotly_chart(fig, use_container_width=True)
 
         # Mean comparison table
-        st.markdown("#### 📊 Feature Mean Shift (Training → Operational)")
+        st.markdown("#### 📊 Historical Feature Mean Comparison")
         shift_df = feat_df[["feature", "baseline_mean", "current_mean", "PSI", "KS_statistic", "KS_pvalue", "status"]].copy()
         shift_df["mean_delta"] = shift_df["current_mean"] - shift_df["baseline_mean"]
         shift_df["mean_delta_pct"] = (shift_df["mean_delta"] / shift_df["baseline_mean"].abs().replace(0, 1)) * 100
-        shift_df.columns = ["Feature", "Baseline Mean", "Operational Mean", "PSI", "KS Stat", "KS p-value", "Status", "Δ Mean", "Δ %"]
+        shift_df.columns = ["Feature", "Baseline Mean", "Comparison Mean", "PSI", "KS Stat", "KS reference p-value", "Status", "Δ Mean", "Δ %"]
         st.dataframe(
             shift_df.style.format({
-                "Baseline Mean": "{:.3f}", "Operational Mean": "{:.3f}",
-                "PSI": "{:.4f}", "KS Stat": "{:.4f}", "KS p-value": "{:.2e}",
+                "Baseline Mean": "{:.3f}", "Comparison Mean": "{:.3f}",
+                "PSI": "{:.4f}", "KS Stat": "{:.4f}", "KS reference p-value": "{:.2e}",
                 "Δ Mean": "{:+.3f}", "Δ %": "{:+.1f}%",
             }),
             use_container_width=True,
@@ -595,8 +598,8 @@ def tab_drift():
     if wf is not None:
         st.markdown("#### 📈 Model Stability — Walk-Forward Expanding Window")
         st.markdown(
-            "Each year is used as the test set, with all prior years for training. "
-            "Stable PR-AUC across years indicates the model generalises well over time."
+            "Each year is evaluated after training on prior years with target-window purging. "
+            "AP depends on yearly prevalence; these historical comparisons do not establish stability in future years."
         )
         fig2 = go.Figure()
         fig2.add_trace(go.Scatter(
@@ -671,22 +674,22 @@ def tab_about():
     st.markdown("""
 | Source | Variable | Period | License |
 |--------|----------|--------|---------|
-| **INPE Queimadas** (AQUA_M-T satellite) | Fire hotspots | 2016–2025 | Brazilian Open Government Data |
+| **INPE Queimadas** (reference-product archive) | Fire hotspots | 2016–2025 | Public access; verify redistribution terms before republishing |
 | **NASA POWER** (MERRA-2 reanalysis) | T2M_MAX, T2M_MIN, RH2M, PRECTOTCORR, WS10M | 2016–2025 | NASA Open Data Policy |
     """)
 
     st.markdown("#### ⚠️ Limitations")
     st.markdown("""
 1. **Cloud cover**: MODIS cannot detect fires under dense clouds.
-2. **Orbital frequency**: AQUA observes each cell once/day (~1:30 PM local time).
+2. **Sensor coverage**: The reference product does not establish complete daily observation of every cell.
 3. **Spatial granularity**: A 0.5° cell (~56 km) indicates aggregate area risk, not a precise ignition point.
-4. **Pilot scope**: Currently limited to Mato Grosso state; generalisation to other biomes requires retraining.
+4. **Pilot scope**: Evaluation is limited to Mato Grosso; transfer to other states or biomes requires separate validation.
     """)
 
     st.markdown("#### 🤝 Responsible Use")
     st.warning(
-        "This is an academic decision-support tool. "
-        "**Do not use as a substitute for official emergency warnings** from INPE, CENSIPAM, IBAMA, or ICMBio."
+        "This is a retrospective research prototype. Visual bands are conventions. "
+        "**Do not use this prototype to guide emergency response or resource mobilization.**"
     )
 
     st.markdown("---")

@@ -3,7 +3,6 @@
 import argparse
 import json
 import platform
-import subprocess
 import time
 
 import joblib
@@ -15,11 +14,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from src.config import get_project_root
+from src.config import evaluation_periods, get_project_root
 from src.data.manifest import compute_sha256
 from src.models.calibration import PlattCalibrator
 from src.models.evaluation import block_confidence_intervals, paired_ap_difference
 from src.models.inference import calibrated_probabilities, feature_matrix
+from src.models.provenance import capture_execution
 from src.models.train import (
     assign_spatial_blocks,
     climatology_baseline,
@@ -37,9 +37,10 @@ SPATIAL_PARAMS = dict(n_estimators=200, learning_rate=.05, max_depth=6, num_leav
 
 
 def split_data(df, horizon=7):
-    return (df[df.date <= pd.Timestamp("2023-01-01") - pd.Timedelta(days=horizon + 1)].copy(),
-            df[(df.date >= "2023-01-01") & (df.date <= pd.Timestamp("2024-01-01") - pd.Timedelta(days=horizon + 1))].copy(),
-            df[(df.date >= "2024-01-01") & (df.date <= "2025-12-24")].copy())
+    periods = evaluation_periods(horizon_days=horizon)
+    return (df[df.date.between(periods["train_start"], periods["train_end"])].copy(),
+            df[df.date.between(periods["calibration_start"], periods["calibration_end"])].copy(),
+            df[df.date.between(periods["test_start"], periods["test_end"])].copy())
 
 
 def metric_row(frame, probability, name):
@@ -67,6 +68,8 @@ def calibrated_tree(train, cal, test, columns, params):
 
 def run(repetitions=500):
     root = get_project_root()
+    execution_snapshot = capture_execution(root, ["data/processed/features.parquet", "data/processed/grid.csv",
+                                                 "models/lightgbm_model.joblib", "models/platt_calibrator.joblib"])
     output = root / "reports/research"
     output.mkdir(parents=True, exist_ok=True)
     df = pd.read_parquet(root / "data/processed/features.parquet")
@@ -207,7 +210,7 @@ def run(repetitions=500):
     yearly = [dict(metric_row(test[test.date.dt.year == year], prediction[(test.date.dt.year == year).to_numpy()], "LightGBM"), year=year)
               for year in (2024, 2025)]
     pd.DataFrame(yearly).to_csv(output / "yearly_prevalence.csv", index=False)
-    meta = {"commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+    meta = {"commit": execution_snapshot["commit_at_start"], "execution_snapshot": execution_snapshot,
             "seed": SEED, "python": platform.python_version(), "bootstrap_repetitions": repetitions,
             "features_sha256": compute_sha256(root / "data/processed/features.parquet"),
             "primary_model_sha256": compute_sha256(root / "models/lightgbm_model.joblib"),

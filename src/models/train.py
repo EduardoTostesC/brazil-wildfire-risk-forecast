@@ -1,16 +1,9 @@
-"""Train baseline and ML models for wildfire risk prediction with scientific rigor.
+"""Retrospective training, separate 2023 calibration and 2024–2025 evaluation.
 
-Scientific Rigor Implementation (Phases 2, 3 & 4):
-1. Territorial Masking: Excludes cells strictly outside Mato Grosso (IBGE SIRGAS 2000).
-2. Strict Temporal Purging / Embargo: For horizon H, training ends H days before calibration start,
-   and calibration ends H days before test start, completely eliminating label leakage.
-3. Out-of-Sample Calibration: Fits PlattCalibrator (pure NumPy/SciPy sigmoid) and IsotonicCalibrator
-   strictly on an independent 2023 holdout.
-4. Block Bootstrap Uncertainty: Evaluates 95% confidence intervals using temporal block resampling
-   (preserving autocorrelation) and computes paired significance tests against baselines.
-5. Operational Decision Metrics: Recall@Top5%, Recall@Top10%, Precision@Top10%, Number Needed to Screen.
-6. Feature Ablation Study: Quantifies marginal contribution of climate, fire history, and spatial features.
-7. Walk-Forward Expanding Window Validation: Rigorous multi-year temporal stability assessment.
+Target windows are purged at partition boundaries. Training-only spatial CV
+retains neighbor observations and is not itself proof of spatial transfer.
+Date-block intervals condition on observed cells; no null-hypothesis p-value
+or operational emergency-response utility is established by these metrics.
 """
 
 import json
@@ -43,9 +36,10 @@ from sklearn.preprocessing import StandardScaler
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from src.config import get_project_root, load_config
+from src.config import evaluation_periods, get_project_root, load_config
 from src.models.calibration import IsotonicCalibrator, PlattCalibrator, compute_ece
 from src.models.inference import feature_matrix
+from src.models.provenance import capture_execution
 
 warnings.filterwarnings("ignore", category=UserWarning)
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -70,8 +64,9 @@ def assign_spatial_blocks(df: pd.DataFrame) -> np.ndarray:
     - Block 1 (Central MT, Cerrado core): -14.5 <= lat < -11.0
     - Block 2 (South MT, Pantanal basin): lat < -14.5
 
-    Using contiguous geographical blocks eliminates spatial adjacency leakage
-    inherent in random spatial cross-validation.
+    These latitude bands are geographic approximations, not biome polygons.
+    They do not remove neighbor-feature overlap; the separate held-region
+    experiment excludes neighbor features and adds a buffer.
     """
     lat = df["lat_center"].values
     blocks = np.zeros(len(df), dtype=int)
@@ -221,12 +216,11 @@ def evaluate_fixed_thresholds(y_true: np.ndarray, y_prob: np.ndarray, thresholds
 def compute_operational_decision_metrics(
     y_true: np.ndarray, y_prob: np.ndarray, model_name: str, cal_thresholds: dict[str, float] | None = None
 ) -> dict:
-    """Compute surveillance decision metrics:
+    """Legacy-named ranking metrics over labeled cell-days, not distinct fires.
 
-    - Recall@Top5% and Recall@Top10%: fraction of all fires captured within top inspection tiers.
-    - Precision@Top5% and Precision@Top10%: accuracy when inspecting prioritized cells.
-    - Number Needed to Screen (NNS): inspections required per verified fire event.
-    - Out-of-sample evaluated fixed thresholds (T_P50, T_F1, T_30, T_50) from calibration set.
+    Top-K ties use array ordering. NNS is a ratio of ranked cell-days to
+    positive labels, not verified field inspections. The pre-merge analysis
+    separately reports fractional tie expectations without replacing history.
     """
     n = len(y_true)
     total_pos = int(np.sum(y_true))
@@ -442,13 +436,12 @@ def run_feature_ablation(
 def train_all(config: dict | None = None) -> pd.DataFrame:
     """Execute the full scientifically defensible training and calibration pipeline."""
     cfg = config or load_config()
+    periods = evaluation_periods(cfg)
     root = get_project_root()
     import hashlib
-    execution_snapshot = {
-        "commit_at_start": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
-        "working_tree_dirty_at_start": bool(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip()),
-        "train_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-    }
+    execution_snapshot = capture_execution(root, ["data/processed/features.parquet", "data/processed/grid.csv",
+                                                 "data/geo/mato_grosso_ibge.geojson"])
+    execution_snapshot["train_source_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     seed = cfg["model"]["seed"]
     np.random.seed(seed)
     random.seed(seed)
@@ -478,16 +471,16 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
 
     # ── Strict Temporal Purging / Embargo ─────────────────────────────────
     horizon_days = cfg["model"].get("forecast_horizon_days", 7)
-    cal_start = pd.Timestamp("2023-01-01")
-    test_start = pd.Timestamp(f"{cfg['model']['test_start_year']}-01-01")
+    cal_start = pd.Timestamp(periods["calibration_start"])
+    test_start = pd.Timestamp(periods["test_start"])
 
     # Enforce embargo of H days at split boundaries (Dec 24 for H=7)
     train_cutoff = cal_start - pd.Timedelta(days=horizon_days + 1)
     cal_cutoff = test_start - pd.Timedelta(days=horizon_days + 1)
 
-    train_mask = (df["date"] >= "2016-01-01") & (df["date"] <= train_cutoff)
+    train_mask = (df["date"] >= periods["train_start"]) & (df["date"] <= train_cutoff)
     cal_mask = (df["date"] >= cal_start) & (df["date"] <= cal_cutoff)
-    test_mask = (df["date"] >= test_start) & (df["date"] <= "2025-12-24")
+    test_mask = (df["date"] >= test_start) & (df["date"] <= periods["test_end"])
 
     train_df = df[train_mask].copy()
     cal_df = df[cal_mask].copy()
@@ -663,7 +656,7 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
     results.append(m_iso)
     print(f"  Isotonic Calibrated metrics: {m_iso}")
 
-    # Primary operational model uses Platt scaling (monotonic, robust, smooth)
+    # Primary retrospective model uses the prespecified Platt calibration.
     y_prob_primary = y_prob_platt
 
     joblib.dump(final_model, models_dir / "lightgbm_model.joblib")
@@ -767,9 +760,9 @@ def train_all(config: dict | None = None) -> pd.DataFrame:
             h_train_cutoff = cal_start - pd.Timedelta(days=h + 1)
             h_cal_cutoff = test_start - pd.Timedelta(days=h + 1)
 
-            h_train_df = df[(df["date"] >= "2016-01-01") & (df["date"] <= h_train_cutoff)]
+            h_train_df = df[(df["date"] >= periods["train_start"]) & (df["date"] <= h_train_cutoff)]
             h_cal_df = df[(df["date"] >= cal_start) & (df["date"] <= h_cal_cutoff)]
-            h_test_df = df[(df["date"] >= test_start) & (df["date"] <= "2025-12-24")]
+            h_test_df = df[(df["date"] >= test_start) & (df["date"] <= periods["test_end"])]
 
             X_tr_h = feature_matrix(h_train_df, feature_cols)
             y_tr_h = h_train_df[target_col].values

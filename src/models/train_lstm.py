@@ -15,10 +15,11 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.config import get_project_root
+from src.config import evaluation_periods, get_project_root
 from src.models.calibration import PlattCalibrator
 from src.models.evaluation import paired_ap_difference
 from src.models.inference import feature_matrix
+from src.models.provenance import capture_execution
 from src.models.research import metric_row
 
 
@@ -61,6 +62,9 @@ def train_and_evaluate_lstm(seq_len=14, batch_size=1024, epochs=5, lr=.001, seed
     np.random.seed(seed)
     random.seed(seed)
     root = get_project_root()
+    periods = evaluation_periods()
+    execution_snapshot = capture_execution(root, ["data/processed/features.parquet", "data/processed/dataset.parquet",
+                                                 "data/processed/grid.csv", "models/training_metadata.json"])
     models = root / "models"
     output = root / "reports/research"
     output.mkdir(parents=True, exist_ok=True)
@@ -77,12 +81,12 @@ def train_and_evaluate_lstm(seq_len=14, batch_size=1024, epochs=5, lr=.001, seed
     df["dtr"] = compute_dtr(df.T2M_MAX, df.T2M_MIN)
     sequence_features = ["T2M_MAX", "T2M_MIN", "RH2M", "PRECTOTCORR", "WS10M", "fire_count", "vpd", "dtr", "lat_center", "lon_center"]
     preprocessing = make_pipeline(SimpleImputer(strategy="median"), StandardScaler())
-    preprocessing.fit(df.loc[df.date <= "2022-12-24", sequence_features])
+    preprocessing.fit(df.loc[df.date.between(periods["train_start"], periods["train_end"]), sequence_features])
     df[sequence_features] = preprocessing.transform(df[sequence_features])
     sequences, y, keys = build_sequences(df, sequence_features, seq_len, return_keys=True)
-    train_mask = (keys.date <= "2022-12-24").to_numpy()
-    cal_mask = ((keys.date >= "2023-01-01") & (keys.date <= "2023-12-24")).to_numpy()
-    test_mask = ((keys.date >= "2024-01-01") & (keys.date <= "2025-12-24")).to_numpy()
+    train_mask = keys.date.between(periods["train_start"], periods["train_end"]).to_numpy()
+    cal_mask = keys.date.between(periods["calibration_start"], periods["calibration_end"]).to_numpy()
+    test_mask = keys.date.between(periods["test_start"], periods["test_end"]).to_numpy()
     print("Matched counts:", train_mask.sum(), cal_mask.sum(), test_mask.sum(), flush=True)
     model = WildfireLSTM(len(sequence_features))
     loader = DataLoader(TensorDataset(torch.from_numpy(sequences[train_mask]), torch.from_numpy(y[train_mask])),
@@ -146,7 +150,7 @@ def train_and_evaluate_lstm(seq_len=14, batch_size=1024, epochs=5, lr=.001, seed
     comparison.to_csv(output / "matched_lstm.csv", index=False)
     comparison.to_csv(root / "reports/lstm_comparison.csv", index=False)
     paired = paired_ap_difference(test_frame.date, y[test_mask], tree_calibrated, calibrated)
-    meta = {"seq_len": seq_len, "feature_cols": sequence_features, "epochs_fixed_before_test": epochs,
+    meta = {"execution_snapshot": execution_snapshot, "seq_len": seq_len, "feature_cols": sequence_features, "epochs_fixed_before_test": epochs,
             "seed": seed, "training_rows": int(train_mask.sum()), "calibration_rows": int(cal_mask.sum()),
             "test_rows": int(test_mask.sum()), "same_labels_and_keys_verified": True,
             "training_stride": 1, "test_stride": 1, "lstm_parameters": sum(p.numel() for p in model.parameters()),

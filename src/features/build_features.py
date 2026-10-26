@@ -1,9 +1,9 @@
 """Feature engineering for wildfire risk prediction.
 
-All features use ONLY information available up to day D (the prediction date).
-No future data leaks into features. This is enforced by:
+Features use observations dated no later than D in retrospective replay.
+Observation date does not establish publication or operational availability:
 1. All rolling windows look BACKWARD in time.
-2. Fire count on day D itself IS available (the satellite has already passed).
+2. Fire counts include day D; their historical publication time is unknown.
 3. The target uses days D+1 to D+7 (strictly future).
 
 Features created:
@@ -210,7 +210,7 @@ def _add_neighbor_features(df: pd.DataFrame, cfg: dict) -> None:
     """Add fire counts from neighboring grid cells (in-place).
 
     For each cell, sums fire_count_7d from the 8 surrounding cells.
-    This captures spatial fire spread patterns.
+    This represents neighboring detection history; it does not identify fire propagation.
     """
     # Build a lookup of (row, col) neighbors
     if "grid_row" not in df.columns or "grid_col" not in df.columns:

@@ -5,6 +5,36 @@ import pandas as pd
 from sklearn.metrics import average_precision_score
 
 
+def top_k_tie_sensitivity(y, probability, fraction=.10):
+    """Expected and attainable Top-K counts when cutoff ties are exchangeable.
+
+    This descriptive sensitivity leaves legacy ranking tables unchanged.
+    Bounds reflect tie ordering, not statistical confidence intervals.
+    """
+    y, probability = np.asarray(y), np.asarray(probability, dtype=float)
+    if (y.ndim != 1 or probability.shape != y.shape or not len(y)
+            or not np.isin(y, [0, 1]).all() or not np.isfinite(probability).all()
+            or ((probability < 0) | (probability > 1)).any() or not 0 < fraction <= 1):
+        raise ValueError("Top-K requires aligned binary labels, valid probabilities and a fraction in (0, 1]")
+    k = int(np.ceil(fraction * len(y)))
+    cutoff = float(np.partition(probability, len(y) - k)[len(y) - k])
+    above, tied = probability > cutoff, probability == cutoff
+    remaining = k - int(above.sum())
+    base_tp, tied_tp = int(y[above].sum()), int(y[tied].sum())
+    tied_n = int(tied.sum())
+    expected = base_tp + remaining * tied_tp / tied_n
+    lower = base_tp + max(0, remaining - (tied_n - tied_tp))
+    upper = base_tp + min(remaining, tied_tp)
+    positives = int(y.sum())
+    return {"n": len(y), "fraction": fraction, "k": k, "cutoff": cutoff,
+            "tied_at_cutoff": tied_n, "remaining_at_cutoff": remaining,
+            "expected_true_positives": expected, "true_positive_order_bounds": [lower, upper],
+            "expected_precision": expected / k,
+            "expected_recall": expected / positives if positives else None,
+            "precision_order_bounds": [lower / k, upper / k],
+            "interpretation": "Fractional expectation under exchangeable ties; bounds are ordering sensitivity, not confidence intervals."}
+
+
 class WeightedMetrics:
     """Cache sorting and ties so block bootstrap does not repeatedly sort scores."""
 
