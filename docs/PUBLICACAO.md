@@ -2,7 +2,9 @@
 
 ## Estado atual — 27/10/2026
 
-A [PR #1](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1) foi aberta pelo proprietário para a candidata pré-merge 5877c8a. Não foi integrada automaticamente. Atualizar seu corpo pela integração retornou 403; o texto está em PULL_REQUEST_PRE_MERGE.md. As melhorias posteriores estão em release/retrospective-publication-2026-10-26, com [guia de deploy atual](DEPLOY_RETROSPECTIVO.md), lock mínimo, exportação permitida e [release candidata apenas preparada](RELEASE_CANDIDATE_v2.1.0-rc.1.md).
+A [PR #1](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1), candidata pré-merge 5877c8a, foi integrada por EduardoTostesC em 26/10/2026 às 22:53:51 (Brasília), merge b87381a78588ae4cfeaf93746aaf03d005412442. Isso ocorreu após a inspeção inicial; o agente não executou esse merge nem modificou a main local. As melhorias posteriores estão em release/retrospective-publication-2026-10-26, com [guia de deploy atual](DEPLOY_RETROSPECTIVO.md), lock mínimo, exportação permitida e [release candidata apenas preparada](RELEASE_CANDIDATE_v2.1.0-rc.1.md).
+
+A tentativa atual de criar uma PR draft das melhorias contra main também retornou **403 Resource not accessible by integration**; [resposta](../reports/evidence/publication/publication-pr-create.json). Não existe uma nova PR criada pelo agente. Abrir pelo [comparador atual](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/compare/main...release/retrospective-publication-2026-10-26?expand=1), usando o título e corpo de [PULL_REQUEST_PUBLICATION](PULL_REQUEST_PUBLICATION.md). A revisão/decisão de merge continua com o proprietário.
 
 Escolha atual: Community Cloud para a amostra gratuita; alternativa Docker Spaces condicionada à conta/plano elegível. Autenticação de publicação não está disponível; não existe URL pública validada. Os metadados About/topics estão prontos em deploy/github-metadata.json, sem homepage inventada. O serviço não oferece ferramenta para editar esses campos por esta integração; a aplicação manual cabe ao proprietário.
 

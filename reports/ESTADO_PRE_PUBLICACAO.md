@@ -40,3 +40,7 @@ Nenhum HF_TOKEN, HUGGING_FACE_HUB_TOKEN ou cache padrão de token Hugging Face e
 ## Contratos desta rodada
 
 Preservar pesos, calibradores, schema, polígono, resultados e bytes do protocolo future-2027-v1. Nenhum acesso a rótulos de 2027. Implementar interface PT-BR/EN, serving enxuto quando demonstrado, benchmarks reais, aquisição auditável em diretório novo e executor somente de avaliação com fixtures. Não executar DAG científico por rotina. Estender CI para release/** para que o HEAD novo tenha verificações próprias.
+
+## Atualização de fechamento — 27/10/2026
+
+O snapshot inicial acima foi coletado em 27/10 às 01:53:20 UTC, quando a PR #1 ainda estava aberta. O GitHub registra merge por EduardoTostesC às 01:53:51 UTC (26/10 às 22:53:51 em Brasília), 31 segundos depois. A nova consulta e git fetch confirmaram origin/main em `b87381a78588ae4cfeaf93746aaf03d005412442`, contendo a candidata 5877c8a. O estado inicial não foi reescrito para ocultar essa mudança externa; a branch de trabalho conserva sua ancestralidade. O agente não executou o merge nem alterou a main local. Ver o estado corrente em [FINALIZACAO_PUBLICACAO](FINALIZACAO_PUBLICACAO.md).

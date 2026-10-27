@@ -1,12 +1,14 @@
 # Finalização da preparação de publicação
 
-Rodada de 26–27/10/2026, horário de Brasília. Produto retrospectivo preparado para revisão e demonstração; deploy público, merge e release não foram executados. A revisão crítica é interna, sem alegação de aprovação científica independente.
+Rodada de 26–27/10/2026, horário de Brasília. Produto retrospectivo preparado para revisão e demonstração; deploy público e release não foram executados. O proprietário integrou a candidata anterior na PR #1; as melhorias desta rodada aguardam nova revisão. Nenhum merge foi executado pelo agente. A revisão crítica é interna, sem alegação de aprovação científica independente.
 
 ## Referências e objetivo
 
 Base preservada: `5877c8ab1e84443a7d9671fb7f6af13ae0fc3792`, em audit/pre-merge-2026-10-26. Branch de trabalho: release/retrospective-publication-2026-10-26. A implementação funcional e o clone público foram verificados em `9e382945df041435f74c2dfbd79e20e096c09359`; commits posteriores consolidam documentação, automação de evidência e fechamento. O HEAD efetivamente integrado nunca deve ser deduzido da data deste texto: consultar git rev-parse HEAD e o inventário publication-history.json do artefato CI daquele checkout.
 
 No início, origin/main estava em `0f05555922e485ae067d35e95c722d4ffce41af4`; main local, em dbbc21b, já diferia da remota e foi preservada. A candidata tinha 19 commits além de origin/main e CI próprio verde. A árvore inicial estava limpa. [Inspeção inicial](ESTADO_PRE_PUBLICACAO.md). Objetivo desta rodada: interface pública verificável, runtime menor, medição real, proveniência e ferramentas futuras tecnicamente testadas, sem repetir o treino integral já auditado.
+
+Na consulta final, origin/main foi atualizada por git fetch para `b87381a78588ae4cfeaf93746aaf03d005412442`, merge da PR #1 realizado por EduardoTostesC, 31 segundos após o snapshot inicial. A referência local main permanece dbbc21b; a candidata pré-merge permanece 5877c8a. Não houve reset, rebase ou push para main. [Estado remoto atualizado](evidence/publication/remote-after-owner-merge.json).
 
 ## Entregas
 
@@ -51,7 +53,7 @@ O protocolo future-2027-v1.json conserva SHA-256 `106f80f46afba90c67e785994cde20
 
 **Deploy:** preferência por Streamlit Community Cloud para a amostra; pacote Docker alternativo pronto. Autenticação da plataforma não disponível; nenhuma publicação ou URL real validada. [Passos exatos](../docs/DEPLOY_RETROSPECTIVO.md): autenticar, selecionar repositório/branch/app/streamlit_app.py e Python 3.12, verificar instalação mínima, guardar SHA/URL/logs e repetir inspeção nas cinco abas e três horizontes. Somente então preencher homepage.
 
-**GitHub:** PR [#1](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1) aberta pelo proprietário, candidata 5877c8a, sem merge. A integração recusou a edição do título/corpo com 403; [resposta](evidence/publication/pr-update.json). O texto está em [PULL_REQUEST_PRE_MERGE](../docs/PULL_REQUEST_PRE_MERGE.md). Revisar/aprovar essa integração; depois revisar as diferenças da branch release em relação à candidata, usando [corpo preparado da rodada seguinte](../docs/PULL_REQUEST_PUBLICATION.md). Nenhuma PR duplicada foi criada.
+**GitHub:** PR [#1](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1), candidata 5877c8a, integrada pelo proprietário em 26/10 às 22:53:51 (Brasília), merge b87381a. A integração recusou antes a edição do título/corpo com 403; [resposta histórica](evidence/publication/pr-update.json). A consulta atual confirmou nenhuma PR aberta; tentar criar uma draft desta branch contra main também retornou 403, sem contornar permissões: [resposta atual](evidence/publication/publication-pr-create.json). Abrir a nova revisão pelo [comparador main...release](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/compare/main...release/retrospective-publication-2026-10-26?expand=1), usando o [corpo preparado](../docs/PULL_REQUEST_PUBLICATION.md). Não há número ou link fictício para essa nova PR.
 
 **About/topics:** valores preparados em [github-metadata.json](../deploy/github-metadata.json), homepage null. A integração disponível não oferece edição desses campos; aplicar manualmente nas configurações do repositório. **Release:** [v2.1.0-rc.1 preparada](../docs/RELEASE_CANDIDATE_v2.1.0-rc.1.md), sem nova tag ou release publicada; depende de revisão/autorização e escolha do SHA integrado com CI verde.
 

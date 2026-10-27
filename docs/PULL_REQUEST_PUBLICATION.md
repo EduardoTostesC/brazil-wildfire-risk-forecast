@@ -1,6 +1,6 @@
 # Publish retrospective demo: bilingual UI, lean runtime and auditable evaluation tooling
 
-Origem: release/retrospective-publication-2026-10-26, derivada de 5877c8a. Revisar as mudanças novas em comparação com audit/pre-merge-2026-10-26. Após integração aprovada da PR #1, usar a main atualizada como destino desta rodada. Nenhum merge automático.
+Origem: release/retrospective-publication-2026-10-26, derivada de 5877c8a. Destino: main, cuja PR #1 já foi integrada pelo proprietário no merge b87381a78588ae4cfeaf93746aaf03d005412442. Revisar somente as melhorias posteriores à candidata pré-merge. A branch conserva sua ancestralidade e não reescreve o histórico; o merge anterior da main não foi executado pelo agente. Esta revisão não autoriza merge automático.
 
 Interface PT-BR/EN com cinco abas, três horizontes, mensagens científicas, erros localizados, cache por identidade de artefatos e gráficos/viewport realmente inspecionados. Serving separado por lock e Dockerfile, sem bibliotecas de treinamento, mantendo modelos e paridade numérica nos ambientes e imagens comparados.
 

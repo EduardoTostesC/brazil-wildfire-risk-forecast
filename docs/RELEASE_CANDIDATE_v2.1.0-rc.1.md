@@ -28,6 +28,6 @@ Ver [deploy](DEPLOY_RETROSPECTIVO.md), [dashboard](../reports/DASHBOARD_FINAL.md
 
 ## Pendências e compatibilidade
 
-Integração depende da decisão do proprietário sobre a PR #1 e revisão separada das melhorias posteriores. Publicação exige autenticação da plataforma e validação da URL real; nenhuma demo pública é anunciada aqui. Metadados About/topics estão preparados em deploy/github-metadata.json; homepage aguarda essa URL.
+A candidata anterior foi integrada pelo proprietário na PR #1, merge b87381a. As melhorias desta branch dependem de nova revisão; criar a nova PR pela integração retornou 403, e o comparador/corpo estão preparados em docs/PUBLICACAO.md. Publicação exige autenticação da plataforma e validação da URL real; nenhuma demo pública é anunciada aqui. Metadados About/topics estão preparados em deploy/github-metadata.json; homepage aguarda essa URL.
 
 Dados brutos completos não são distribuídos pelo Git ou DVC remoto; termos específicos/versionamento das coleções e réplica independente continuam pendentes. O protótipo não orienta resposta emergencial. Release só deve ser publicada pelo proprietário após revisar esse escopo e os checks do commit escolhido.
