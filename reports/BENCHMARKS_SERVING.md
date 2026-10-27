@@ -1,6 +1,6 @@
 # Benchmarks reais de serving
 
-Medições locais em 27/10/2026; três processos novos por condição, API em loopback, amostra pública de 2.464 linhas/352 células/sete datas, 39 features. Não representa latência de produção ou da plataforma de deploy. API/calibradores/modelos correspondem ao código c68731e e aos artefatos preservados; o script de instrumentação novo é identificado por SHA-256 no início de cada execução, antes do commit que guarda esses resultados.
+Medições iniciadas em 26/10/2026 às 23:59 (Brasília), consolidadas em 27/10; timestamps UTC originais nos JSONs. Três processos novos por condição, API em loopback, amostra pública de 2.464 linhas/352 células/sete datas, 39 features. Não representa latência de produção ou da plataforma de deploy. API/calibradores/modelos correspondem ao código c68731e e aos artefatos preservados; o script de instrumentação novo é identificado por SHA-256 no início de cada execução, antes do commit que guarda esses resultados.
 
 ## Método
 

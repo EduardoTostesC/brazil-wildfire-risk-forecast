@@ -6,6 +6,10 @@
 
 [Revisão pré-merge de 26/10/2026](reports/REVISAO_PRE_MERGE.md): conferência de fontes, análises exploratórias de empates/calibração e protocolo de avaliação futura congelado. Os badges identificam separadamente a main e a candidata.
 
+[![CI da publicação](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg?branch=release%2Fretrospective-publication-2026-10-26)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions?query=branch%3Arelease%2Fretrospective-publication-2026-10-26)
+
+A preparação de publicação está isolada em `release/retrospective-publication-2026-10-26`; a [PR #1 de integração](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1) preserva a candidata anterior. O dashboard agora permite Português/English, com [runtime separado](docs/DEPLOY_RETROSPECTIVO.md), [benchmarks medidos](reports/BENCHMARKS_SERVING.md) e [fechamento atual](reports/FINALIZACAO_PUBLICACAO.md). O avaliador futuro foi testado tecnicamente e permanece bloqueado até esclarecer o protocolo; nenhum desfecho de 2027 foi acessado. Não se anuncia URL pública de demo.
+
 Pesquisa retrospectiva de aprendizado de máquina sobre detecção de focos de calor em Mato Grosso. Modelos LightGBM estimam a probabilidade de **ao menos um foco detectável pelo sistema de referência em uma célula de 0,5° entre D+1 e D+H**, com H de 1, 3 ou 7 dias. A API e o dashboard Streamlit consultam observações históricas da célula e data exatas.
 
 Foco detectado não equivale a incêndio independente. O alvo não mede ponto de ignição, propagação, área queimada ou severidade. A ausência de detecção não comprova ausência física de fogo.
@@ -92,11 +96,13 @@ python -m streamlit run app/streamlit_app.py
 
 Documentação da API: `http://localhost:8000/docs`. A amostra versionada aparece identificada como demonstração. Consulta ausente retorna 404; outra data não é substituída. Falta de modelo/calibrador ou infraestrutura retorna 503, entrada fora do domínio 422 e erro interno controlado 500. `operational_forecast` retorna 503.
 
+Para **somente API/dashboard**, use outro ambiente e instale `python -m pip install --require-hashes -r app/requirements.txt`. Esse runtime exclui bibliotecas de treino/notebooks; testes científicos e treinamento usam o lock completo acima. Selecione o idioma na barra lateral ou use `?lang=en`. `Dockerfile.serving` inicia o dashboard por padrão e tem um target `api` separado.
+
 O guia [REPRODUCIBILIDADE](reports/REPRODUCIBILIDADE.md) contém aquisição, treinamento, DVC, pesquisa e publicação. Dados brutos e processados completos são locais e não são distribuídos pelo Git. Um manifesto local não equivale a uma versão pública desses dados.
 
 ## Demonstração e evidências
 
-[Screenshot do dashboard](reports/figures/dashboard-desktop.png) · [Testes e CI](reports/TESTES_E_CI.md) · [Pendências](reports/PENDENCIAS_REAIS.md) · [Parecer por finalidade](reports/PARECER_FINAL.md)
+[Desktop PT-BR](reports/figures/publication/pt-BR-desktop-home.png) · [Mobile](reports/figures/publication/pt-BR-mobile-home.png) · [Validação do dashboard](reports/DASHBOARD_FINAL.md) · [Testes e CI](reports/TESTES_E_CI.md) · [Parecer atual](reports/PARECER_POS_PUBLICACAO.md)
 
 Não se declara deploy público nem aceite acadêmico. O projeto não substitui alertas oficiais de emergência.
 

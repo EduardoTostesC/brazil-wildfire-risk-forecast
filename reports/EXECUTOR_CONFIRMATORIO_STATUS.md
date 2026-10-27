@@ -1,6 +1,6 @@
 # Estado do executor confirmatório
 
-Implementado em 27/10/2026, sem avaliação real de 2027. Original future-2027-v1.json preservado byte a byte. Código: src/models/frozen_evaluation.py; CLI: scripts/evaluate_frozen_2027.py. O SHA completo do commit de implementação e hashes canônicos das fontes serão registrados no fechamento após o commit existir.
+Implementado em 27/10/2026, sem avaliação real de 2027. Original future-2027-v1.json preservado byte a byte. Commit de implementação: `9e382945df041435f74c2dfbd79e20e096c09359`. Código: src/models/frozen_evaluation.py, SHA-256 `1053f9a188196ae3d3c605ab1107c6ed2e83b837a8ddf700ed15ab7eb7d6b071`; CLI: scripts/evaluate_frozen_2027.py, SHA-256 `c9d8ec1d7e03aa3755a7c9a45eb39da40928c07e82fdb197c9e945eac35eb247`. Nesses dois arquivos os bytes já usam LF; hashes conferidos após o commit.
 
 ## Implementado e testado
 
@@ -15,6 +15,7 @@ Comparação primária usa 5.000 blocos de datas pareados, 14 dias, seed 2026102
 ## Evidências executadas
 
 - 24 testes técnicos aprovados inicialmente: [log](evidence/publication/frozen-evaluator-tests.txt), [XML](evidence/publication/frozen-evaluator-tests.xml). Cobrem adulteração de protocolo/pesos/schema/polígono, calendário, duplicação, coordenadas, unidades/sensor, população, calibração, horizonte, bootstrap inválido e ausência de positivos.
+- A suíte completa posterior passou em 142 testes por versão Python 3.11/3.12, localmente, em clone sem dados privados e no [CI de 9e38294](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40457916591). Isso valida a implementação técnica disponível, sem autorizar uso confirmatório da proposta.
 - O teste de inferência torna fit proibido em LightGBM, regressão, imputador, scaler e calibrador. A chamada de predição histórica continua funcionando; calibrador não ajustado falha.
 - O teste do CLI substitui a leitura de Parquet por uma função que falha se chamada; o gate rejeita a execução antes dessa leitura.
 - Lookups reconstruídos reproduzem **exatamente** os dois baselines originais nos 2.464 registros públicos, com treino de 897.600 linhas e arquivo de origem SHA-256 conferido. [Comparação](evidence/publication/frozen-baselines-equivalence.json). Não é novo teste confirmatório nem retreinamento dos modelos.

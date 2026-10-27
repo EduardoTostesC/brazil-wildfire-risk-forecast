@@ -2,6 +2,8 @@
 
 Inicie `python -m uvicorn api.main:app --port 8000` no ambiente validado. A documentação interativa está em `http://localhost:8000/docs` enquanto o servidor estiver em execução.
 
+Na branch de publicação, o runtime mínimo pode ser instalado separadamente com `python -m pip install --require-hashes -r app/requirements.txt`. `WILDFIRE_USE_SAMPLE=1` força a amostra mesmo quando existe arquivo completo local, alinhando API e dashboard; o comportamento padrão continua preferindo o arquivo completo quando disponível. Readiness em /health exclui calibradores não ajustados. Pesos/probabilidades permanecem equivalentes nas verificações de [paridade](../reports/evidence/publication/serving-parity.json).
+
 Exemplo disponível na amostra versionada:
 
 ```bash

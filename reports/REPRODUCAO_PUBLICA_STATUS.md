@@ -32,7 +32,11 @@ Proposta de armazenamento, após resolver termos e versionamento: repositório d
 
 ## Clone público e reconstrução
 
-O CI da nova branch instala a distribuição completa em Python 3.11/3.12 e a de serving isoladamente nas mesmas versões, sem dados privados. API, modelos e documentação têm checks próprios. A verificação local adicional em clone separado será registrada no fechamento, com SHA e comandos efetivos; este texto não a antecipa como executada.
+Foi executado git clone pela rede da branch pública em diretório novo, checkout `9e382945df041435f74c2dfbd79e20e096c09359`, sem data/raw ou data/processed. Os 142 testes passaram em Python 3.11 e 3.12. Foram reutilizados os interpretadores isolados auditados: não se apresenta esse passo como reinstalação completa de dependências. A instalação nova do runtime mínimo foi verificada separadamente. [Resultados da suíte no clone](evidence/publication/clean-clone-tests.json).
+
+Nesse clone, bundle, protocolo original, suplemento, hashes das fontes, geradores de métricas/tabelas e Ruff passaram. O módulo src foi importado da árvore do clone. A API iniciada com o interpretador mínimo respondeu corretamente aos 12 casos HTTP; Chrome inspecionou as cinco abas nos dois idiomas e dois viewports usando o servidor mínimo. [Checks e comandos](evidence/publication/clean-clone-checks.json), [respostas reais](evidence/publication/clean-http-examples.json), [navegador](evidence/publication/dashboard-browser.json).
+
+A verificação de data_manifest.json nesse clone terminou com código 1, esperado pela ausência das fontes completas; [saída preservada](evidence/publication/clean-full-manifest-expected-unavailable.txt). Não foi regenerado o manifesto nem declarado sucesso de reconstrução integral. O [CI de 9e38294](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40457916591) também aprovou 142 testes em cada Python, as instalações mínimas isoladas nas duas versões e Docker/paridade em Linux, sem esses dados privados.
 
 Para aquisição integral por terceiro, seguir [PLANO_REPRODUCAO_EXTERNA](PLANO_REPRODUCAO_EXTERNA.md). Os downloaders legados continuam sendo o caminho compatível com a árvore de entrada do DAG. A ferramenta nova gera recibos independentes: comparar hashes de processed.csv antes de importá-lo deliberadamente como climate_GRID.csv/focos_MT_ANO.csv em um clone novo. Depois, o downloader de focos recompõe o CSV combinado e o manifesto verifica a coleção. Não copiar sobre a única referência histórica nem regenerar seu manifesto para esconder diferenças.
 

@@ -12,6 +12,6 @@ short_description: Historical satellite hotspot risk replay in Mato Grosso
 
 # Historical hotspot risk replay
 
-Retrospective demonstration using exact archived observations. Operational forecasting is unavailable. Metrics and limitations are maintained in the [GitHub documentation](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast).
+Retrospective Portuguese/English demonstration using exact archived observations. Operational forecasting is unavailable. Metrics and limitations are maintained in the [publication branch documentation](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/tree/release/retrospective-publication-2026-10-26).
 
-For a Docker-based Space, configure the image to start Streamlit on port 8501, as described in docs/PUBLICACAO.md. This file is a deployment template, not evidence of a live Space.
+The prepared export from scripts/prepare_space.py uses Dockerfile.serving and starts Streamlit on port 8501 with only runtime dependencies. No full raw dataset or credentials are included. Review docs/DEPLOY_RETROSPECTIVO.md and the platform's current account requirements before uploading. This file is a template, not evidence of a live Space.
