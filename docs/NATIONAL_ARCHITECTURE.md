@@ -26,8 +26,11 @@ insulares presentes na malha. Interseções de área positiva são mantidas mesm
 quando pequenas. Contato de área nula não constitui unidade de previsão.
 
 Um foco recebe uma única UF por coordenada e geometria. Em ponto exatamente sobre
-limite compartilhado, escolher o menor código IBGE entre as geometrias que o
-cobrem, registrar todos os candidatos e marcar ambiguidade. Nunca fazer uma junção
+limite compartilhado, registrar todos os polígonos que cobrem o ponto e marcar
+ambiguidade. Entre esses candidatos, escolher o menor código IBGE cuja interseção
+com a célula semiaberta atribuída tenha área positiva. A elegibilidade evita
+atribuir um evento a unidade inexistente quando limite estadual coincide com
+aresta norte/leste da grade. Sem candidato elegível, enviar para quarentena. Nunca fazer uma junção
 que replique um foco para ambas as UFs. A comparação com UF textual/código informado
 na origem produz divergências auditáveis, sem substituir a atribuição geográfica
 silenciosamente. Coordenadas fora da malha e fontes inválidas vão para quarentena.
