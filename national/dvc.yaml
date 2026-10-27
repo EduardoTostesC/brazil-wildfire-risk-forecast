@@ -1,0 +1,14 @@
+stages:
+  geography_inventory:
+    wdir: ..
+    cmd: python scripts/build_national_geography.py benchmark --source data/geo/national/ibge-2024 --output data/raw/national/dvc-engineering/grid-inventory.json
+    deps:
+      - data/geo/national/ibge-2024/BR_UF_2024.geojson.gz
+      - data/geo/national/ibge-2024/receipt.json
+      - scripts/build_national_geography.py
+      - src/geo/boundaries.py
+      - src/geo/national_grid.py
+      - src/geo/uf_registry.py
+      - requirements-cpu.lock
+    outs:
+      - data/raw/national/dvc-engineering/grid-inventory.json
