@@ -1,6 +1,7 @@
 """Verify both languages/viewports/tabs and real missing-data browser states."""
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -18,8 +19,8 @@ sys.path.insert(0, str(ROOT))
 from app.i18n import horizon_label, translate
 
 
-def start(root, port, log):
-    process = subprocess.Popen([sys.executable, "-m", "streamlit", "run", "app/streamlit_app.py",
+def start(root, port, log, python=sys.executable):
+    process = subprocess.Popen([python, "-m", "streamlit", "run", "app/streamlit_app.py",
         "--server.headless=true", f"--server.port={port}", "--browser.gatherUsageStats=false"],
         cwd=root, env=dict(os.environ, WILDFIRE_USE_SAMPLE="1", PYTHONIOENCODING="utf-8"),
         stdout=log, stderr=subprocess.STDOUT,
@@ -38,10 +39,24 @@ def start(root, port, log):
     raise RuntimeError("Dashboard health timeout")
 
 
-def ready(page, language, error=False):
+def ready(page, language, error=False, require_map=True):
     text = translate("unavailable" if error else "shown", language)
-    page.get_by_text(text, exact=True).first.wait_for(state="visible", timeout=120000)
+    if error or require_map:
+        page.get_by_text(text, exact=True).first.wait_for(state="visible", timeout=120000)
     page.locator('[data-testid="stStatusWidget"]').wait_for(state="hidden", timeout=120000)
+    # A hidden status widget can precede the final replacement of stale elements.
+    # Observe a quiet DOM before capturing a completed view, including after reruns.
+    page.evaluate("""() => {
+        window.__dashboardObserver?.disconnect();
+        window.__dashboardLastMutation = performance.now();
+        window.__dashboardObserver = new MutationObserver(() => {
+            window.__dashboardLastMutation = performance.now();
+        });
+        window.__dashboardObserver.observe(document.body, {subtree: true, childList: true, attributes: true});
+    }""")
+    page.wait_for_function("""() => !document.querySelector('[data-stale="true"]') &&
+        performance.now() - window.__dashboardLastMutation > 1000""", timeout=120000)
+    page.evaluate("() => window.__dashboardObserver.disconnect()")
     expect(page.locator('[data-testid="stException"]')).to_have_count(0)
     if not error:
         expect(page.get_by_role("tab")).to_have_count(5)
@@ -52,13 +67,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--browser-executable")
+    parser.add_argument("--server-python", default=sys.executable)
     args = parser.parse_args()
+    if Path(args.server_python).is_file():
+        args.server_python = str(Path(args.server_python).resolve())
     evidence = ROOT / "reports/evidence/publication"
     figures = ROOT / "reports/figures/publication"
     evidence.mkdir(parents=True, exist_ok=True)
     figures.mkdir(parents=True, exist_ok=True)
     log = (evidence / "dashboard-server.txt").open("w", encoding="utf-8")
-    process = start(args.root.resolve(), 8505, log)
+    process = start(args.root.resolve(), 8505, log, args.server_python)
     results, errors = [], []
     try:
         with sync_playwright() as playwright:
@@ -83,6 +101,7 @@ def main():
                         page.locator('[data-testid="stSidebarCollapseButton"] button').click()
                     if device == "mobile":
                         expect(sidebar).to_have_attribute("aria-expanded", "false")
+                    ready(page, language)
                     home = figures / f"{language}-{device}-home.png"
                     page.screenshot(path=str(home), animations="disabled")
                     checks = []
@@ -108,6 +127,7 @@ def main():
                                 if not box or box["height"] < 200 or box["width"] < 200:
                                     raise RuntimeError(f"Unreadable chart geometry: {key} {box}")
                         expect(page.locator('[data-testid="stException"]')).to_have_count(0)
+                        ready(page, language, require_map=False)
                         screenshot = figures / f"{language}-{device}-{key}.png"
                         if key == "map_tab":
                             # Capture the actual map element after its native layout settles.
@@ -129,7 +149,7 @@ def main():
                     shutil.copytree(args.root / name, missing / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
                 shutil.copy2(args.root / "config.yaml", missing / "config.yaml")
                 error_log = (evidence / "dashboard-error-server.txt").open("w", encoding="utf-8")
-                error_process = start(missing, 8506, error_log)
+                error_process = start(missing, 8506, error_log, args.server_python)
                 try:
                     for language in ("pt-BR", "en"):
                         page = browser.new_page(viewport={"width": 390, "height": 844}, locale=language)
@@ -145,6 +165,10 @@ def main():
                     error_log.close()
             browser.close()
         result = {"mode": "actual public sample in local browser; screenshots are viewports, not whole documents",
+                  "capture_wait": "No stale elements and DOM quiet for at least 1000 ms before screenshots",
+                  "checkout_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=args.root, text=True).strip(),
+                  "app_source_sha256_lf": hashlib.sha256((args.root / "app/streamlit_app.py").read_bytes().replace(b"\r\n", b"\n")).hexdigest(),
+                  "private_data_directories_present": {name: (args.root / name).exists() for name in ["data/raw", "data/processed"]},
                   "cases": results, "browser_errors": errors}
         (evidence / "dashboard-browser.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
         if errors:

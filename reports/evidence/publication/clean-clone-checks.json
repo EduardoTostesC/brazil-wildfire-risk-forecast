@@ -1,0 +1,119 @@
+{
+  "checkout_head": "9e382945df041435f74c2dfbd79e20e096c09359",
+  "raw_exists": false,
+  "processed_exists": false,
+  "actual_http_responses": 12,
+  "checks": [
+    {
+      "name": "bundle",
+      "command": [
+        "python",
+        "-m",
+        "src.models.artifacts",
+        "--verify"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "protocol",
+      "command": [
+        "python",
+        "scripts/verify_frozen_protocol.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "future-verification",
+      "command": [
+        "python",
+        "scripts/evaluate_frozen_2027.py",
+        "--verify-only"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "readme-metrics",
+      "command": [
+        "python",
+        "-m",
+        "src.reporting.generate_readme_metrics",
+        "--check"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "research-tables",
+      "command": [
+        "python",
+        "-m",
+        "src.reporting.generate_research_tables",
+        "--check"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "ruff",
+      "command": [
+        "python",
+        "-m",
+        "ruff",
+        "check",
+        ".",
+        "--ignore",
+        "E501,E402"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "source-import",
+      "command": [
+        "python",
+        "-c",
+        "import src; print(src.__file__)"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "full-manifest-expected-unavailable",
+      "command": [
+        "python",
+        "-m",
+        "src.data.manifest",
+        "--verify"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "passed": true
+    },
+    {
+      "name": "full-py312-pip",
+      "exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "full-py311-pip",
+      "exit_code": 0,
+      "passed": true
+    },
+    {
+      "name": "runtime-pip",
+      "exit_code": 0,
+      "passed": true
+    }
+  ],
+  "redactions": "Only absolute local workspace/user paths and advertised Network/External addresses redacted in published text/XML logs; response values unchanged."
+}

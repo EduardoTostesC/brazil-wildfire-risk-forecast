@@ -1,0 +1,103 @@
+{
+  "source_head": "909f5699d5f29cd5eed97e3668ed923a9df86a53",
+  "checks": [
+    {
+      "check": "ruff-final",
+      "command": [
+        "python",
+        "-m",
+        "ruff",
+        "check",
+        ".",
+        "--ignore",
+        "E501,E402"
+      ],
+      "exit_code": 0,
+      "output": "All checks passed!\n"
+    },
+    {
+      "check": "links-final",
+      "command": [
+        "python",
+        "scripts/check_doc_links.py"
+      ],
+      "exit_code": 0,
+      "output": "Local links verified in 42 current Markdown documents\n"
+    },
+    {
+      "check": "metrics-final",
+      "command": [
+        "python",
+        "-m",
+        "src.reporting.generate_readme_metrics",
+        "--check"
+      ],
+      "exit_code": 0,
+      "output": "Documentation metrics verified\n"
+    },
+    {
+      "check": "tables-final",
+      "command": [
+        "python",
+        "-m",
+        "src.reporting.generate_research_tables",
+        "--check"
+      ],
+      "exit_code": 0,
+      "output": "Research documentation verified\n"
+    },
+    {
+      "check": "bundle-final",
+      "command": [
+        "python",
+        "-m",
+        "src.models.artifacts",
+        "--verify"
+      ],
+      "exit_code": 0,
+      "output": "Model bundle verified\n"
+    },
+    {
+      "check": "protocol-final",
+      "command": [
+        "python",
+        "scripts/verify_frozen_protocol.py"
+      ],
+      "exit_code": 0,
+      "output": "Frozen protocol and model/schema hashes verified; no future observations accessed\n"
+    },
+    {
+      "check": "executor-final",
+      "command": [
+        "python",
+        "scripts/evaluate_frozen_2027.py",
+        "--verify-only"
+      ],
+      "exit_code": 0,
+      "output": "Original protocol/models/schema/geometry/algorithm/baseline hashes verified; implementation clarification remains a proposal. No future inputs read.\n"
+    },
+    {
+      "check": "dvc-final",
+      "command": [
+        "python",
+        "-m",
+        "dvc",
+        "status",
+        "--json"
+      ],
+      "exit_code": 0,
+      "output": "{}\n"
+    }
+  ],
+  "protected_paths_count": 49,
+  "protected_paths_changed": [],
+  "original_protocol_sha256": "106f80f46afba90c67e785994cde20e2effc7b920bfc95460f5e779eae2a58d1",
+  "export": {
+    "files": 68,
+    "hashes_verified": true,
+    "private_dirs_or_secret_files": false,
+    "upload_performed": false
+  },
+  "secret_pattern_matches": [],
+  "secret_scan_scope": "Tracked and unignored candidate text files; heuristic scan, not an independent security audit."
+}

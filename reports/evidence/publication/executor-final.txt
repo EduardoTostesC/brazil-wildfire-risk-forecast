@@ -1,0 +1,1 @@
+Original protocol/models/schema/geometry/algorithm/baseline hashes verified; implementation clarification remains a proposal. No future inputs read.

@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6; Node.js 24
+      with:
+        fetch-depth: 0
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6; Node.js 24
@@ -45,6 +47,7 @@ jobs:
         python -m src.reporting.generate_research_tables --check
         python scripts/verify_frozen_protocol.py
         python scripts/evaluate_frozen_2027.py --verify-only
+        python scripts/publication_history.py --output publication-history.md --json publication-history.json
 
     - name: Preserve validation evidence
       if: always()
@@ -54,6 +57,8 @@ jobs:
         path: |
           test-results.xml
           environment.txt
+          publication-history.md
+          publication-history.json
 
   serving:
     name: Runtime-only Python ${{ matrix.python-version }}

@@ -1,6 +1,6 @@
 # Commits da próxima fase
 
-Base preservada: `5877c8ab1e84443a7d9671fb7f6af13ae0fc3792`. Checkout inventariado: `9e382945df041435f74c2dfbd79e20e096c09359`.
+Base preservada: `5877c8ab1e84443a7d9671fb7f6af13ae0fc3792`. Checkout inventariado: `909f5699d5f29cd5eed97e3668ed923a9df86a53`.
 
 Inventário gerado do Git real. O relatório versionado lista os commits existentes antes de seu fechamento; o próprio commit que o grava aparece no inventário completo do artefato CI e em git log. Isso evita inventar o SHA de um commit que ainda não existia.
 
@@ -57,3 +57,12 @@ Objetivo: Executor somente de avaliação e gates pré-desfechos.
 Verificação: 24 testes técnicos; baselines originais equivalentes; nenhuma avaliação 2027.
 Evidência: reports/EXECUTOR_CONFIRMATORIO_STATUS.md.
 Arquivos: `.gitattributes`, `.github/workflows/ci.yml`, `reports/EXECUTOR_CONFIRMATORIO_STATUS.md`, `reports/PROTOCOLO_CONFIRMATORIO_CONGELADO.md`, `reports/evidence/publication/frozen-baselines-equivalence.json`, `reports/evidence/publication/frozen-evaluator-tests.txt`, `reports/evidence/publication/frozen-evaluator-tests.xml`, `reports/protocol/FUTURE_2027_CLARIFICATIONS_PROPOSAL.md`, `reports/protocol/future-2027-implementation-proposal.json`, `scripts/evaluate_frozen_2027.py`, `scripts/prepare_frozen_baselines.py`, `src/models/frozen_evaluation.py`, `tests/test_frozen_evaluator.py`.
+
+## 909f5699d5f29cd5eed97e3668ed923a9df86a53
+
+docs(release): consolidate publication evidence and prepare reviewed release candidate
+
+Objetivo: Documentação, metadados e release candidata.
+Verificação: Geradores/links e verificações finais documentados; sem publicação automática.
+Evidência: reports/FINALIZACAO_PUBLICACAO.md.
+Arquivos: `README.hf.md`, `README.md`, `README.pt-BR.md`, `deploy/github-metadata.json`, `docs/API.md`, `docs/PUBLICACAO.md`, `docs/PULL_REQUEST_PUBLICATION.md`, `docs/RELEASE_CANDIDATE_v2.1.0-rc.1.md`, `reports/BENCHMARKS_SERVING.md`, `reports/COMMITS_PROXIMA_FASE.md`, `reports/DASHBOARD_FINAL.md`, `reports/EXECUTOR_CONFIRMATORIO_STATUS.md`, `reports/FINALIZACAO_PUBLICACAO.md`, `reports/PARECER_POS_PUBLICACAO.md`, `reports/REPRODUCAO_PUBLICA_STATUS.md`.

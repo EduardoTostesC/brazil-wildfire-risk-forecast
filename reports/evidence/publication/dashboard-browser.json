@@ -1,5 +1,12 @@
 {
   "mode": "actual public sample in local browser; screenshots are viewports, not whole documents",
+  "capture_wait": "No stale elements and DOM quiet for at least 1000 ms before screenshots",
+  "checkout_head": "9e382945df041435f74c2dfbd79e20e096c09359",
+  "app_source_sha256_lf": "0511117b6f5ca3cebf2613eb15d8879e2067e02200935a1a96fc40e3da114783",
+  "private_data_directories_present": {
+    "data/raw": false,
+    "data/processed": false
+  },
   "cases": [
     {
       "language": "pt-BR",
