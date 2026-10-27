@@ -146,3 +146,51 @@ def test_missing_or_duplicate_geometries_fail(archived_fixture):
         load_boundaries(path, manifest)
     with pytest.raises(ValueError, match="27"):
         validate_boundaries({"51": box(0, 0, 1, 1)})
+
+
+def test_gzip_loader_checks_both_archived_and_plaintext_hashes(archived_fixture):
+    import gzip
+    path, manifest, receipt = archived_fixture
+    plain = path.read_bytes()
+    zipped = path.with_suffix('.geojson.gz')
+    zipped.write_bytes(gzip.compress(plain, mtime=0))
+    receipt['sha256'] = hashlib.sha256(zipped.read_bytes()).hexdigest()
+    receipt['derived_plaintext_sha256'] = hashlib.sha256(plain).hexdigest()
+    manifest.write_text(json.dumps(receipt))
+    assert len(load_boundaries(zipped, manifest)) == 27
+    receipt['derived_plaintext_sha256'] = '0' * 64
+    manifest.write_text(json.dumps(receipt))
+    with pytest.raises(ValueError, match='plaintext SHA-256'):
+        load_boundaries(zipped, manifest)
+
+
+@pytest.fixture(scope='module')
+def real_ibge_boundaries():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1] / 'data/geo/national/ibge-2024'
+    return load_boundaries(root / 'BR_UF_2024.geojson.gz', root / 'receipt.json')
+
+
+def test_real_ibge_2024_archive_integrity():
+    from pathlib import Path
+    from zipfile import ZipFile
+    root = Path(__file__).resolve().parents[1] / 'data/geo/national/ibge-2024'
+    receipt = json.loads((root / 'receipt.json').read_text())
+    archive = root / 'BR_UF_2024.zip'
+    assert hashlib.sha256(archive.read_bytes()).hexdigest() == receipt['raw_zip_sha256']
+    with ZipFile(archive) as bundle:
+        assert bundle.testzip() is None
+        from pyproj import CRS
+        assert CRS.from_wkt(bundle.read('BR_UF_2024.prj').decode()).to_epsg() == 4674
+
+
+def test_real_27_ufs_representative_points_and_df_grid(real_ibge_boundaries):
+    assert set(real_ibge_boundaries) == set(UF_BY_CODE)
+    for code, geometry in real_ibge_boundaries.items():
+        point = geometry.representative_point()
+        assigned = assign_point(point.y, point.x, real_ibge_boundaries)
+        assert assigned['uf_code'] == code
+        assert geodesic_area_km2(geometry) > 0
+    df = build_national_grid({'53': real_ibge_boundaries['53']}, 'ibge-2024')
+    assert df and all(row['uf_area_km2'] > 0 for row in df)
+    assert any(row['uf_fraction_geodesic'] < 1 for row in df)

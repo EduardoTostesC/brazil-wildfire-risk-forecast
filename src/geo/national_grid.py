@@ -6,6 +6,7 @@ import math
 from pyproj import Geod
 from shapely.geometry import Point, box
 from shapely.geometry.polygon import orient
+from shapely.prepared import prep
 
 from src.geo.boundaries import validate_boundaries
 
@@ -61,15 +62,17 @@ def build_national_grid(boundaries, geometry_version, resolution=0.5):
     rows = []
     for code in sorted(boundaries):
         geom = boundaries[code]
+        prepared = prep(geom)
         west, south, east, north = geom.bounds
         for row in range(math.floor((south + 90) / resolution), math.ceil((north + 90) / resolution)):
             lat_min = row * resolution - 90
             for col in range(math.floor((west + 180) / resolution), math.ceil((east + 180) / resolution)):
                 lon_min = col * resolution - 180
                 cell = box(lon_min, lat_min, lon_min + resolution, lat_min + resolution)
-                if not geom.intersects(cell):
+                if not prepared.intersects(cell):
                     continue
-                clipped = geom.intersection(cell)
+                # Interior cells need no expensive clipping of the full UF mesh.
+                clipped = cell if prepared.covers(cell) else geom.intersection(cell)
                 area = geodesic_area_km2(clipped)
                 if area <= 0:
                     continue

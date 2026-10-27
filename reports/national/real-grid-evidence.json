@@ -1,0 +1,408 @@
+{
+  "source_receipt": "data/geo/national/ibge-2024/receipt.json",
+  "measurement": "complete official IBGE2024 geometry; no fire/climate/model metrics",
+  "results": [
+    {
+      "resolution_deg": 0.5,
+      "spatial_units": 3673,
+      "national_cells": 3062,
+      "wall_seconds": 11.188151479997032,
+      "process_peak_rss_kib": 425620,
+      "per_uf": {
+        "11": {
+          "spatial_units": 111,
+          "polygon_area_km2": 237754.19538870288,
+          "clipped_area_km2": 237754.20995951287,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 5
+        },
+        "12": {
+          "spatial_units": 78,
+          "polygon_area_km2": 164083.16877655574,
+          "clipped_area_km2": 164083.6755485587,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 3
+        },
+        "13": {
+          "spatial_units": 585,
+          "polygon_area_km2": 1558707.252681454,
+          "clipped_area_km2": 1558706.9727734446,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 5
+        },
+        "14": {
+          "spatial_units": 107,
+          "polygon_area_km2": 223504.97314746442,
+          "clipped_area_km2": 223504.97715302263,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 7
+        },
+        "15": {
+          "spatial_units": 467,
+          "polygon_area_km2": 1245829.031381165,
+          "clipped_area_km2": 1245828.7534835658,
+          "polygon_components": 35,
+          "small_intersections_lt_1pct": 8
+        },
+        "16": {
+          "spatial_units": 71,
+          "polygon_area_km2": 142253.89407324194,
+          "clipped_area_km2": 142253.89339918768,
+          "polygon_components": 3,
+          "small_intersections_lt_1pct": 5
+        },
+        "17": {
+          "spatial_units": 127,
+          "polygon_area_km2": 277423.6324463358,
+          "clipped_area_km2": 277423.6266468215,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 3
+        },
+        "21": {
+          "spatial_units": 147,
+          "polygon_area_km2": 329651.5193457217,
+          "clipped_area_km2": 329651.5199424027,
+          "polygon_components": 61,
+          "small_intersections_lt_1pct": 5
+        },
+        "22": {
+          "spatial_units": 111,
+          "polygon_area_km2": 251755.4965534286,
+          "clipped_area_km2": 251755.49654675947,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 3
+        },
+        "23": {
+          "spatial_units": 67,
+          "polygon_area_km2": 148894.44106590314,
+          "clipped_area_km2": 148894.44101964953,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 1
+        },
+        "24": {
+          "spatial_units": 31,
+          "polygon_area_km2": 52809.60131194165,
+          "clipped_area_km2": 52809.601345372095,
+          "polygon_components": 2,
+          "small_intersections_lt_1pct": 2
+        },
+        "25": {
+          "spatial_units": 37,
+          "polygon_area_km2": 56467.24416148887,
+          "clipped_area_km2": 56467.24416229609,
+          "polygon_components": 7,
+          "small_intersections_lt_1pct": 2
+        },
+        "26": {
+          "spatial_units": 60,
+          "polygon_area_km2": 98067.87935173271,
+          "clipped_area_km2": 98067.87934777205,
+          "polygon_components": 18,
+          "small_intersections_lt_1pct": 6
+        },
+        "27": {
+          "spatial_units": 21,
+          "polygon_area_km2": 27830.661176608857,
+          "clipped_area_km2": 27830.661180907617,
+          "polygon_components": 2,
+          "small_intersections_lt_1pct": 3
+        },
+        "28": {
+          "spatial_units": 18,
+          "polygon_area_km2": 21938.188225951628,
+          "clipped_area_km2": 21938.18836771614,
+          "polygon_components": 2,
+          "small_intersections_lt_1pct": 3
+        },
+        "29": {
+          "spatial_units": 241,
+          "polygon_area_km2": 564760.4468249232,
+          "clipped_area_km2": 564760.4432313407,
+          "polygon_components": 21,
+          "small_intersections_lt_1pct": 9
+        },
+        "31": {
+          "spatial_units": 252,
+          "polygon_area_km2": 586513.966943806,
+          "clipped_area_km2": 586513.9671637351,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 10
+        },
+        "32": {
+          "spatial_units": 32,
+          "polygon_area_km2": 46074.44863451363,
+          "clipped_area_km2": 46074.4534411009,
+          "polygon_components": 84,
+          "small_intersections_lt_1pct": 3
+        },
+        "33": {
+          "spatial_units": 34,
+          "polygon_area_km2": 43750.424836826234,
+          "clipped_area_km2": 43750.42483709632,
+          "polygon_components": 577,
+          "small_intersections_lt_1pct": 4
+        },
+        "35": {
+          "spatial_units": 120,
+          "polygon_area_km2": 248219.48275984172,
+          "clipped_area_km2": 248219.48254563767,
+          "polygon_components": 120,
+          "small_intersections_lt_1pct": 3
+        },
+        "41": {
+          "spatial_units": 96,
+          "polygon_area_km2": 199298.98316208555,
+          "clipped_area_km2": 199298.98370837187,
+          "polygon_components": 4,
+          "small_intersections_lt_1pct": 4
+        },
+        "42": {
+          "spatial_units": 55,
+          "polygon_area_km2": 95730.68266892504,
+          "clipped_area_km2": 95730.68276381116,
+          "polygon_components": 79,
+          "small_intersections_lt_1pct": 2
+        },
+        "43": {
+          "spatial_units": 137,
+          "polygon_area_km2": 281707.0656571358,
+          "clipped_area_km2": 281707.15665495716,
+          "polygon_components": 2,
+          "small_intersections_lt_1pct": 4
+        },
+        "50": {
+          "spatial_units": 159,
+          "polygon_area_km2": 357141.4588877534,
+          "clipped_area_km2": 357142.23301233066,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 10
+        },
+        "51": {
+          "spatial_units": 352,
+          "polygon_area_km2": 903208.7918199224,
+          "clipped_area_km2": 903209.1218752572,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 7
+        },
+        "52": {
+          "spatial_units": 151,
+          "polygon_area_km2": 340242.8576028922,
+          "clipped_area_km2": 340242.8615906597,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 4
+        },
+        "53": {
+          "spatial_units": 6,
+          "polygon_area_km2": 5760.780674531221,
+          "clipped_area_km2": 5760.78090851088,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 0
+        }
+      },
+      "spatial_config_sha256": "050907e471c5d64864c328edf417b34670b8e9ce84e97ac90cbe7151a3dbf615"
+    },
+    {
+      "resolution_deg": 0.25,
+      "spatial_units": 13088,
+      "national_cells": 11817,
+      "wall_seconds": 17.920820747000107,
+      "process_peak_rss_kib": 425620,
+      "per_uf": {
+        "11": {
+          "spatial_units": 380,
+          "polygon_area_km2": 237754.19538870288,
+          "clipped_area_km2": 237754.3076691853,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 4
+        },
+        "12": {
+          "spatial_units": 267,
+          "polygon_area_km2": 164083.16877655574,
+          "clipped_area_km2": 164083.45695458862,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 9
+        },
+        "13": {
+          "spatial_units": 2196,
+          "polygon_area_km2": 1558707.252681454,
+          "clipped_area_km2": 1558706.3253946586,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 19
+        },
+        "14": {
+          "spatial_units": 358,
+          "polygon_area_km2": 223504.97314746442,
+          "clipped_area_km2": 223504.97956899335,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 8
+        },
+        "15": {
+          "spatial_units": 1754,
+          "polygon_area_km2": 1245829.031381165,
+          "clipped_area_km2": 1245828.61921818,
+          "polygon_components": 35,
+          "small_intersections_lt_1pct": 14
+        },
+        "16": {
+          "spatial_units": 234,
+          "polygon_area_km2": 142253.89407324194,
+          "clipped_area_km2": 142253.89339992902,
+          "polygon_components": 3,
+          "small_intersections_lt_1pct": 8
+        },
+        "17": {
+          "spatial_units": 440,
+          "polygon_area_km2": 277423.6324463358,
+          "clipped_area_km2": 277423.6246073526,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 8
+        },
+        "21": {
+          "spatial_units": 513,
+          "polygon_area_km2": 329651.5193457217,
+          "clipped_area_km2": 329651.5290409388,
+          "polygon_components": 61,
+          "small_intersections_lt_1pct": 13
+        },
+        "22": {
+          "spatial_units": 394,
+          "polygon_area_km2": 251755.4965534286,
+          "clipped_area_km2": 251755.49659667275,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 8
+        },
+        "23": {
+          "spatial_units": 235,
+          "polygon_area_km2": 148894.44106590314,
+          "clipped_area_km2": 148894.4409218141,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 8
+        },
+        "24": {
+          "spatial_units": 96,
+          "polygon_area_km2": 52809.60131194165,
+          "clipped_area_km2": 52809.60102873257,
+          "polygon_components": 2,
+          "small_intersections_lt_1pct": 2
+        },
+        "25": {
+          "spatial_units": 112,
+          "polygon_area_km2": 56467.24416148887,
+          "clipped_area_km2": 56467.24446466465,
+          "polygon_components": 7,
+          "small_intersections_lt_1pct": 3
+        },
+        "26": {
+          "spatial_units": 184,
+          "polygon_area_km2": 98067.87935173271,
+          "clipped_area_km2": 98067.87928147214,
+          "polygon_components": 18,
+          "small_intersections_lt_1pct": 11
+        },
+        "27": {
+          "spatial_units": 57,
+          "polygon_area_km2": 27830.661176608857,
+          "clipped_area_km2": 27830.66125767449,
+          "polygon_components": 2,
+          "small_intersections_lt_1pct": 4
+        },
+        "28": {
+          "spatial_units": 50,
+          "polygon_area_km2": 21938.188225951628,
+          "clipped_area_km2": 21938.18830747199,
+          "polygon_components": 2,
+          "small_intersections_lt_1pct": 4
+        },
+        "29": {
+          "spatial_units": 861,
+          "polygon_area_km2": 564760.4468249232,
+          "clipped_area_km2": 564760.4305353707,
+          "polygon_components": 21,
+          "small_intersections_lt_1pct": 15
+        },
+        "31": {
+          "spatial_units": 907,
+          "polygon_area_km2": 586513.966943806,
+          "clipped_area_km2": 586513.9738757566,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 17
+        },
+        "32": {
+          "spatial_units": 97,
+          "polygon_area_km2": 46074.44863451363,
+          "clipped_area_km2": 46074.45881295976,
+          "polygon_components": 84,
+          "small_intersections_lt_1pct": 6
+        },
+        "33": {
+          "spatial_units": 97,
+          "polygon_area_km2": 43750.424836826234,
+          "clipped_area_km2": 43750.424860458,
+          "polygon_components": 577,
+          "small_intersections_lt_1pct": 6
+        },
+        "35": {
+          "spatial_units": 422,
+          "polygon_area_km2": 248219.48275984172,
+          "clipped_area_km2": 248219.4833606312,
+          "polygon_components": 120,
+          "small_intersections_lt_1pct": 12
+        },
+        "41": {
+          "spatial_units": 336,
+          "polygon_area_km2": 199298.98316208555,
+          "clipped_area_km2": 199298.97819883047,
+          "polygon_components": 4,
+          "small_intersections_lt_1pct": 8
+        },
+        "42": {
+          "spatial_units": 185,
+          "polygon_area_km2": 95730.68266892504,
+          "clipped_area_km2": 95730.68836681264,
+          "polygon_components": 79,
+          "small_intersections_lt_1pct": 9
+        },
+        "43": {
+          "spatial_units": 491,
+          "polygon_area_km2": 281707.0656571358,
+          "clipped_area_km2": 281707.1600968553,
+          "polygon_components": 2,
+          "small_intersections_lt_1pct": 8
+        },
+        "50": {
+          "spatial_units": 564,
+          "polygon_area_km2": 357141.4588877534,
+          "clipped_area_km2": 357142.4200377144,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 14
+        },
+        "51": {
+          "spatial_units": 1308,
+          "polygon_area_km2": 903208.7918199224,
+          "clipped_area_km2": 903209.6699583565,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 8
+        },
+        "52": {
+          "spatial_units": 536,
+          "polygon_area_km2": 340242.8576028922,
+          "clipped_area_km2": 340242.86301034776,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 9
+        },
+        "53": {
+          "spatial_units": 14,
+          "polygon_area_km2": 5760.780674531221,
+          "clipped_area_km2": 5760.781843598339,
+          "polygon_components": 1,
+          "small_intersections_lt_1pct": 0
+        }
+      },
+      "spatial_config_sha256": "148340cfd72fe804c24ceba564c71281c7b9711051250bb3533b8479f4856c52"
+    }
+  ],
+  "geometry_gzip_sha256": "675611345ce68e1ab3e204ff9fd686e62e29de973260a776aae30133315e7a2c",
+  "receipt_sha256": "e7719da5fda1f1dfd411c0007d113e29db2af546af9249d6014ef1ab1ae4d5a7",
+  "command": ".venv/bin/python scripts/build_national_geography.py benchmark --output reports/national/real-grid-optimized-evidence.json",
+  "peak_memory_note": "ru_maxrss is cumulative process peak, Linux KiB; second resolution includes retained first result metadata, not independent isolated process RSS."
+}

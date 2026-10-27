@@ -5,6 +5,7 @@ An acquisition receipt accompanies immutable raw GeoJSON bytes. This loader
 verifies integrity and metadata, not the authenticity of an arbitrary receipt.
 Acquire bytes using verified HTTPS from the declared official IBGE destination.
 """
+import gzip
 import hashlib
 import json
 from pathlib import Path
@@ -15,8 +16,8 @@ from shapely.geometry import shape
 from src.geo.uf_registry import UF_BY_CODE
 
 GEOMETRY_VERSION = "ibge-2024"
-# A selected fixed-year API request; must verify response provenance before use.
-IBGE_SOURCE_URL = "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=maxima&intrarregiao=UF&periodo=2024"
+# Fixed-year official archive, exercised with verified HTTPS in onboarding.
+IBGE_SOURCE_URL = "https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR_UF_2024.zip"
 
 
 def validate_boundaries(boundaries, require_all=True):
@@ -55,7 +56,13 @@ def load_boundaries(path: Path, manifest_path: Path):
         raise ValueError("Boundary edition must be IBGE 2024")
     if receipt["crs"] != "EPSG:4674":
         raise ValueError("Expected SIRGAS 2000 geographic coordinates (EPSG:4674)")
-    document = json.loads(raw)
+    if Path(path).suffix == ".gz":
+        plaintext = gzip.decompress(raw)
+        if receipt.get("derived_plaintext_sha256") != hashlib.sha256(plaintext).hexdigest():
+            raise ValueError("Boundary derived plaintext SHA-256 mismatch")
+        document = json.loads(plaintext)
+    else:
+        document = json.loads(raw)
     if document.get("type") != "FeatureCollection":
         raise ValueError("GeoJSON FeatureCollection required")
     boundaries = {}

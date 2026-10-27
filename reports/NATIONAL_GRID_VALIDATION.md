@@ -1,71 +1,86 @@
-# Validação da grade nacional — PARCIAL
+# Validação da grade nacional — geografia executada
 
-27/10/2026. Linhagem `brazil_national_v1`. Implementação de engenharia; nenhuma
-cobertura geográfica nacional real é declarada neste relatório.
+27/10/2026. Linhagem `brazil_national_v1`; base histórica `c1bead5` preservada.
+Este relatório comprova geografia e grade, sem afirmar cobertura preditiva.
 
-## Executado
+## Aquisição real e integridade
 
-`src/geo/uf_registry.py` registra os 27 códigos IBGE de dois dígitos, siglas, nomes,
-macrorregiões, identidade geográfica e edição territorial selecionada (`ibge-2024`).
-O cadastro não comprova aquisição de malha, dados ou capacidade preditiva.
+Após a liberação da configuração de rede, a fonte oficial geoftp IBGE respondeu
+HTTP200. A API `servicodados.ibge.gov.br` permaneceu com erro upstream HTTP503;
+a aquisição usou outro canal oficial, sem contornar políticas.
 
-`src/geo/boundaries.py` exige 27 geometrias válidas Polygon/MultiPolygon, códigos
-únicos e conhecidos, ausência de interseção entre interiores, SHA-256 correspondente
-aos bytes arquivados e recibo de proveniência com URL HTTPS oficial, ano, versão,
-CRS SIRGAS 2000 EPSG:4674 e atribuição. O recibo é uma declaração de proveniência:
-autenticidade requer aquisição HTTPS verificada, não somente satisfazer o schema.
-O loader não repara polígonos, não altera o piloto e não usa geometria substituta.
+Edição única: **Malha Municipal Digital 2024, agregação UF**. URL:
+https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR_UF_2024.zip
 
-`src/geo/national_grid.py` implementa origem global (-180,-90), células semiabertas,
-IDs independentes da UF/ordem de processamento, unidade `national_cell_id × uf_code`,
-interseções de área positiva e área geodésica GRS80 com anéis orientados, furos e
-ilhas. Hash espacial inclui configuração e fingerprints WKB das geometrias.
-A fração é cobertura pela malha territorial, não um produto independente de terra/água.
+Arquivo bruto 14.674.008 bytes, SHA256
+`be61a1e11bf86b265098b5a0b02eb836237421ad73354b1f0892fb6be4598866`.
+ZIP preservado em `data/geo/national/ibge-2024/BR_UF_2024.zip`; CRC íntegro.
+PRJ confirma EPSG:4674, SIRGAS2000 geográfico, elipsoide GRS80; CPG UTF-8.
+Os 27 códigos, nomes, siglas e regiões estão nos registros DBF oficiais.
 
-Eventos recebem uma única UF. Na fronteira, todos os candidatos são registrados;
-vence o menor código elegível com área positiva na célula floor. Isso trata a
-coincidência entre fronteira estadual e limite da grade sem criar unidade de área
-zero. Sem unidade elegível, o ponto é enviado à quarentena (`None`). Nenhum ponto
-é deslocado para outra célula. O caller deve preservar a ocorrência de quarentena.
+Derivação GeoJSON sem simplificação, reparo ou transformação de coordenadas:
+pyshp2.3.1 com wheel verificado, Shapely2.0.7, gzip9/mtime0. Gzip 9.308.856 bytes,
+SHA256 `675611345ce68e1ab3e204ff9fd686e62e29de973260a776aae30133315e7a2c`.
+SHA256 do JSON descomprimido:
+`deea9f7cc230a26c547248222f8e4793087e31cff37d335bccf0a962fe8290c0`.
+A conversão independente em diretório novo reproduziu exatamente o hash do gzip.
+Recibo contém origem, timestamp, CRS, edição, atribuição e ferramentas/hashes.
+Fonte e atribuição: IBGE. O ZIP não inclui licença SPDX; não atribuir a licença MIT
+do código aos dados de terceiros. Ver README da coleção para atribuição e comandos.
 
-## Testes e comparação de resolução
+`load_boundaries` verificou SHA, metadados, exatamente 27 UFs válidas e ausência de
+sobreposição de interiores. Polygon/MultiPolygon, ilhas e furos foram preservados;
+RJ possui 577 componentes, SP120, SC79, ES84, MA61 e AP3 na fonte. A malha é uma
+representação oficial de sua edição, sem alegar detalhe superior ao arquivo.
+Não foi substituído ou combinado o polígono histórico MT.
 
-Comando executado: `.venv/bin/python -m pytest tests/test_national_geo.py -q`.
-Resultado: **18 aprovados**. Ruff dos módulos e testes aprovado.
-Fixtures incluem duas UFs adjacentes, pequeno polígono com código DF, ilha, furo,
-multipolígono, limites exatos, coordenadas inválidas, sobreposição, hash alterado,
-proveniência incorreta, edição errada e duplicação de códigos. O fixture de 27
-retângulos testa o contrato do loader; não representa o Brasil.
+## Grade e fronteiras
 
-Medição sintética em `national/geo-engineering-evidence.json`:
+Origem global (-180,-90), IDs independentes de UF/ordem, células semiabertas;
+unidade estatística célula×código IBGE com geometria recortada. Interseções de área
+positiva são mantidas, sem limiar mínimo de tamanho. Área geodésica GRS80 com anéis
+orientados e fração territorial, sem chamar área em graus de km².
 
-| Resolução | Células distintas | Interseções | Interseções DF sintético | Tempo (s) | Pico Python (bytes) |
-|---|---:|---:|---:|---:|---:|
-| 0,5° | 2 | 3 | 1 | 0,00423 | 6686 |
-| 0,25° | 5 | 5 | 1 | 0,00535 | 9529 |
+Na fronteira, todos os candidatos são auditados e cada evento recebe uma única UF:
+menor código elegível com área positiva na célula floor. Assim, limite estadual
+coincidente com linha da grade não cria unidade de área zero. Sem unidade elegível,
+a ocorrência retorna quarentena; o caller deve preservá-la. Nenhum evento é movido.
 
-Pico obtido por tracemalloc, sem cobrir integralmente alocações nativas GEOS/PROJ.
-Essas medidas mínimas não estimam custo nacional. Não houve seleção por métrica de
-teste. Áreas/células reais por UF, frações costeiras, DF real, prevalência, densidade
-e quantidade de séries POWER distintas **não foram medidas**. NASA POWER tem
-resolução física diferente (~0,5°×0,625°); 0,25° não aumenta sua informação física.
+## Medição real de ambas as resoluções
 
-## Bloqueio e continuação
+Comando exercido: `python scripts/build_national_geography.py benchmark --output <arquivo-novo>`.
+Evidência completa, vinculada a hashes do gzip e recibo:
+`reports/national/real-grid-evidence.json`.
 
-Consultas HTTPS oficiais realizadas nesta sessão a `servicodados.ibge.gov.br`
-(localidades e malha) e `geoftp.ibge.gov.br` falharam antes da resposta da fonte:
-`ProxyError: Tunnel connection failed: 403 Forbidden`.
-Isso não é evidência de inexistência da malha nem falha de credencial IBGE.
-Não foram contornadas restrições de rede.
+| Resolução | Células nacionais | Interseções célula×UF | UFs com unidades | Unidades DF | Tempo (s) | Pico processo (KiB) |
+|---|---:|---:|---:|---:|---:|---:|
+| 0,5° | 3062 | 3673 | 27 | 6 | 11,188 | 425620 |
+| 0,25° | 11817 | 13088 | 27 | 14 | 17,921 | 425620 |
 
-Edição planejada: 2024, fonte oficial IBGE. A URL proposta consta em
-`src/geo/boundaries.py`; seu suporte aos parâmetros e metadados de edição/CRS ainda
-precisa ser confirmado por resposta oficial. Não existe arquivo nacional real,
-recibo real ou hash nacional publicado nesta entrega. Não misturar o polígono MT
-arquivado com edição nova para fingir 27 UFs. Proveniência, detalhe costeiro,
-ilhas, área nacional e comparação de grades reais permanecem BLOQUEADOS.
+RAM via `ru_maxrss` Linux, pico cumulativo do processo; não são duas medições de
+processos independentes. Contagens por UF, áreas, componentes e interseções menores
+que1% estão no JSON e na tabela de cobertura. Áreas geodésicas de união e fragmentos
+diferem até ~3,09 partes por milhão: a subdivisão introduz vértices nas arestas e
+altera levemente a interpretação geodésica dos segmentos. A conservação topológica
+planar é testada em fixtures; não afirmar igualdade exata das somas geodésicas.
 
-Após acesso autorizado às fontes, arquivar os bytes e recibo em nova coleção
-nacional, validar licença/atribuição, edição e CRS; executar loader, ambas as
-grades e inventário por UF. Remover este estado de bloqueio somente com evidências
-reais. O DF continua sem alegação intraurbana ou hiperlocal.
+DF real: polígono ~5760,78km², seis unidades em 0,5° e14 em0,25°. Essas unidades
+não demonstram capacidade intraurbana/hiperlocal. O aumento de resolução analítica
+não melhora a resolução física da NASA POWER (~0,5°×0,625°). Resolução não foi
+selecionada por desempenho de teste; prevalência, densidade de focos, fontes
+climáticas distintas e custo do dataset completo ainda precisam de inventário.
+
+## Testes e pendências
+
+`.venv/bin/python -m pytest tests/test_national_geo.py -q`: **21 aprovados**.
+Inclui cadastro27, fixtures vizinhas/DF/ilhas/furos, IDs, ordem, fronteiras exatas,
+coordenadas inválidas, topologia, hashes/proveniência/gzip adulterados, CRC e CRS do
+ZIP real, atribuição geográfica de pontos internos das27 UFs e grade DF real.
+Ruff aprovado. O benchmark completo das27 UFs é evidência adicional executada;
+não é refeito a cada consulta de API.
+
+Piloto real limitado de cinco UFs executado; ver `NATIONAL_FEASIBILITY.md`.
+Pendente: dados nacionais completos, adequação
+temporal do produto INPE, mapeamento meteorológico real, features, treino,
+calibração, métricas e validação científica. Testes geográficos não satisfazem
+esses gates. Inventário de dados real deve preceder decisão de escala.
