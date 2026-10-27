@@ -1,0 +1,138 @@
+{
+  "mode": "actual public sample in local browser; screenshots are viewports, not whole documents",
+  "cases": [
+    {
+      "language": "pt-BR",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        1100
+      ],
+      "home": "reports/figures/publication/pt-BR-desktop-home.png",
+      "checks": [
+        {
+          "tab": "map_tab",
+          "screenshot": "reports/figures/publication/pt-BR-desktop-map_tab.png"
+        },
+        {
+          "tab": "rank_tab",
+          "screenshot": "reports/figures/publication/pt-BR-desktop-rank_tab.png"
+        },
+        {
+          "tab": "shap_tab",
+          "screenshot": "reports/figures/publication/pt-BR-desktop-shap_tab.png"
+        },
+        {
+          "tab": "drift_tab",
+          "screenshot": "reports/figures/publication/pt-BR-desktop-drift_tab.png"
+        },
+        {
+          "tab": "about_tab",
+          "screenshot": "reports/figures/publication/pt-BR-desktop-about_tab.png"
+        }
+      ]
+    },
+    {
+      "language": "pt-BR",
+      "device": "mobile",
+      "viewport": [
+        390,
+        844
+      ],
+      "home": "reports/figures/publication/pt-BR-mobile-home.png",
+      "checks": [
+        {
+          "tab": "map_tab",
+          "screenshot": "reports/figures/publication/pt-BR-mobile-map_tab.png"
+        },
+        {
+          "tab": "rank_tab",
+          "screenshot": "reports/figures/publication/pt-BR-mobile-rank_tab.png"
+        },
+        {
+          "tab": "shap_tab",
+          "screenshot": "reports/figures/publication/pt-BR-mobile-shap_tab.png"
+        },
+        {
+          "tab": "drift_tab",
+          "screenshot": "reports/figures/publication/pt-BR-mobile-drift_tab.png"
+        },
+        {
+          "tab": "about_tab",
+          "screenshot": "reports/figures/publication/pt-BR-mobile-about_tab.png"
+        }
+      ]
+    },
+    {
+      "language": "en",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        1100
+      ],
+      "home": "reports/figures/publication/en-desktop-home.png",
+      "checks": [
+        {
+          "tab": "map_tab",
+          "screenshot": "reports/figures/publication/en-desktop-map_tab.png"
+        },
+        {
+          "tab": "rank_tab",
+          "screenshot": "reports/figures/publication/en-desktop-rank_tab.png"
+        },
+        {
+          "tab": "shap_tab",
+          "screenshot": "reports/figures/publication/en-desktop-shap_tab.png"
+        },
+        {
+          "tab": "drift_tab",
+          "screenshot": "reports/figures/publication/en-desktop-drift_tab.png"
+        },
+        {
+          "tab": "about_tab",
+          "screenshot": "reports/figures/publication/en-desktop-about_tab.png"
+        }
+      ]
+    },
+    {
+      "language": "en",
+      "device": "mobile",
+      "viewport": [
+        390,
+        844
+      ],
+      "home": "reports/figures/publication/en-mobile-home.png",
+      "checks": [
+        {
+          "tab": "map_tab",
+          "screenshot": "reports/figures/publication/en-mobile-map_tab.png"
+        },
+        {
+          "tab": "rank_tab",
+          "screenshot": "reports/figures/publication/en-mobile-rank_tab.png"
+        },
+        {
+          "tab": "shap_tab",
+          "screenshot": "reports/figures/publication/en-mobile-shap_tab.png"
+        },
+        {
+          "tab": "drift_tab",
+          "screenshot": "reports/figures/publication/en-mobile-drift_tab.png"
+        },
+        {
+          "tab": "about_tab",
+          "screenshot": "reports/figures/publication/en-mobile-about_tab.png"
+        }
+      ]
+    },
+    {
+      "language": "pt-BR",
+      "missing_data_message_verified": true
+    },
+    {
+      "language": "en",
+      "missing_data_message_verified": true
+    }
+  ],
+  "browser_errors": []
+}
