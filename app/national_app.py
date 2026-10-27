@@ -7,8 +7,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pandas as pd
 import streamlit as st
+from streamlit_folium import st_folium
 
-from api.national import coverage, state_readiness
+from api.national import coverage, national_boundaries, state_readiness
 from src.geo.uf_registry import UF_BY_CODE
 
 TEXT = {
@@ -25,6 +26,8 @@ TEXT = {
         "missing": "Período, células, probabilidade e desempenho nacionais: indisponíveis. Dados reais e validação científica ainda são necessários.",
         "resolution": "Resoluções em estudo: 0,5° e 0,25°. Uma grade mais fina não torna a meteorologia mais precisa; não há alegação de previsão intraurbana no DF.",
         "code": "Código IBGE", "name": "Nome oficial", "abbr": "Sigla",
+        "map": "Mostrar limite oficial da UF",
+        "map_caption": "Malha IBGE 2024; simplificação somente para exibição. Este mapa mostra geografia, sem probabilidades ou modelo nacional.",
     },
     "en": {
         "title": "Brazil · National Research Expansion",
@@ -39,6 +42,8 @@ TEXT = {
         "missing": "National period, spatial units, probability and performance: unavailable. Real data and scientific validation remain necessary.",
         "resolution": "Resolutions under study: 0.5° and 0.25°. A finer grid does not improve meteorological resolution; there is no claim of intraurban prediction for DF.",
         "code": "IBGE code", "name": "Official name", "abbr": "Abbreviation",
+        "map": "Show official state boundary",
+        "map_caption": "IBGE 2024 boundaries; simplified for display only. This map shows geography, without national probabilities or a model.",
     },
 }
 
@@ -66,6 +71,18 @@ def main():
     st.subheader(f"{selected['abbreviation']} · {selected['uf_name']} ({code})")
     st.info(text["missing"])
     st.caption(text["resolution"])
+    if selected["geometry_available"] and st.checkbox(text["map"], key="national_show_map"):
+        import folium
+
+        polygon = national_boundaries()[code].simplify(0.025, preserve_topology=True)
+        point = polygon.representative_point()
+        state_map = folium.Map(location=[point.y, point.x], zoom_start=6, tiles=None)
+        folium.GeoJson(polygon.__geo_interface__, name=selected["uf_name"]).add_to(state_map)
+        west, south, east, north = polygon.bounds
+        state_map.fit_bounds([[south, west], [north, east]])
+        st_folium(state_map, height=420, use_container_width=True, returned_objects=[],
+                  key=f"national_geography_{code}")
+        st.caption(text["map_caption"])
     stages = ["registered", "geometry_available", "grid_created", "valid_fire_data",
               "valid_climate_data", "features_computed", "model_applicable", "metrics_calculated"]
     table = pd.DataFrame([{text["code"]: row["uf_code"], text["abbr"]: row["abbreviation"],
