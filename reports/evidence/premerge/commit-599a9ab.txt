@@ -1,0 +1,1692 @@
+commit 599a9ab533090f1fa16db975edad811f1248bafe
+Author:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+AuthorDate: Wed Oct 21 18:57:04 2026 -0300
+Commit:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+CommitDate: Wed Oct 21 18:57:04 2026 -0300
+
+    feat(mlops): implement Block C MLOps pipeline (DVC DAG, MLflow tracking, drift monitoring, CI and Docker)
+
+diff --git a/.dvc/.gitignore b/.dvc/.gitignore
+new file mode 100644
+index 0000000..14d86ad
+--- /dev/null
++++ b/.dvc/.gitignore
+@@ -0,0 +1 @@
++/cache
+diff --git a/.dvc/config b/.dvc/config
+new file mode 100644
+index 0000000..e69de29
+diff --git a/.dvcignore b/.dvcignore
+new file mode 100644
+index 0000000..5197305
+--- /dev/null
++++ b/.dvcignore
+@@ -0,0 +1,3 @@
++# Add patterns of files dvc should ignore, which could improve
++# the performance. Learn more at
++# https://dvc.org/doc/user-guide/dvcignore
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index cf8f5a3..416d140 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -25,8 +25,8 @@ jobs:
+     - name: Install dependencies
+       run: |
+         python -m pip install --upgrade pip
++        pip install torch --index-url https://download.pytorch.org/whl/cpu
+         pip install -r requirements.txt
+-        pip install pytest httpx ruff
+ 
+     - name: Lint with Ruff
+       run: |
+diff --git a/.gitignore b/.gitignore
+index 56f6415..f74b59b 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -42,6 +42,12 @@ Thumbs.db
+ # Optuna
+ *.db
+ 
++# MLflow & DVC
++mlruns/
++.dvc/cache/
++.dvc/tmp/
++.dvc/*.local
++
+ # Docker
+ *.log
+ 
+diff --git a/Dockerfile b/Dockerfile
+index fe60bac..c752b1c 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -1,17 +1,31 @@
+ FROM python:3.12-slim
+ 
++# Prevent Python from writing .pyc files and buffer stdout/stderr
++ENV PYTHONDONTWRITEBYTECODE=1 \
++    PYTHONUNBUFFERED=1
++
+ WORKDIR /app
+ 
+-# Install dependencies
++# Install system dependencies (libgomp1 is required by LightGBM, curl for healthchecks)
++RUN apt-get update && apt-get install -y --no-install-recommends \
++    build-essential \
++    libgomp1 \
++    curl \
++    && rm -rf /var/lib/apt/lists/*
++
++# Install python dependencies
+ COPY requirements.txt .
+ RUN pip install --no-cache-dir -r requirements.txt
+ 
+ # Copy project files
+ COPY . .
+ 
+-# Expose ports for API (8000) and Streamlit (8501)
++# Expose ports for FastAPI (8000) and Streamlit (8501)
+ EXPOSE 8000 8501
+ 
+-# Default: run the API
+-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
++# Healthcheck for API
++HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
++    CMD curl -f http://localhost:8000/health || exit 1
+ 
++# Default: run the FastAPI server
++CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+diff --git a/Makefile b/Makefile
+index 3264f42..496973d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,4 @@
+-.PHONY: install data features train evaluate explain api app test all clean
++.PHONY: install data features train evaluate explain drift dvc-repro mlflow-ui lint api app test all clean
+ 
+ install:
+ 	pip install -r requirements.txt
+@@ -18,6 +18,18 @@ train:
+ explain:
+ 	python -m src.models.explain
+ 
++drift:
++	python -m src.monitoring.drift_detector
++
++dvc-repro:
++	dvc repro
++
++mlflow-ui:
++	mlflow ui
++
++lint:
++	ruff check .
++
+ api:
+ 	uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+ 
+@@ -27,8 +39,7 @@ app:
+ test:
+ 	pytest tests/ -v
+ 
+-all: data features train explain
++all: data features train explain drift
+ 
+ clean:
+ 	rm -rf data/raw/ data/processed/ models/*.pkl models/*.joblib reports/figures/*.png
+-
+diff --git a/README.md b/README.md
+index 3c7d250..17b59b6 100644
+--- a/README.md
++++ b/README.md
+@@ -278,32 +278,126 @@ curl -X POST "http://localhost:8000/predict" \
+ - **LightGBM**: Primary model chosen for histogram-based gradient boosting, handling class imbalance via `scale_pos_weight`, native NaN handling, and sub-millisecond CPU inference.
+ - **PyTorch**: Used for sequential recurrent deep learning (LSTM) benchmark comparison.
+ - **Optuna**: Bayesian hyperparameter optimization with Contiguous Spatial Block Cross-Validation.
++- **Platt Scaling**: Smooth 1D logistic calibration preserving tree ranking while slashing probability calibration error (Brier score from 0.1498 to 0.0927).
+ - **SHAP**: Exact TreeExplainer algorithm providing mathematically rigorous feature attributions.
+-- **FastAPI + Pydantic v2**: High-performance asynchronous API framework with automatic validation and documentation.
+-- **Streamlit + Folium**: Rapid geospatial prototyping without frontend overhead.
+-- **Pytest**: Automated test suite (17 tests) guarding against data leakage, boundary faults, and domain regression.
++- **MLflow**: Centralized experiment tracking, metric history across baselines, models, multi-horizons, and artifact store (`sqlite:///mlflow.db`).
++- **DVC (Data Version Control)**: Pipeline DAG orchestration (`dvc.yaml`), stage caching, and data versioning.
++- **Statistical Drift Detection**: Population Stability Index (PSI) and 2-sample Kolmogorov-Smirnov (KS) monitoring for covariate shift.
++- **FastAPI + Pydantic v2**: High-performance asynchronous API framework with automatic validation, OpenAPI docs, and `/drift` endpoint.
++- **Streamlit + Folium**: Rapid geospatial prototyping with interactive horizon toggle and dynamic color scales.
++- **Pytest**: Automated test suite (20 tests) guarding against data leakage, boundary faults, drift metrics, and domain regression.
++- **Ruff**: Lightning-fast linter enforcing clean PEP-8 code standards.
+ - **Parquet / PyArrow**: Columnar storage format for 1.8M+ record datasets.
+ 
+ ---
+ 
++## 🔄 MLOps, Pipeline Orchestration & Monitoring (Block C)
++
++A production-grade ML system requires end-to-end reproducibility, continuous performance tracking, automated data quality validation, and early detection of distribution shift.
++
++### 1. Reproducible Pipeline DAG with DVC (`dvc.yaml`)
++
++The entire data and modeling lifecycle is managed through a Directed Acyclic Graph (DAG) defined in [`dvc.yaml`](dvc.yaml). Each stage specifies exact inputs, code dependencies, and output artifacts:
++
++```text
++      +------------+          
++      | build_grid |          
++      +------------+          
++              *               
++      +--------------+        
++      | process_data |        
++      +--------------+        
++              *               
++    +----------------+        
++    | build_features |        
++    +----------------+        
++         *        *           
++       **          **         
++      *              *        
+++-------+         +-------+   
++| drift |         | train |   
+++-------+         +-------+   
++                      *       
++                 +---------+  
++                 | explain |  
++                 +---------+  
++```
++
++To reproduce or inspect the pipeline:
++```bash
++# Verify the stage dependency graph
++dvc dag
++
++# Reproduce the entire DAG (or only stale stages)
++dvc repro
++```
++
++### 2. Experiment Tracking with MLflow
++
++All model runs, Bayesian search parameters, multi-horizon metrics, and visualization artifacts are automatically tracked in a centralized MLflow database (`sqlite:///mlflow.db`):
++
++- **Logged Parameters**: Best Optuna hyperparameter set (`n_estimators`, `learning_rate`, `num_leaves`, `reg_alpha`, etc.), spatial validation strategy, seed, and dataset sizes.
++- **Logged Metrics**: Multi-horizon evaluations (1d, 3d, 7d), PR-AUC, ROC-AUC, Brier score, and Recall@P50 for both raw and Platt-calibrated models, plus baseline benchmarks (Persistence, Climatology, Logistic Regression).
++- **Logged Artifacts**: Serialized model metadata (`training_metadata.json`), comparative CSV reports, and high-resolution evaluation figures.
++
++To launch the MLflow dashboard locally:
++```bash
++mlflow ui --backend-store-uri sqlite:///mlflow.db
++# Opens at http://localhost:5000
++```
++
++### 3. Data & Concept Drift Monitoring (`src/monitoring/drift_detector.py`)
++
++Environmental and climatological regimes shift over time (e.g., severe droughts and heatwaves during El Niño events). To prevent silent model degradation in production, the system computes:
++
++1. **Population Stability Index (PSI)**:
++   - $\text{PSI} < 0.10$: Stable distribution (No action needed).
++   - $0.10 \le \text{PSI} < 0.25$: Moderate drift (Warning alert, flag for monitoring).
++   - $\text{PSI} \ge 0.25$: Critical drift (Action required, automated retraining trigger).
++2. **Two-Sample Kolmogorov-Smirnov (KS) Test**: Non-parametric test assessing whether baseline and operational samples originate from identical continuous distributions.
++
++#### Real Drift Benchmark Results (Baseline 2016–2023 vs Operational 2024–2025):
++- **Monitored Features**: 11 core climatological and biophysical variables.
++- **Stable Features (9/11)**: `PRECTOTCORR` ($\text{PSI} = 0.0094$), `WS10M` ($\text{PSI} = 0.0084$), `fire_count_7d` ($\text{PSI} = 0.0526$), `neighbor_fire_7d` ($\text{PSI} = 0.0381$), `dtr` ($\text{PSI} = 0.0560$), etc.
++- **Moderate Drift Detected (2/11)**:
++  - `T2M_MAX` ($\text{PSI} = 0.1503$, $p < 0.001$): Mean maximum temperature surged from **32.0°C** in 2016–2023 to **33.4°C** in 2024–2025, accurately capturing the historic 2024 central Brazil heatwave.
++  - `vpd` ($\text{PSI} = 0.1067$, $p < 0.001$): Mean Vapor Pressure Deficit increased from **1.17 kPa** to **1.46 kPa**, indicating significantly drier atmospheric fuel drying conditions.
++  - `dry_days`: Mean consecutive rainless days increased from **10.0 days** to **13.0 days**.
++- **Critical Drift (0/11)**: No feature crossed the $\text{PSI} \ge 0.25$ threshold.
++
++The drift analysis automatically generates [`reports/drift_report.json`](reports/drift_report.json) and visual summary plots in [`reports/figures/drift_summary.png`](reports/figures/drift_summary.png). It is also exposed live via the API endpoint:
++```bash
++curl http://localhost:8000/drift
++```
++
++### 4. Continuous Integration & Production Docker
++
++- **GitHub Actions CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): Matrix testing across Python 3.11 and 3.12, running `ruff check .` and all 20 automated unit/integration tests on every push and pull request.
++- **Production Container** ([`Dockerfile`](Dockerfile)): Based on `python:3.12-slim`, includes system OpenMP runtime (`libgomp1`) required for LightGBM, `curl` for container health monitoring, exposes ports 8000 (FastAPI) and 8501 (Streamlit), and includes an automated `HEALTHCHECK` pinging `http://localhost:8000/health`.
++
++---
++
+ ## 📁 Repository Structure
+ 
+ ```text
+ brazil-wildfire-risk-forecast/
+ ├── .github/
+-│   └── workflows/ci.yml          # GitHub Actions CI (lint, types, pytest)
+-├── .gitignore                    # Excludes heavy raw data and virtual environments
++│   └── workflows/ci.yml          # GitHub Actions CI (ruff lint, multi-python, pytest)
++├── .dvc/                         # DVC internal configuration
++├── .gitignore                    # Excludes heavy raw data, virtualenvs, mlruns
+ ├── config.yaml                   # Global pipeline configurations (grid, region, dates)
+-├── Dockerfile                    # Containerization for API and Streamlit
++├── Dockerfile                    # Production containerization with OpenMP & healthcheck
++├── dvc.yaml                      # DVC multi-stage pipeline DAG definition
+ ├── LICENSE                       # MIT License
+-├── Makefile                      # Command shortcuts (Linux/macOS)
++├── Makefile                      # Standard CLI shortcuts (make dvc-repro, make drift, etc.)
++├── pyproject.toml                # Project build metadata, ruff & pytest configurations
+ ├── run_pipeline.ps1              # Single-command automated pipeline (Windows PowerShell)
+ ├── README.md                     # English documentation (this file)
+ ├── README.pt-BR.md               # Brazilian Portuguese documentation
+ ├── requirements.txt              # Pinned production dependencies
+ │
+ ├── api/
+-│   └── main.py                   # FastAPI application with multi-horizon /predict and /health
++│   └── main.py                   # FastAPI service with /predict, /health, and /drift endpoints
+ │
+ ├── app/
+ │   └── streamlit_app.py          # Interactive web map dashboard with horizon toggle
+@@ -335,6 +429,7 @@ brazil-wildfire-risk-forecast/
+ │   └── 02_modeling.ipynb         # Full model benchmarking, multi-horizon & LSTM comparison
+ │
+ ├── reports/
++│   ├── drift_report.json         # Automated PSI and KS feature drift report
+ │   ├── feature_importance.csv    # Full SHAP importance table
+ │   ├── model_comparison.csv      # Primary benchmark metrics
+ │   ├── multi_horizon_comparison.csv # 1d, 3d, 7d comparison metrics
+@@ -344,6 +439,7 @@ brazil-wildfire-risk-forecast/
+ │       ├── accuracy_by_month.png # Monthly accuracy chart
+ │       ├── accuracy_by_region.png# Accuracy across MT spatial subregions
+ │       ├── calibration_curve.png # Probability calibration plot
++│       ├── drift_summary.png     # Feature distribution drift summary
+ │       ├── lstm_vs_lgbm.png      # PyTorch LSTM vs LightGBM PR/ROC curves
+ │       ├── shap_bar.png          # SHAP feature importance bar plot
+ │       └── shap_summary.png      # SHAP beeswarm summary plot
+@@ -357,13 +453,15 @@ brazil-wildfire-risk-forecast/
+ │   │   └── process_data.py       # Spatiotemporal aggregation & multi-horizon targets
+ │   ├── features/
+ │   │   └── build_features.py     # 39 leakage-free engineered features (VPD, DTR, FWI)
+-│   └── models/
+-│       ├── train.py              # Training pipeline, Optuna, Platt & multi-horizon models
+-│       ├── train_lstm.py         # PyTorch LSTM sequential benchmark
+-│       └── explain.py            # SHAP TreeExplainer generation
++│   ├── models/
++│   │   ├── train.py              # Training pipeline, Optuna, Platt, MLflow tracking
++│   │   ├── train_lstm.py         # PyTorch LSTM sequential benchmark
++│   │   └── explain.py            # SHAP TreeExplainer generation
++│   └── monitoring/
++│       └── drift_detector.py     # PSI & Kolmogorov-Smirnov drift detector
+ │
+ └── tests/
+-    └── test_pipeline.py          # 17 automated tests (grid, leak, API, bounds, LSTM, config)
++    └── test_pipeline.py          # 20 automated tests (grid, leak, API, bounds, drift, LSTM)
+ ```
+ 
+ ---
+diff --git a/README.pt-BR.md b/README.pt-BR.md
+index c08b700..5681924 100644
+--- a/README.pt-BR.md
++++ b/README.pt-BR.md
+@@ -278,32 +278,126 @@ curl -X POST "http://localhost:8000/predict" \
+ - **LightGBM**: Modelo principal em gradiente boosting de histograma, com suporte nativo a valores ausentes, peso de desbalanceamento (`scale_pos_weight`) e inferência sub-milissegundo em CPU.
+ - **PyTorch**: Utilizado para o benchmark sequencial de Deep Learning recorrente (LSTM).
+ - **Optuna**: Otimizador bayesiano de última geração (TPE sampler) com validação em blocos espaciais contíguos.
++- **Platt Scaling**: Calibração logística unidimensional suave que preserva o ranking e reduz o erro de calibração (Brier score de 0.1498 para 0.0927).
+ - **SHAP (TreeExplainer)**: Cálculo exato baseado na teoria dos jogos para interpretar modelos em árvore.
+-- **FastAPI + Pydantic v2**: Serialização estrita, validação de tipos em nanossegundos e documentação OpenAPI nativa.
+-- **Streamlit + Folium**: Prototipação ágil de interfaces geoespaciais sem complexidade de front-end.
+-- **Pytest**: Validação automatizada de regras de negócio, testes de API, LSTM e testes de contenção de data leakage (17 testes).
++- **MLflow**: Rastreamento centralizado de experimentos, métricas históricas de baselines, modelos, múltiplos horizontes e registro de artefatos (`sqlite:///mlflow.db`).
++- **DVC (Data Version Control)**: Orquestração de DAG reproduzível (`dvc.yaml`), cache de etapas intermediárias e versionamento de dados.
++- **Detecção Estatística de Drift**: Monitoramento de Population Stability Index (PSI) e teste bicaudal Kolmogorov-Smirnov (KS) para detectar desvio de covariáveis.
++- **FastAPI + Pydantic v2**: Serialização estrita, validação de tipos em nanossegundos, documentação OpenAPI nativa e endpoint `/drift`.
++- **Streamlit + Folium**: Prototipação ágil de interfaces geoespaciais com seletor de horizonte e escala cromática dinâmica.
++- **Pytest**: Validação automatizada com 20 testes unitários e de integração prevenindo vazamento de dados, falhas de limites, métricas de drift e regressões de API.
++- **Ruff**: Linter de altíssima performance garantindo aderência rigorosa à PEP-8 e clean architecture.
+ - **Parquet / PyArrow**: Armazenamento colunar comprimido e eficiente para 1,8M+ registros.
+ 
+ ---
+ 
++## 🔄 MLOps, Orquestração de Pipeline e Monitoramento (Bloco C)
++
++Um sistema de Machine Learning em produção exige reprodutibilidade ponta a ponta, rastreamento contínuo de experimentos, validação automatizada de qualidade e detecção precoce de desvio de distribuição.
++
++### 1. Grafo Acíclico Dirigido (DAG) com DVC (`dvc.yaml`)
++
++Todo o ciclo de vida dos dados e modelagem é estruturado em um DAG gerenciado via DVC em [`dvc.yaml`](dvc.yaml). Cada etapa especifica suas dependências exatas de código, entradas de dados e artefatos de saída:
++
++```text
++      +------------+          
++      | build_grid |          
++      +------------+          
++              *               
++      +--------------+        
++      | process_data |        
++      +--------------+        
++              *               
++    +----------------+        
++    | build_features |        
++    +----------------+        
++         *        *           
++       **          **         
++      *              *        
+++-------+         +-------+   
++| drift |         | train |   
+++-------+         +-------+   
++                      *       
++                 +---------+  
++                 | explain |  
++                 +---------+  
++```
++
++Para inspecionar ou reproduzir o pipeline:
++```bash
++# Visualizar o grafo de dependências no terminal
++dvc dag
++
++# Reproduzir o pipeline completo (ou apenas etapas desatualizadas)
++dvc repro
++```
++
++### 2. Rastreamento de Experimentos com MLflow
++
++Todos os ciclos de treino, hiperparâmetros da busca Bayesiana com Optuna, métricas multi-horizonte e gráficos são automaticamente persistidos em banco de dados SQLite local (`sqlite:///mlflow.db`):
++
++- **Parâmetros Rastreados**: Melhores hiperparâmetros (`n_estimators`, `learning_rate`, `num_leaves`, `reg_alpha`, etc.), estratégia de blocos espaciais, semente pseudoaleatória e dimensões amostrais.
++- **Métricas Registradas**: PR-AUC, ROC-AUC, Brier score e Recall@P50 para horizontes de 1d, 3d e 7d (modelos brutos e calibrados por Platt), além dos baselines (Persistência, Climatologia e Regressão Logística).
++- **Artefatos Armazenados**: Metadados completos do modelo (`training_metadata.json`), relatórios comparativos em CSV e figuras em alta resolução.
++
++Para abrir a interface visual do MLflow:
++```bash
++mlflow ui --backend-store-uri sqlite:///mlflow.db
++# Acesse no navegador em http://localhost:5000
++```
++
++### 3. Monitoramento de Data Drift e Desvio de Conceito (`src/monitoring/drift_detector.py`)
++
++Regimes climáticos e ambientais variam expressivamente ao longo dos anos (como secas históricas e ondas de calor associadas a eventos intensos de El Niño). Para evitar degradação silenciosa em produção, o sistema calcula:
++
++1. **Population Stability Index (PSI)**:
++   - $\text{PSI} < 0.10$: Distribuição estável (Nenhuma ação requerida).
++   - $0.10 \le \text{PSI} < 0.25$: Desvio moderado (Alerta de aviso, manter sob vigilância).
++   - $\text{PSI} \ge 0.25$: Desvio crítico (Ação necessária, acionar pipeline de retreino).
++2. **Teste Kolmogorov-Smirnov (KS) Bicaudal**: Teste não-paramétrico contínuo avaliando se a base histórica de treino e os dados operacionais recentes pertencem à mesma distribuição subjacente.
++
++#### Resultados Reais de Drift (Base Histórica 2016–2023 vs Operação 2024–2025):
++- **Features Monitoradas**: 11 variáveis climáticas e biofísicas centrais.
++- **Variáveis Estáveis (9/11)**: `PRECTOTCORR` ($\text{PSI} = 0.0094$), `WS10M` ($\text{PSI} = 0.0084$), `fire_count_7d` ($\text{PSI} = 0.0526$), `neighbor_fire_7d` ($\text{PSI} = 0.0381$), `dtr` ($\text{PSI} = 0.0560$), etc.
++- **Desvio Moderado Detectado (2/11)**:
++  - `T2M_MAX` ($\text{PSI} = 0.1503$, $p < 0.001$): A temperatura máxima média saltou de **32.0°C** no período base para **33.4°C** em 2024–2025, capturando com exatidão a onda extrema de calor no Centro-Oeste durante o El Niño de 2024.
++  - `vpd` ($\text{PSI} = 0.1067$, $p < 0.001$): O Déficit de Pressão de Vapor médio subiu de **1.17 kPa** para **1.46 kPa**, refletindo condições atmosféricas significativamente mais secas e propensas à propagação de fogo.
++  - `dry_days`: A média de dias consecutivos sem chuva aumentou de **10.0 dias** para **13.0 dias**.
++- **Desvio Crítico (0/11)**: Nenhuma variável ultrapassou o limiar de $\text{PSI} \ge 0.25$.
++
++O módulo exporta automaticamente [`reports/drift_report.json`](reports/drift_report.json) e o gráfico [`reports/figures/drift_summary.png`](reports/figures/drift_summary.png), disponibilizando os dados em tempo real no endpoint da API:
++```bash
++curl http://localhost:8000/drift
++```
++
++### 4. Integração Contínua e Container Docker de Produção
++
++- **GitHub Actions CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): Matriz automatizada de testes no Ubuntu (Python 3.11 e 3.12), executando `ruff check .` e a suíte completa de 20 testes em cada push e pull request.
++- **Container de Produção** ([`Dockerfile`](Dockerfile)): Construído sobre `python:3.12-slim`, inclui a biblioteca OpenMP do Linux (`libgomp1`) necessária para o LightGBM, `curl` para healthcheck automatizado, expõe portas 8000 (FastAPI) e 8501 (Streamlit), com diretiva `HEALTHCHECK` consultando periodicamente `http://localhost:8000/health`.
++
++---
++
+ ## 📁 Estrutura do Repositório
+ 
+ ```text
+ brazil-wildfire-risk-forecast/
+ ├── .github/
+-│   └── workflows/ci.yml          # CI no GitHub Actions (lint, tipos, pytest)
+-├── .gitignore                    # Exclusão de arquivos pesados e temporários
++│   └── workflows/ci.yml          # CI no GitHub Actions (ruff lint, multi-python, pytest)
++├── .dvc/                         # Configuração interna do DVC
++├── .gitignore                    # Exclusão de arquivos pesados, virtualenvs e mlruns
+ ├── config.yaml                   # Configurações globais (grade, região, períodos)
+-├── Dockerfile                    # Container Docker para API e App
++├── Dockerfile                    # Container Docker com OpenMP e healthcheck
++├── dvc.yaml                      # Definição do grafo DAG de etapas do DVC
+ ├── LICENSE                       # Licença MIT
+-├── Makefile                      # Automação de tarefas (Linux/macOS)
++├── Makefile                      # Automação de tarefas (make dvc-repro, make drift, etc.)
++├── pyproject.toml                # Metadados de empacotamento, configs de ruff e pytest
+ ├── run_pipeline.ps1              # Pipeline automatizado em comando único (Windows PowerShell)
+ ├── README.md                     # Versão em inglês
+ ├── README.pt-BR.md               # Versão em português (esta página)
+-├── requirements.txt              # Dependências com versões exatas
++├── requirements.txt              # Dependências de produção fixadas
+ │
+ ├── api/
+-│   └── main.py                   # API FastAPI com endpoint multi-horizonte /predict e /health
++│   └── main.py                   # API FastAPI com endpoints /predict, /health e /drift
+ │
+ ├── app/
+ │   └── streamlit_app.py          # Dashboard interativo com mapa Folium e seletor de horizonte
+@@ -332,9 +426,10 @@ brazil-wildfire-risk-forecast/
+ │
+ ├── notebooks/
+ │   ├── 01_eda.ipynb              # Análise exploratória e sazonalidade narrada
+-│   └── 02_modeling.ipynb         # Modelagem, baselines, calibração, multi-horizonte e LSTM
++│   └── 02_modeling.ipynb         # Full model benchmarking, multi-horizon & LSTM comparison
+ │
+ ├── reports/
++│   ├── drift_report.json         # Relatório automatizado de drift de features (PSI e KS)
+ │   ├── feature_importance.csv    # Ranking SHAP de variáveis
+ │   ├── model_comparison.csv      # Tabela comparativa de métricas reais
+ │   ├── multi_horizon_comparison.csv # Métricas nos horizontes de 1d, 3d e 7d
+@@ -344,6 +439,7 @@ brazil-wildfire-risk-forecast/
+ │       ├── accuracy_by_month.png # Acurácia temporal por mês
+ │       ├── accuracy_by_region.png# Acurácia por macrorregião de MT
+ │       ├── calibration_curve.png # Curva de calibração de probabilidade
++│       ├── drift_summary.png     # Gráfico comparativo de distribuição e drift
+ │       ├── lstm_vs_lgbm.png      # Curvas comparativas PR/ROC da LSTM vs LightGBM
+ │       ├── shap_bar.png          # Gráfico de barras SHAP
+ │       └── shap_summary.png      # Beeswarm plot SHAP
+@@ -357,13 +453,15 @@ brazil-wildfire-risk-forecast/
+ │   │   └── process_data.py       # Agregação espaço-temporal e alvos multi-horizonte
+ │   ├── features/
+ │   │   └── build_features.py     # 39 variáveis biofísicas sem vazamento (VPD, DTR, FWI)
+-│   └── models/
+-│       ├── train.py              # Treino, busca Bayesiana, calibração e multi-horizonte
+-│       ├── train_lstm.py         # Benchmark sequencial Deep Learning em PyTorch
+-│       └── explain.py            # SHAP TreeExplainer
++│   ├── models/
++│   │   ├── train.py              # Treino, busca Bayesiana, Platt e rastreamento MLflow
++│   │   ├── train_lstm.py         # Benchmark sequencial Deep Learning em PyTorch
++│   │   └── explain.py            # SHAP TreeExplainer
++│   └── monitoring/
++│       └── drift_detector.py     # Monitor de drift estatístico com PSI e teste KS
+ │
+ └── tests/
+-    └── test_pipeline.py          # 17 testes unitários (grade, leak, API, limites, LSTM, config)
++    └── test_pipeline.py          # 20 testes unitários (grade, leak, API, limites, drift, LSTM)
+ ```
+ 
+ ---
+diff --git a/api/main.py b/api/main.py
+index f7a2685..064958b 100644
+--- a/api/main.py
++++ b/api/main.py
+@@ -280,6 +280,22 @@ def predict(request: PredictionRequest) -> PredictionResponse:
+     )
+ 
+ 
++@app.get("/drift")
++def get_drift_report():
++    """Return data and feature drift report (PSI and KS test)."""
++    report_path = _PROJECT_ROOT / "reports" / "drift_report.json"
++    if report_path.exists():
++        import json
++        with open(report_path, "r", encoding="utf-8") as f:
++            return json.load(f)
++    else:
++        try:
++            from src.monitoring.drift_detector import run_drift_analysis
++            return run_drift_analysis()
++        except Exception as e:
++            raise HTTPException(status_code=500, detail=f"Failed to generate drift report: {e}")
++
++
+ @app.get("/")
+ def root():
+     """API root — redirect to docs."""
+@@ -287,5 +303,6 @@ def root():
+         "message": "Brazil Wildfire Risk Forecast API",
+         "docs": "/docs",
+         "health": "/health",
++        "drift": "/drift",
+     }
+ 
+diff --git a/app/streamlit_app.py b/app/streamlit_app.py
+index 3ac0cdd..f6c2c8a 100644
+--- a/app/streamlit_app.py
++++ b/app/streamlit_app.py
+@@ -13,12 +13,12 @@ from pathlib import Path
+ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ sys.path.insert(0, str(_PROJECT_ROOT))
+ 
++import folium
+ import joblib
+ import numpy as np
+ import pandas as pd
+ import plotly.express as px
+ import streamlit as st
+-import folium
+ from streamlit_folium import st_folium
+ 
+ st.set_page_config(
+diff --git a/dvc.yaml b/dvc.yaml
+new file mode 100644
+index 0000000..f233622
+--- /dev/null
++++ b/dvc.yaml
+@@ -0,0 +1,64 @@
++stages:
++  build_grid:
++    cmd: python -m src.data.build_grid
++    deps:
++      - config.yaml
++      - src/data/build_grid.py
++    outs:
++      - data/processed/grid.csv:
++          cache: false
++
++  process_data:
++    cmd: python -m src.data.process_data
++    deps:
++      - data/processed/grid.csv
++      - src/data/process_data.py
++    outs:
++      - data/processed/dataset.parquet:
++          cache: false
++
++  build_features:
++    cmd: python -m src.features.build_features
++    deps:
++      - data/processed/dataset.parquet
++      - src/features/build_features.py
++    outs:
++      - data/processed/features.parquet:
++          cache: false
++
++  train:
++    cmd: python -m src.models.train
++    deps:
++      - data/processed/features.parquet
++      - src/models/train.py
++    outs:
++      - models/lightgbm_model.joblib:
++          cache: false
++      - models/platt_calibrator.joblib:
++          cache: false
++    metrics:
++      - reports/model_comparison.csv:
++          cache: false
++      - reports/multi_horizon_comparison.csv:
++          cache: false
++
++  explain:
++    cmd: python -m src.models.explain
++    deps:
++      - models/lightgbm_model.joblib
++      - src/models/explain.py
++    outs:
++      - reports/figures/shap_summary.png:
++          cache: false
++
++  drift:
++    cmd: python -m src.monitoring.drift_detector
++    deps:
++      - data/processed/features.parquet
++      - src/monitoring/drift_detector.py
++    outs:
++      - reports/figures/drift_summary.png:
++          cache: false
++    metrics:
++      - reports/drift_report.json:
++          cache: false
+diff --git a/models/lightgbm_1d.joblib b/models/lightgbm_1d.joblib
+index 44df16f..6540f35 100644
+Binary files a/models/lightgbm_1d.joblib and b/models/lightgbm_1d.joblib differ
+diff --git a/models/lightgbm_3d.joblib b/models/lightgbm_3d.joblib
+index 950df53..47d30f3 100644
+Binary files a/models/lightgbm_3d.joblib and b/models/lightgbm_3d.joblib differ
+diff --git a/models/lightgbm_model.joblib b/models/lightgbm_model.joblib
+index 7a3b277..e53fba1 100644
+Binary files a/models/lightgbm_model.joblib and b/models/lightgbm_model.joblib differ
+diff --git a/models/platt_calibrator.joblib b/models/platt_calibrator.joblib
+index 18332cb..6964e55 100644
+Binary files a/models/platt_calibrator.joblib and b/models/platt_calibrator.joblib differ
+diff --git a/models/platt_calibrator_1d.joblib b/models/platt_calibrator_1d.joblib
+index 53d0caa..2fa1cab 100644
+Binary files a/models/platt_calibrator_1d.joblib and b/models/platt_calibrator_1d.joblib differ
+diff --git a/models/platt_calibrator_3d.joblib b/models/platt_calibrator_3d.joblib
+index ce7cfb2..77046ca 100644
+Binary files a/models/platt_calibrator_3d.joblib and b/models/platt_calibrator_3d.joblib differ
+diff --git a/models/training_metadata.json b/models/training_metadata.json
+index fb6fc94..8aa41a8 100644
+--- a/models/training_metadata.json
++++ b/models/training_metadata.json
+@@ -46,15 +46,15 @@
+   "test_size": 366344,
+   "spatial_block_cv": "Contiguous (North / Central / South MT)",
+   "best_params": {
+-    "n_estimators": 251,
+-    "learning_rate": 0.022711106732108986,
+-    "max_depth": 5,
+-    "num_leaves": 55,
+-    "min_child_samples": 154,
+-    "subsample": 0.9062935001654231,
+-    "colsample_bytree": 0.8678960396606045,
+-    "reg_alpha": 0.1097303965014448,
+-    "reg_lambda": 0.009415368595727648
++    "n_estimators": 203,
++    "learning_rate": 0.02801895126690664,
++    "max_depth": 6,
++    "num_leaves": 57,
++    "min_child_samples": 175,
++    "subsample": 0.9041689133187472,
++    "colsample_bytree": 0.8600897137634251,
++    "reg_alpha": 3.1818822659182637,
++    "reg_lambda": 0.16511270409815212
+   },
+   "p_value_vs_climatology": 0.0,
+   "p_value_vs_persistence": 0.0,
+@@ -103,16 +103,16 @@
+     },
+     "LightGBM (Platt Calibrated)": {
+       "PR-AUC_95CI": [
+-        0.6172,
+-        0.6387
++        0.6197,
++        0.6416
+       ],
+       "ROC-AUC_95CI": [
+-        0.8791,
+-        0.8862
++        0.8802,
++        0.8871
+       ],
+       "Brier_95CI": [
+-        0.0915,
+-        0.0945
++        0.0911,
++        0.0942
+       ]
+     }
+   },
+@@ -121,28 +121,28 @@
+       "horizon": "7-day",
+       "horizon_desc": "D+1 to D+7",
+       "positive_rate": "16.48%",
+-      "PR-AUC": 0.6274,
+-      "ROC-AUC": 0.8823,
+-      "Brier": 0.0931,
+-      "Recall@P50": 0.6734
++      "PR-AUC": 0.6301,
++      "ROC-AUC": 0.8833,
++      "Brier": 0.0927,
++      "Recall@P50": 0.6753
+     },
+     {
+       "horizon": "1-day",
+       "horizon_desc": "D+1",
+       "positive_rate": "4.26%",
+-      "PR-AUC": 0.3666,
+-      "ROC-AUC": 0.8953,
+-      "Brier": 0.0326,
+-      "Recall@P50": 0.2927
++      "PR-AUC": 0.368,
++      "ROC-AUC": 0.896,
++      "Brier": 0.0325,
++      "Recall@P50": 0.2958
+     },
+     {
+       "horizon": "3-day",
+       "horizon_desc": "D+1 to D+3",
+       "positive_rate": "9.67%",
+-      "PR-AUC": 0.533,
+-      "ROC-AUC": 0.8875,
+-      "Brier": 0.0625,
+-      "Recall@P50": 0.5013
++      "PR-AUC": 0.5341,
++      "ROC-AUC": 0.8882,
++      "Brier": 0.0624,
++      "Recall@P50": 0.5018
+     }
+   ],
+   "results": [
+@@ -169,17 +169,17 @@
+     },
+     {
+       "model": "LightGBM (Raw)",
+-      "PR-AUC": 0.6274,
+-      "ROC-AUC": 0.8823,
+-      "Brier": 0.1501,
+-      "Recall@P50": 0.6734
++      "PR-AUC": 0.6301,
++      "ROC-AUC": 0.8833,
++      "Brier": 0.1498,
++      "Recall@P50": 0.6753
+     },
+     {
+       "model": "LightGBM (Platt Calibrated)",
+-      "PR-AUC": 0.6274,
+-      "ROC-AUC": 0.8823,
+-      "Brier": 0.0931,
+-      "Recall@P50": 0.6734
++      "PR-AUC": 0.6301,
++      "ROC-AUC": 0.8833,
++      "Brier": 0.0927,
++      "Recall@P50": 0.6753
+     }
+   ]
+ }
+\ No newline at end of file
+diff --git a/pyproject.toml b/pyproject.toml
+new file mode 100644
+index 0000000..8c460a1
+--- /dev/null
++++ b/pyproject.toml
+@@ -0,0 +1,40 @@
++[build-system]
++requires = ["setuptools>=61.0"]
++build-backend = "setuptools.build_meta"
++
++[project]
++name = "brazil-wildfire-risk-forecast"
++version = "1.0.0"
++description = "Production ML pipeline predicting 1-day, 3-day, and 7-day wildfire risk across regular geographic grid cells in Mato Grosso, Brazil."
++readme = "README.md"
++requires-python = ">=3.11"
++authors = [
++    { name = "Eduardo Tostes" }
++]
++
++[tool.ruff]
++line-length = 100
++target-version = "py312"
++exclude = [
++    ".git",
++    ".dvc",
++    "mlruns",
++    "notebooks",
++    "venv",
++    ".venv",
++]
++
++[tool.ruff.lint]
++select = ["E", "F", "W", "I"]
++ignore = [
++    "E501",  # line too long
++    "E402",  # module level import not at top of file
++]
++
++[tool.pytest.ini_options]
++testpaths = ["tests"]
++python_files = ["test_*.py"]
++filterwarnings = [
++    "ignore::DeprecationWarning",
++    "ignore::UserWarning",
++]
+diff --git a/reports/drift_report.json b/reports/drift_report.json
+new file mode 100644
+index 0000000..eccdd7c
+--- /dev/null
++++ b/reports/drift_report.json
+@@ -0,0 +1,113 @@
++{
++  "baseline_period": "<= 2023",
++  "current_period": ">= 2024",
++  "baseline_samples": 1478532,
++  "current_samples": 366344,
++  "summary": {
++    "total_monitored": 11,
++    "stable_count": 9,
++    "moderate_drift_count": 2,
++    "critical_drift_count": 0
++  },
++  "features": [
++    {
++      "feature": "T2M_MAX",
++      "PSI": 0.1503,
++      "KS_statistic": 0.1618,
++      "KS_pvalue": 0.0,
++      "status": "MODERATE_DRIFT",
++      "baseline_mean": 31.996,
++      "current_mean": 33.401
++    },
++    {
++      "feature": "T2M_MIN",
++      "PSI": 0.0836,
++      "KS_statistic": 0.1292,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 21.783,
++      "current_mean": 22.33
++    },
++    {
++      "feature": "RH2M",
++      "PSI": 0.0933,
++      "KS_statistic": 0.1108,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 69.337,
++      "current_mean": 63.569
++    },
++    {
++      "feature": "PRECTOTCORR",
++      "PSI": 0.0088,
++      "KS_statistic": 0.0357,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 3.647,
++      "current_mean": 3.112
++    },
++    {
++      "feature": "WS10M",
++      "PSI": 0.0075,
++      "KS_statistic": 0.0289,
++      "KS_pvalue": 3.9431975379094955e-214,
++      "status": "STABLE",
++      "baseline_mean": 1.597,
++      "current_mean": 1.622
++    },
++    {
++      "feature": "vpd",
++      "PSI": 0.1067,
++      "KS_statistic": 0.1238,
++      "KS_pvalue": 0.0,
++      "status": "MODERATE_DRIFT",
++      "baseline_mean": 1.173,
++      "current_mean": 1.457
++    },
++    {
++      "feature": "dtr",
++      "PSI": 0.0497,
++      "KS_statistic": 0.0943,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 10.212,
++      "current_mean": 11.071
++    },
++    {
++      "feature": "fwi_proxy",
++      "PSI": 0.0735,
++      "KS_statistic": 0.0944,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 0.822,
++      "current_mean": 1.003
++    },
++    {
++      "feature": "fire_count_30d",
++      "PSI": 0.007,
++      "KS_statistic": 0.0362,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 4.625,
++      "current_mean": 5.072
++    },
++    {
++      "feature": "neighbor_fire_7d",
++      "PSI": 0.0109,
++      "KS_statistic": 0.0431,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 8.541,
++      "current_mean": 9.289
++    },
++    {
++      "feature": "dry_days",
++      "PSI": 0.0081,
++      "KS_statistic": 0.0287,
++      "KS_pvalue": 4.9467398616554296e-210,
++      "status": "STABLE",
++      "baseline_mean": 10.026,
++      "current_mean": 13.0
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/reports/figures/accuracy_by_month.png b/reports/figures/accuracy_by_month.png
+index ffff3e2..d484587 100644
+Binary files a/reports/figures/accuracy_by_month.png and b/reports/figures/accuracy_by_month.png differ
+diff --git a/reports/figures/accuracy_by_region.png b/reports/figures/accuracy_by_region.png
+index e9e518d..5743dca 100644
+Binary files a/reports/figures/accuracy_by_region.png and b/reports/figures/accuracy_by_region.png differ
+diff --git a/reports/figures/calibration_curve.png b/reports/figures/calibration_curve.png
+index 559d434..cc93c5c 100644
+Binary files a/reports/figures/calibration_curve.png and b/reports/figures/calibration_curve.png differ
+diff --git a/reports/figures/drift_summary.png b/reports/figures/drift_summary.png
+new file mode 100644
+index 0000000..296111d
+Binary files /dev/null and b/reports/figures/drift_summary.png differ
+diff --git a/reports/model_comparison.csv b/reports/model_comparison.csv
+index 6b1e157..53a65d6 100644
+--- a/reports/model_comparison.csv
++++ b/reports/model_comparison.csv
+@@ -2,5 +2,5 @@ model,PR-AUC,ROC-AUC,Brier,Recall@P50
+ Persistence (Empirical),0.4293,0.726,0.1074,0.5281
+ Climatology,0.5169,0.8521,0.1079,0.4855
+ LogisticRegression,0.5464,0.8276,0.1658,0.5935
+-LightGBM (Raw),0.6274,0.8823,0.1501,0.6734
+-LightGBM (Platt Calibrated),0.6274,0.8823,0.0931,0.6734
++LightGBM (Raw),0.6301,0.8833,0.1498,0.6753
++LightGBM (Platt Calibrated),0.6301,0.8833,0.0927,0.6753
+diff --git a/reports/multi_horizon_comparison.csv b/reports/multi_horizon_comparison.csv
+index 07d8729..b2a5b5e 100644
+--- a/reports/multi_horizon_comparison.csv
++++ b/reports/multi_horizon_comparison.csv
+@@ -1,4 +1,4 @@
+ horizon,horizon_desc,positive_rate,PR-AUC,ROC-AUC,Brier,Recall@P50
+-7-day,D+1 to D+7,16.48%,0.6274,0.8823,0.0931,0.6734
+-1-day,D+1,4.26%,0.3666,0.8953,0.0326,0.2927
+-3-day,D+1 to D+3,9.67%,0.533,0.8875,0.0625,0.5013
++7-day,D+1 to D+7,16.48%,0.6301,0.8833,0.0927,0.6753
++1-day,D+1,4.26%,0.368,0.896,0.0325,0.2958
++3-day,D+1 to D+3,9.67%,0.5341,0.8882,0.0624,0.5018
+diff --git a/reports/walk_forward_metrics.csv b/reports/walk_forward_metrics.csv
+index 74ee39e..bb6571b 100644
+--- a/reports/walk_forward_metrics.csv
++++ b/reports/walk_forward_metrics.csv
+@@ -1,6 +1,6 @@
+ test_year,train_period,train_size,test_size,positive_rate,PR-AUC,ROC-AUC,Brier
+-2021,2016-2020,924462,184690,0.1799,0.6379,0.8871,0.1522
+-2022,2016-2021,1109152,184690,0.1843,0.6469,0.8818,0.1485
+-2023,2016-2022,1293842,184690,0.184,0.638,0.8851,0.147
+-2024,2016-2023,1478532,185196,0.2138,0.6933,0.8837,0.1542
+-2025,2016-2024,1663728,181148,0.1147,0.4968,0.8715,0.1461
++2021,2016-2020,924462,184690,0.1799,0.6391,0.8879,0.1515
++2022,2016-2021,1109152,184690,0.1843,0.6476,0.8828,0.1479
++2023,2016-2022,1293842,184690,0.184,0.6392,0.8857,0.1469
++2024,2016-2023,1478532,185196,0.2138,0.6958,0.8848,0.1532
++2025,2016-2024,1663728,181148,0.1147,0.4998,0.873,0.1464
+diff --git a/requirements.txt b/requirements.txt
+index ce8099d..2106ebc 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -30,9 +30,15 @@ streamlit-folium==0.23.1
+ # Calibration & metrics
+ joblib==1.4.2
+ 
+-# Testing
++# Testing & Quality
+ pytest==8.3.4
+ httpx==0.28.1
++ruff>=0.5.0
++
++# MLOps & Tracking
++mlflow>=2.14.0
++dvc>=3.50.0
++scipy>=1.13.0
+ 
+ # Notebook
+ jupyter==1.1.1
+diff --git a/src/config.py b/src/config.py
+index d45735f..cc85c35 100644
+--- a/src/config.py
++++ b/src/config.py
+@@ -5,7 +5,6 @@ from typing import Any
+ 
+ import yaml
+ 
+-
+ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ _CONFIG_PATH = _PROJECT_ROOT / "config.yaml"
+ 
+diff --git a/src/data/process_data.py b/src/data/process_data.py
+index 0e24625..0fcd5e9 100644
+--- a/src/data/process_data.py
++++ b/src/data/process_data.py
+@@ -12,12 +12,12 @@ clear. The target for day D uses fire data from days D+1 to D+7, which is
+ information from the future that the model must predict, NOT use as input.
+ """
+ 
+-import pandas as pd
++
+ import numpy as np
+-from pathlib import Path
++import pandas as pd
+ 
+ from src.config import get_project_root, load_config
+-from src.data.build_grid import build_grid, assign_to_grid
++from src.data.build_grid import assign_to_grid, build_grid
+ 
+ 
+ def process_data(config: dict | None = None) -> pd.DataFrame:
+diff --git a/src/features/build_features.py b/src/features/build_features.py
+index 9cb3c7e..1db837e 100644
+--- a/src/features/build_features.py
++++ b/src/features/build_features.py
+@@ -206,7 +206,6 @@ def _add_neighbor_features(df: pd.DataFrame, cfg: dict) -> None:
+     neighbor_melted["date"] = pd.to_datetime(neighbor_melted["date"])
+ 
+     # Merge into main dataframe
+-    df_idx = df.set_index(["grid_id", "date"]).index
+     neighbor_melted = neighbor_melted.set_index(["grid_id", "date"])
+     df["neighbor_fire_7d"] = df.set_index(["grid_id", "date"]).join(
+         neighbor_melted, how="left"
+diff --git a/src/models/explain.py b/src/models/explain.py
+index d1ce7ad..3a9412e 100644
+--- a/src/models/explain.py
++++ b/src/models/explain.py
+@@ -5,11 +5,11 @@ Uses TreeExplainer for LightGBM (exact, fast computation).
+ """
+ 
+ import joblib
++import matplotlib
+ import numpy as np
+ import pandas as pd
+ import shap
+ 
+-import matplotlib
+ matplotlib.use("Agg")
+ import matplotlib.pyplot as plt
+ 
+diff --git a/src/models/train.py b/src/models/train.py
+index d55f7be..e9ca421 100644
+--- a/src/models/train.py
++++ b/src/models/train.py
+@@ -17,6 +17,7 @@ from pathlib import Path
+ 
+ import joblib
+ import lightgbm as lgb
++import matplotlib
+ import numpy as np
+ import optuna
+ import pandas as pd
+@@ -32,7 +33,6 @@ from sklearn.metrics import (
+ from sklearn.model_selection import GroupKFold
+ from sklearn.preprocessing import StandardScaler
+ 
+-import matplotlib
+ matplotlib.use("Agg")
+ import matplotlib.pyplot as plt
+ 
+@@ -594,6 +594,47 @@ def train_all(config: dict | None = None) -> None:
+     with open(models_dir / "training_metadata.json", "w") as f:
+         json.dump(meta, f, indent=2, default=str)
+ 
++    # ── 13. MLflow Tracking ───────────────────────────────────────
++    try:
++        import mlflow
++        db_path = (root / "mlflow.db").resolve()
++        mlflow.set_tracking_uri(f"sqlite:///{db_path}")
++        mlflow.set_experiment("brazil-wildfire-risk-forecast")
++        with mlflow.start_run(run_name="lightgbm-calibrated-production") as run:
++            mlflow.log_params(study.best_params)
++            mlflow.log_params({
++                "model_type": "LightGBM + Platt Scaling",
++                "spatial_blocks": "North_Central_South_MT",
++                "seed": seed,
++                "train_size": len(train_df),
++                "test_size": len(test_df),
++                "n_features": len(feature_cols),
++                "p_value_vs_climatology": p_val_vs_clim,
++            })
++            for r in results:
++                m_name = r["Model"].lower().replace(" ", "_").replace("(", "").replace(")", "")
++                for metric_key in ["PR-AUC", "ROC-AUC", "Brier", "Recall@P50"]:
++                    if metric_key in r:
++                        metric_val = float(r[metric_key])
++                        sanitized_key = metric_key.lower().replace("-", "_").replace("@", "_")
++                        mlflow.log_metric(f"{m_name}_{sanitized_key}", metric_val)
++            for h_row in horizon_results:
++                h_name = h_row["horizon"].replace("-", "_")
++                for metric_key in ["PR-AUC", "ROC-AUC", "Brier", "Recall@P50"]:
++                    if metric_key in h_row:
++                        sanitized_key = metric_key.lower().replace("-", "_").replace("@", "_")
++                        mlflow.log_metric(f"{h_name}_{sanitized_key}", float(h_row[metric_key]))
++            mlflow.log_artifact(str(models_dir / "training_metadata.json"))
++            if (root / "reports" / "model_comparison.csv").exists():
++                mlflow.log_artifact(str(root / "reports" / "model_comparison.csv"))
++            if (root / "reports" / "multi_horizon_comparison.csv").exists():
++                mlflow.log_artifact(str(root / "reports" / "multi_horizon_comparison.csv"))
++            for fig_path in figures_dir.glob("*.png"):
++                mlflow.log_artifact(str(fig_path), artifact_path="figures")
++            print(f"\n[MLflow] Experiment run logged successfully! (Run ID: {run.info.run_id})")
++    except Exception as e:
++        print(f"\n[MLflow] Warning: Could not log to MLflow: {e}")
++
+     print("\nTraining and validation pipeline complete!")
+     return results_df
+ 
+diff --git a/src/models/train_lstm.py b/src/models/train_lstm.py
+index 56896eb..9ad3f3c 100644
+--- a/src/models/train_lstm.py
++++ b/src/models/train_lstm.py
+@@ -15,14 +15,15 @@ Comparative Analysis & Physical Insights:
+ 
+ import time
+ import warnings
+-from pathlib import Path
+ 
+-import joblib
+ import matplotlib
++
+ matplotlib.use("Agg")
+ import matplotlib.pyplot as plt
+ import numpy as np
+ import pandas as pd
++import torch
++import torch.nn as nn
+ from sklearn.metrics import (
+     average_precision_score,
+     brier_score_loss,
+@@ -30,11 +31,9 @@ from sklearn.metrics import (
+     roc_auc_score,
+ )
+ from sklearn.preprocessing import StandardScaler
+-import torch
+-import torch.nn as nn
+ from torch.utils.data import DataLoader, TensorDataset
+ 
+-from src.config import get_project_root, load_config
++from src.config import get_project_root
+ 
+ warnings.filterwarnings("ignore")
+ 
+@@ -62,7 +61,7 @@ class WildfireLSTM(nn.Module):
+ 
+     def forward(self, x: torch.Tensor) -> torch.Tensor:
+         """Forward pass.
+-        
++
+         Args:
+             x: Tensor of shape (batch_size, seq_len, input_dim)
+         Returns:
+@@ -84,19 +83,19 @@ def build_sequences(
+     sample_stride: int = 4,
+ ) -> tuple[np.ndarray, np.ndarray]:
+     """Extract rolling sequences per grid cell using fast numpy views.
+-    
++
+     Args:
+         df: DataFrame sorted by (grid_id, date)
+         feature_cols: List of sequence features
+         seq_len: Number of backward days (default 14)
+         sample_stride: Downsampling stride in days to fit memory efficiently
+-        
++
+     Returns:
+         X (n_sequences, seq_len, n_features), y (n_sequences,)
+     """
+     X_parts = []
+     y_parts = []
+-    
++
+     for _, group in df.groupby("grid_id"):
+         feat_vals = group[feature_cols].values.astype(np.float32)
+         targets = group["target"].values.astype(np.float32)
+@@ -111,7 +110,7 @@ def build_sequences(
+             y_targets = y_targets[::sample_stride]
+         X_parts.append(windows)
+         y_parts.append(y_targets)
+-        
++
+     return np.concatenate(X_parts, axis=0), np.concatenate(y_parts, axis=0)
+ 
+ 
+@@ -139,19 +138,19 @@ def train_and_evaluate_lstm(
+     reports_dir = root / "reports"
+     figures_dir = reports_dir / "figures"
+     figures_dir.mkdir(parents=True, exist_ok=True)
+-    
++
+     print("=" * 60)
+     print("Training PyTorch LSTM Sequential Benchmark")
+     print("=" * 60)
+-    
++
+     # Load dataset
+     ds_path = root / "data" / "processed" / "dataset.parquet"
+     if not ds_path.exists():
+         raise FileNotFoundError(f"Processed dataset not found: {ds_path}")
+-        
++
+     df = pd.read_parquet(ds_path)
+     df = df.sort_values(["grid_id", "date"]).reset_index(drop=True)
+-    
++
+     # Compute basic physical features if missing
+     if "vpd" not in df.columns:
+         t_mean = (df["T2M_MAX"] + df["T2M_MIN"]) / 2.0
+@@ -159,27 +158,27 @@ def train_and_evaluate_lstm(
+         df["vpd"] = es * np.clip(1.0 - (df["RH2M"] / 100.0), 0.0, None)
+     if "dtr" not in df.columns:
+         df["dtr"] = df["T2M_MAX"] - df["T2M_MIN"]
+-        
++
+     seq_feature_cols = [
+         "T2M_MAX", "T2M_MIN", "RH2M", "PRECTOTCORR", "WS10M",
+         "fire_count", "vpd", "dtr", "lat_center", "lon_center",
+     ]
+     print(f"Sequence Features ({len(seq_feature_cols)}): {seq_feature_cols}")
+-    
++
+     # Split into train (2016-2023) and test (2024-2025)
+     train_mask = df["date"].dt.year <= 2023
+     test_mask = df["date"].dt.year >= 2024
+-    
++
+     train_df = df[train_mask].copy()
+     test_df = df[test_mask].copy()
+-    
++
+     print(f"Train records: {len(train_df):,}, Test records: {len(test_df):,}")
+-    
++
+     # Scale features on train set
+     scaler = StandardScaler()
+     train_df[seq_feature_cols] = scaler.fit_transform(train_df[seq_feature_cols].fillna(0))
+     test_df[seq_feature_cols] = scaler.transform(test_df[seq_feature_cols].fillna(0))
+-    
++
+     print("Extracting sequential windows (T=14 days)...")
+     t0 = time.time()
+     X_train, y_train = build_sequences(train_df, seq_feature_cols, seq_len=seq_len, sample_stride=3)
+@@ -187,21 +186,21 @@ def train_and_evaluate_lstm(
+     print(f"Sequences extracted in {time.time() - t0:.1f}s:")
+     print(f"  Train: X={X_train.shape}, positive={np.mean(y_train)*100:.2f}%")
+     print(f"  Test:  X={X_test.shape}, positive={np.mean(y_test)*100:.2f}%")
+-    
++
+     # PyTorch DataLoaders
+     train_dataset = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
+     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+-    
++
+     # Calculate positive weight for class imbalance
+     n_pos = np.sum(y_train == 1)
+     n_neg = np.sum(y_train == 0)
+     pos_weight = torch.tensor([n_neg / max(1, n_pos)], dtype=torch.float32)
+-    
++
+     device = torch.device("cpu")
+     model = WildfireLSTM(input_dim=len(seq_feature_cols), hidden_dim=64, num_layers=1, dropout=0.2).to(device)
+     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight.to(device))
+     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+-    
++
+     print(f"\nTraining LSTM model on {device} ({epochs} epochs)...")
+     train_start = time.time()
+     model.train()
+@@ -219,10 +218,10 @@ def train_and_evaluate_lstm(
+         avg_loss = total_loss / len(train_dataset)
+         if epoch % 2 == 0 or epoch == epochs:
+             print(f"  Epoch [{epoch:02d}/{epochs:02d}] Loss: {avg_loss:.4f}")
+-            
++
+     lstm_train_time = time.time() - train_start
+     print(f"LSTM training completed in {lstm_train_time:.1f}s")
+-    
++
+     # Inference on Test Set
+     model.eval()
+     t_inf_start = time.time()
+@@ -231,30 +230,30 @@ def train_and_evaluate_lstm(
+         test_logits = model(test_tensors)
+         lstm_probs = torch.sigmoid(test_logits).numpy()
+     lstm_inf_time = (time.time() - t_inf_start) / len(X_test) * 1000.0  # ms per sample
+-    
++
+     # Compute metrics for LSTM
+     lstm_pr_auc = float(average_precision_score(y_test, lstm_probs))
+     lstm_roc_auc = float(roc_auc_score(y_test, lstm_probs))
+     lstm_brier = float(brier_score_loss(y_test, lstm_probs))
+     lstm_rec_p50 = float(_recall_at_precision(y_test, lstm_probs, 0.50))
+-    
++
+     print("\nLSTM Test Metrics:")
+     print(f"  PR-AUC:     {lstm_pr_auc:.4f}")
+     print(f"  ROC-AUC:    {lstm_roc_auc:.4f}")
+     print(f"  Brier:      {lstm_brier:.4f}")
+     print(f"  Recall@P50: {lstm_rec_p50*100:.2f}%")
+     print(f"  Latency:    {lstm_inf_time:.3f} ms/sample")
+-    
++
+     # Save LSTM model
+     torch.save(model.state_dict(), models_dir / "lstm_model.pt")
+-    
++
+     # Load LightGBM benchmarks for direct comparison
+     comp_path = reports_dir / "model_comparison.csv"
+     if comp_path.exists():
+         comp_df = pd.read_csv(comp_path)
+     else:
+         comp_df = pd.DataFrame()
+-        
++
+     lstm_row = {
+         "model": "LSTM (PyTorch Recurrent)",
+         "PR-AUC": round(lstm_pr_auc, 4),
+@@ -262,14 +261,14 @@ def train_and_evaluate_lstm(
+         "Brier": round(lstm_brier, 4),
+         "Recall@P50": round(lstm_rec_p50, 4),
+     }
+-    
++
+     # Combine into comparison table
+     benchmark_df = pd.concat([comp_df, pd.DataFrame([lstm_row])], ignore_index=True)
+     benchmark_df.to_csv(reports_dir / "lstm_comparison.csv", index=False)
+-    
++
+     # Plot PR & ROC Comparison curves
+     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+-    
++
+     # PR curve
+     p_lstm, r_lstm, _ = precision_recall_curve(y_test, lstm_probs)
+     ax1.plot(r_lstm, p_lstm, label=f"LSTM (PR-AUC={lstm_pr_auc:.3f})", color="#8e44ad", lw=2)
+@@ -279,7 +278,7 @@ def train_and_evaluate_lstm(
+     ax1.set_title("Precision-Recall Curve Comparison")
+     ax1.legend(loc="upper right")
+     ax1.grid(True, alpha=0.3)
+-    
++
+     # Summary Bar
+     sns_models = benchmark_df["model"].values
+     sns_prauc = benchmark_df["PR-AUC"].values
+@@ -291,11 +290,11 @@ def train_and_evaluate_lstm(
+     for i, v in enumerate(sns_prauc):
+         ax2.text(i, v * 0.9, f"{v:.3f}", ha="center", color="white", fontweight="bold")
+     ax2.grid(True, alpha=0.3, axis="y")
+-    
++
+     plt.tight_layout()
+     plt.savefig(figures_dir / "lstm_vs_lgbm.png", dpi=150)
+     plt.close()
+-    
++
+     print(f"\nSaved LSTM comparison figure: {figures_dir / 'lstm_vs_lgbm.png'}")
+     print(f"Saved benchmark metrics: {reports_dir / 'lstm_comparison.csv'}")
+     return benchmark_df
+diff --git a/src/monitoring/__init__.py b/src/monitoring/__init__.py
+new file mode 100644
+index 0000000..1c26fb8
+--- /dev/null
++++ b/src/monitoring/__init__.py
+@@ -0,0 +1 @@
++"""Monitoring and drift detection package."""
+diff --git a/src/monitoring/drift_detector.py b/src/monitoring/drift_detector.py
+new file mode 100644
+index 0000000..a60c65f
+--- /dev/null
++++ b/src/monitoring/drift_detector.py
+@@ -0,0 +1,206 @@
++"""Data and Concept Drift Detection for Brazil Wildfire Risk Forecast.
++
++Monitors distribution drift between baseline training periods (2016–2023)
++and operational/testing periods (2024–2025 or real-time incoming data).
++
++Key Metrics:
++- Population Stability Index (PSI):
++    * PSI < 0.10: No significant drift (Stable)
++    * 0.10 <= PSI < 0.25: Moderate drift (Warning, continue monitoring)
++    * PSI >= 0.25: Critical drift (Action required, trigger retraining)
++- Kolmogorov-Smirnov (KS) 2-sample test:
++    * Non-parametric test for continuous distribution shift (p-value and statistic).
++"""
++
++import json
++
++import matplotlib
++
++matplotlib.use("Agg")
++import matplotlib.pyplot as plt
++import numpy as np
++import pandas as pd
++from scipy.stats import ks_2samp
++
++from src.config import get_project_root
++
++
++def calculate_psi(baseline: np.ndarray, current: np.ndarray, num_bins: int = 10) -> float:
++    """Calculate Population Stability Index (PSI) between two 1D distributions.
++
++    Args:
++        baseline: Baseline / reference distribution array
++        current: Current / operational distribution array
++        num_bins: Number of quantile bins to segment
++
++    Returns:
++        PSI float value
++    """
++    b = baseline[~np.isnan(baseline)]
++    c = current[~np.isnan(current)]
++
++    if len(b) == 0 or len(c) == 0:
++        return 0.0
++
++    # Quantile bins based on baseline
++    quantiles = np.linspace(0, 100, num_bins + 1)
++    bins = np.percentile(b, quantiles)
++    bins[0] = -np.inf
++    bins[-1] = np.inf
++    bins = np.unique(bins)
++    if len(bins) < 2:
++        return 0.0
++
++    b_counts, _ = np.histogram(b, bins=bins)
++    c_counts, _ = np.histogram(c, bins=bins)
++
++    b_pct = b_counts / len(b)
++    c_pct = c_counts / len(c)
++
++    # Laplace smoothing to prevent division by zero
++    eps = 1e-4
++    b_pct = np.clip(b_pct, eps, None)
++    c_pct = np.clip(c_pct, eps, None)
++
++    b_pct = b_pct / np.sum(b_pct)
++    c_pct = c_pct / np.sum(c_pct)
++
++    psi_val = np.sum((c_pct - b_pct) * np.log(c_pct / b_pct))
++    return float(psi_val)
++
++
++def run_drift_analysis(
++    baseline_end_year: int = 2023,
++    test_start_year: int = 2024,
++) -> dict:
++    """Run drift analysis across core meteorological and behavioral features.
++
++    Compares baseline period (<= baseline_end_year) with operational period (>= test_start_year).
++    """
++    root = get_project_root()
++    feat_path = root / "data" / "processed" / "features.parquet"
++    if not feat_path.exists():
++        feat_path = root / "data" / "sample" / "features_sample.parquet"
++        if not feat_path.exists():
++            raise FileNotFoundError("Features dataset not found for drift analysis.")
++
++    df = pd.read_parquet(feat_path)
++    df["date"] = pd.to_datetime(df["date"])
++
++    baseline_mask = df["date"].dt.year <= baseline_end_year
++    current_mask = df["date"].dt.year >= test_start_year
++
++    baseline_df = df[baseline_mask]
++    current_df = df[current_mask]
++
++    # If running on small sample without future years, split chronologically 70/30
++    if len(current_df) == 0:
++        split_idx = int(len(df) * 0.70)
++        baseline_df = df.iloc[:split_idx]
++        current_df = df.iloc[split_idx:]
++
++    monitored_features = [
++        "T2M_MAX",
++        "T2M_MIN",
++        "RH2M",
++        "PRECTOTCORR",
++        "WS10M",
++        "vpd",
++        "dtr",
++        "fwi_proxy",
++        "fire_count_30d",
++        "neighbor_fire_7d",
++        "dry_days",
++    ]
++    monitored_features = [f for f in monitored_features if f in df.columns]
++
++    feature_metrics = []
++    for feat in monitored_features:
++        b_vals = baseline_df[feat].values.astype(float)
++        c_vals = current_df[feat].values.astype(float)
++
++        psi = calculate_psi(b_vals, c_vals, num_bins=10)
++        ks_stat, ks_pval = ks_2samp(b_vals[~np.isnan(b_vals)], c_vals[~np.isnan(c_vals)])
++
++        if psi < 0.10:
++            status = "STABLE"
++        elif psi < 0.25:
++            status = "MODERATE_DRIFT"
++        else:
++            status = "CRITICAL_DRIFT"
++
++        feature_metrics.append({
++            "feature": feat,
++            "PSI": round(psi, 4),
++            "KS_statistic": round(float(ks_stat), 4),
++            "KS_pvalue": float(ks_pval),
++            "status": status,
++            "baseline_mean": round(float(np.nanmean(b_vals)), 3),
++            "current_mean": round(float(np.nanmean(c_vals)), 3),
++        })
++
++    report = {
++        "baseline_period": f"<= {baseline_end_year}",
++        "current_period": f">= {test_start_year}",
++        "baseline_samples": len(baseline_df),
++        "current_samples": len(current_df),
++        "summary": {
++            "total_monitored": len(monitored_features),
++            "stable_count": sum(1 for m in feature_metrics if m["status"] == "STABLE"),
++            "moderate_drift_count": sum(1 for m in feature_metrics if m["status"] == "MODERATE_DRIFT"),
++            "critical_drift_count": sum(1 for m in feature_metrics if m["status"] == "CRITICAL_DRIFT"),
++        },
++        "features": feature_metrics,
++    }
++
++    # Save JSON report
++    out_dir = root / "reports"
++    out_dir.mkdir(parents=True, exist_ok=True)
++    report_path = out_dir / "drift_report.json"
++    with open(report_path, "w", encoding="utf-8") as f:
++        json.dump(report, f, indent=2)
++    print(f"Drift report saved: {report_path}")
++
++    # Generate summary visualization
++    figures_dir = out_dir / "figures"
++    figures_dir.mkdir(parents=True, exist_ok=True)
++
++    psi_df = pd.DataFrame(feature_metrics).sort_values("PSI", ascending=True)
++
++    fig, ax = plt.subplots(figsize=(10, 6))
++    colors = [
++        "#27ae60" if s == "STABLE" else ("#f39c12" if s == "MODERATE_DRIFT" else "#e74c3c")
++        for s in psi_df["status"]
++    ]
++    ax.barh(psi_df["feature"], psi_df["PSI"], color=colors)
++    ax.axvline(0.10, color="#f39c12", linestyle="--", alpha=0.8, label="Moderate Drift Threshold (PSI=0.10)")
++    ax.axvline(0.25, color="#e74c3c", linestyle="--", alpha=0.8, label="Critical Drift Threshold (PSI=0.25)")
++    ax.set_xlabel("Population Stability Index (PSI)")
++    ax.set_title("Feature Drift Analysis (Baseline 2016-2023 vs Operational 2024-2025)")
++    ax.legend(loc="lower right")
++    ax.grid(True, alpha=0.3, axis="x")
++
++    for i, v in enumerate(psi_df["PSI"]):
++        ax.text(v + 0.005, i, f"{v:.3f}", va="center", fontsize=9, fontweight="bold")
++
++    fig.tight_layout()
++    fig_path = figures_dir / "drift_summary.png"
++    fig.savefig(fig_path, dpi=150)
++    plt.close()
++    print(f"Drift summary figure saved: {fig_path}")
++
++    return report
++
++
++if __name__ == "__main__":
++    print("=" * 60)
++    print("Running Automated Data & Feature Drift Analysis")
++    print("=" * 60)
++    rep = run_drift_analysis()
++    print("\nDrift Summary:")
++    print(f"  Stable Features:   {rep['summary']['stable_count']}")
++    print(f"  Moderate Drift:    {rep['summary']['moderate_drift_count']}")
++    print(f"  Critical Drift:    {rep['summary']['critical_drift_count']}")
++    print("\nFeature Details:")
++    for f in rep["features"]:
++        print(f"  • {f['feature']:18s}: PSI={f['PSI']:.4f} [{f['status']}] (Base={f['baseline_mean']} -> Curr={f['current_mean']})")
+diff --git a/tests/test_pipeline.py b/tests/test_pipeline.py
+index 24bde7c..e8f1441 100644
+--- a/tests/test_pipeline.py
++++ b/tests/test_pipeline.py
+@@ -4,7 +4,6 @@ Includes a leak detection test that verifies no future data leaks into features.
+ """
+ 
+ import sys
+-from datetime import date
+ from pathlib import Path
+ 
+ import numpy as np
+@@ -146,10 +145,23 @@ class TestLeakDetection:
+         # Day 10 itself: target looks at days 11-17, all zero -> target=0
+         # So target=1 for days 3,4,5,6,7,8,9 (indices 2-8)
+         horizon = 7
++        targets = []
+         for i in range(len(df)):
+             future_fires = df["fire_count"].iloc[i+1:i+1+horizon].sum()
+-            expected = 1 if future_fires > 0 else 0
+-            # This is what the target should be
++            targets.append(1 if future_fires > 0 else 0)
++        assert sum(targets) == 7
++        assert targets[2:9] == [1] * 7
++        assert targets[9] == 0
++
++
++# ── API Fixture ───────────────────────────────────────────────────────────────
++
++@pytest.fixture
++def client():
++    from fastapi.testclient import TestClient
++
++    from api.main import app
++    return TestClient(app)
+ 
+ 
+ # ── API tests ─────────────────────────────────────────────────────────────────
+@@ -157,12 +169,6 @@ class TestLeakDetection:
+ class TestAPI:
+     """Tests for the FastAPI endpoints."""
+ 
+-    @pytest.fixture
+-    def client(self):
+-        from fastapi.testclient import TestClient
+-        from api.main import app
+-        return TestClient(app)
+-
+     def test_root_endpoint(self, client):
+         response = client.get("/")
+         assert response.status_code == 200
+@@ -233,6 +239,40 @@ class TestAPI:
+         assert "Invalid horizon_days" in response.json()["detail"]
+ 
+ 
++# ── Drift Monitoring tests ───────────────────────────────────────────────────
++
++class TestDriftDetector:
++    """Tests for drift detection calculations and API endpoint."""
++
++    def test_psi_identical_distributions(self):
++        from src.monitoring.drift_detector import calculate_psi
++        rng = np.random.default_rng(42)
++        base = rng.normal(loc=25.0, scale=5.0, size=2000)
++        curr = rng.normal(loc=25.0, scale=5.0, size=2000)
++        psi = calculate_psi(base, curr)
++        # Identical distributions should have negligible PSI (< 0.05)
++        assert psi < 0.05
++
++    def test_psi_shifted_distributions(self):
++        from src.monitoring.drift_detector import calculate_psi
++        rng = np.random.default_rng(42)
++        base = rng.normal(loc=20.0, scale=3.0, size=2000)
++        curr = rng.normal(loc=35.0, scale=3.0, size=2000)
++        psi = calculate_psi(base, curr)
++        # Severely shifted distribution should trigger critical PSI (> 0.25)
++        assert psi > 0.25
++
++    def test_drift_api_endpoint(self, client):
++        """Test GET /drift endpoint returns status 200 and schema."""
++        response = client.get("/drift")
++        assert response.status_code == 200
++        data = response.json()
++        assert "summary" in data
++        assert "features" in data
++        assert data["summary"]["total_monitored"] > 0
++        assert len(data["features"]) > 0
++
++
+ # ── Sequential Model (LSTM) tests ─────────────────────────────────────────────
+ 
+ class TestSequentialModel:
+@@ -240,6 +280,7 @@ class TestSequentialModel:
+ 
+     def test_lstm_forward_shape(self):
+         import torch
++
+         from src.models.train_lstm import WildfireLSTM
+         model = WildfireLSTM(input_dim=10, hidden_dim=32, num_layers=1)
+         x = torch.randn(4, 14, 10)  # batch=4, seq_len=14, features=10

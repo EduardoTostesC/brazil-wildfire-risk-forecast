@@ -1,0 +1,20 @@
+{
+  "url": "http://localhost:8505",
+  "mode": "real versioned historical demonstration sample",
+  "browser_errors": [],
+  "tabs_checked": 5,
+  "viewports": [
+    [
+      1440,
+      1100
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "screenshots": [
+    "reports/figures/dashboard-desktop.png",
+    "reports/figures/dashboard-mobile.png"
+  ]
+}

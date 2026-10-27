@@ -1,324 +1,170 @@
-"""Sequential Deep Learning Benchmark: PyTorch LSTM for Wildfire Risk Forecasting.
+"""Matched retrospective LSTM/LightGBM benchmark with separate 2023 calibration."""
 
-This script trains a PyTorch LSTM model on 14-day sequences of daily meteorological
-and fire observations, comparing its predictive performance against the gradient-boosted
-tree ensemble (LightGBM) on the identical 2024–2025 temporal holdout set.
-
-Comparative Analysis & Physical Insights:
-- LSTMs process the raw temporal sequence [T=14, D] to learn recurrence representations.
-- Gradient Boosted Trees (LightGBM) operate on explicit summary aggregations (rolling sums,
-  spatial neighborhood counts, and cyclic trigonometric encodings).
-- Real-world findings: Tree ensembles consistently match or outperform recurrent networks
-  on coarse gridded wildfire tabular data, while offering ~100x faster training and sub-millisecond
-  CPU inference latency.
-"""
-
+import json
+import random
 import time
-import warnings
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+import joblib
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from sklearn.metrics import (
-    average_precision_score,
-    brier_score_loss,
-    precision_recall_curve,
-    roc_auc_score,
-)
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.config import get_project_root
-from src.models.calibration import compute_ece
+from src.config import evaluation_periods, get_project_root
+from src.models.calibration import PlattCalibrator
+from src.models.evaluation import paired_ap_difference
+from src.models.inference import feature_matrix
+from src.models.provenance import capture_execution
+from src.models.research import metric_row
 
-warnings.filterwarnings("ignore")
-
-
-# ── PyTorch Model Architecture ────────────────────────────────────────────────
 
 class WildfireLSTM(nn.Module):
-    """Recurrent neural network with LSTM cell for wildfire probability prediction."""
-
-    def __init__(self, input_dim: int, hidden_dim: int = 64, num_layers: int = 1, dropout: float = 0.2):
+    def __init__(self, input_dim: int, hidden_dim: int = 64, num_layers: int = 1, dropout: float = .2):
         super().__init__()
-        self.lstm = nn.LSTM(
-            input_size=input_dim,
-            hidden_size=hidden_dim,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout if num_layers > 1 else 0.0,
-        )
-        self.head = nn.Sequential(
-            nn.Linear(hidden_dim, 32),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(32, 1),
-        )
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True,
+                            dropout=dropout if num_layers > 1 else 0.)
+        self.head = nn.Sequential(nn.Linear(hidden_dim, 32), nn.ReLU(), nn.Dropout(dropout), nn.Linear(32, 1))
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass.
-
-        Args:
-            x: Tensor of shape (batch_size, seq_len, input_dim)
-        Returns:
-            Logits of shape (batch_size,)
-        """
-        lstm_out, _ = self.lstm(x)
-        # Take the hidden state from the last time step
-        last_hidden = lstm_out[:, -1, :]
-        logits = self.head(last_hidden)
-        return logits.squeeze(-1)
+    def forward(self, x):
+        output, _ = self.lstm(x)
+        return self.head(output[:, -1, :]).squeeze(-1)
 
 
-# ── Dataset Sequence Builder ──────────────────────────────────────────────────
-
-def build_sequences(
-    df: pd.DataFrame,
-    feature_cols: list[str],
-    seq_len: int = 14,
-    sample_stride: int = 4,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Extract rolling sequences per grid cell using fast numpy views.
-
-    Args:
-        df: DataFrame sorted by (grid_id, date)
-        feature_cols: List of sequence features
-        seq_len: Number of backward days (default 14)
-        sample_stride: Downsampling stride in days to fit memory efficiently
-
-    Returns:
-        X (n_sequences, seq_len, n_features), y (n_sequences,)
-    """
-    X_parts = []
-    y_parts = []
-
-    for _, group in df.groupby("grid_id"):
-        feat_vals = group[feature_cols].values.astype(np.float32)
-        targets = group["target"].values.astype(np.float32)
-        n = len(feat_vals)
-        if n <= seq_len:
+def build_sequences(df, feature_cols, seq_len=14, sample_stride=1, return_keys=False):
+    """Sequence at D includes D and the preceding seq_len-1 consecutive days."""
+    parts, targets, keys = [], [], []
+    for _, group in df.sort_values(["grid_id", "date"]).groupby("grid_id"):
+        if len(group) < seq_len:
             continue
-        # Past 14-day window: window ending at day i-1 for target at day i
-        windows = np.lib.stride_tricks.sliding_window_view(feat_vals, seq_len, axis=0)[:-1].transpose(0, 2, 1)
-        y_targets = targets[seq_len:]
-        if sample_stride > 1:
-            windows = windows[::sample_stride]
-            y_targets = y_targets[::sample_stride]
-        X_parts.append(windows)
-        y_parts.append(y_targets)
-
-    return np.concatenate(X_parts, axis=0), np.concatenate(y_parts, axis=0)
-
-
-def _recall_at_precision(y_true: np.ndarray, y_prob: np.ndarray, min_precision: float = 0.50) -> float:
-    """Compute maximum recall achievable at precision >= min_precision."""
-    p, r, _ = precision_recall_curve(y_true, y_prob)
-    valid_idx = np.where(p >= min_precision)[0]
-    return float(np.max(r[valid_idx])) if len(valid_idx) > 0 else 0.0
+        if not group.date.diff().dropna().eq(pd.Timedelta(days=1)).all():
+            raise ValueError("Sequential windows require consecutive dates")
+        values = feature_matrix(group, feature_cols)
+        windows = np.lib.stride_tricks.sliding_window_view(values, seq_len, axis=0).transpose(0, 2, 1)
+        parts.append(windows[::sample_stride])
+        endpoints = group.iloc[seq_len-1::sample_stride]
+        targets.append(endpoints.target.to_numpy(dtype=np.float32))
+        keys.append(endpoints[["grid_id", "date"]])
+    if not parts:
+        raise ValueError("No eligible sequences")
+    result = (np.concatenate(parts), np.concatenate(targets))
+    return (*result, pd.concat(keys, ignore_index=True)) if return_keys else result
 
 
-# ── Main Training & Benchmarking Routine ──────────────────────────────────────
-
-def train_and_evaluate_lstm(
-    seq_len: int = 14,
-    batch_size: int = 1024,
-    epochs: int = 5,
-    lr: float = 0.001,
-    seed: int = 42,
-) -> pd.DataFrame:
-    """Train PyTorch LSTM and compare against LightGBM and baselines."""
+def train_and_evaluate_lstm(seq_len=14, batch_size=1024, epochs=5, lr=.001, seed=42):
     torch.manual_seed(seed)
+    torch.set_num_threads(4)
+    torch.use_deterministic_algorithms(True)
     np.random.seed(seed)
+    random.seed(seed)
     root = get_project_root()
-    models_dir = root / "models"
-    reports_dir = root / "reports"
-    figures_dir = reports_dir / "figures"
-    figures_dir.mkdir(parents=True, exist_ok=True)
-
-    print("=" * 60)
-    print("Training PyTorch LSTM Sequential Benchmark")
-    print("=" * 60)
-
-    # Load dataset
-    ds_path = root / "data" / "processed" / "dataset.parquet"
-    if not ds_path.exists():
-        raise FileNotFoundError(f"Processed dataset not found: {ds_path}")
-
-    df = pd.read_parquet(ds_path)
-    df["date"] = pd.to_datetime(df["date"])
-
-    # Territorial filtering: align with official IBGE Mato Grosso cells
-    grid_csv = root / "data" / "processed" / "grid.csv"
-    if grid_csv.exists():
-        gdf = pd.read_csv(grid_csv)
-        valid_cells = set(gdf[gdf["state_status"] != "outside"]["grid_id"])
-        init_len = len(df)
-        df = df[df["grid_id"].isin(valid_cells)].copy()
-        print(f"[Territorial Masking] Retained {len(valid_cells)} inside/partial cells. Records: {len(df):,} (filtered {init_len - len(df):,} outside cells)")
-
-    df = df.sort_values(["grid_id", "date"]).reset_index(drop=True)
-
-    # Compute basic physical features if missing
-    if "vpd" not in df.columns:
-        t_mean = (df["T2M_MAX"] + df["T2M_MIN"]) / 2.0
-        es = 0.61078 * np.exp((17.27 * t_mean) / (t_mean + 237.3))
-        df["vpd"] = es * np.clip(1.0 - (df["RH2M"] / 100.0), 0.0, None)
-    if "dtr" not in df.columns:
-        df["dtr"] = df["T2M_MAX"] - df["T2M_MIN"]
-
-    seq_feature_cols = [
-        "T2M_MAX", "T2M_MIN", "RH2M", "PRECTOTCORR", "WS10M",
-        "fire_count", "vpd", "dtr", "lat_center", "lon_center",
-    ]
-    print(f"Sequence Features ({len(seq_feature_cols)}): {seq_feature_cols}")
-
-    # Split into train (purged at 2023-12-24 to prevent boundary leak) and test (2024-2025)
-    train_mask = df["date"] <= pd.Timestamp("2023-12-24")
-    test_mask = df["date"] >= pd.Timestamp("2024-01-01")
-
-    train_df = df[train_mask].copy()
-    test_df = df[test_mask].copy()
-
-    print(f"Train records: {len(train_df):,}, Test records: {len(test_df):,}")
-
-    # Scale features on train set
-    scaler = StandardScaler()
-    train_df[seq_feature_cols] = scaler.fit_transform(train_df[seq_feature_cols].fillna(0))
-    test_df[seq_feature_cols] = scaler.transform(test_df[seq_feature_cols].fillna(0))
-
-    print("Extracting sequential windows (T=14 days)...")
-    t0 = time.time()
-    X_train, y_train = build_sequences(train_df, seq_feature_cols, seq_len=seq_len, sample_stride=3)
-    X_test, y_test = build_sequences(test_df, seq_feature_cols, seq_len=seq_len, sample_stride=1)
-    print(f"Sequences extracted in {time.time() - t0:.1f}s:")
-    print(f"  Train: X={X_train.shape}, positive={np.mean(y_train)*100:.2f}%")
-    print(f"  Test:  X={X_test.shape}, positive={np.mean(y_test)*100:.2f}%")
-
-    # PyTorch DataLoaders
-    train_dataset = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-
-    # Calculate positive weight for class imbalance
-    n_pos = np.sum(y_train == 1)
-    n_neg = np.sum(y_train == 0)
-    pos_weight = torch.tensor([n_neg / max(1, n_pos)], dtype=torch.float32)
-
-    device = torch.device("cpu")
-    model = WildfireLSTM(input_dim=len(seq_feature_cols), hidden_dim=64, num_layers=1, dropout=0.2).to(device)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight.to(device))
+    periods = evaluation_periods()
+    execution_snapshot = capture_execution(root, ["data/processed/features.parquet", "data/processed/dataset.parquet",
+                                                 "data/processed/grid.csv", "models/training_metadata.json"])
+    models = root / "models"
+    output = root / "reports/research"
+    output.mkdir(parents=True, exist_ok=True)
+    df = pd.read_parquet(root / "data/processed/dataset.parquet")
+    grid = pd.read_csv(root / "data/processed/grid.csv")
+    df = df[df.grid_id.isin(grid.loc[grid.state_status != "outside", "grid_id"])].sort_values(["grid_id", "date"]).copy()
+    from src.features.build_features import (
+        compute_dtr,
+        compute_vpd,
+        validate_meteorological_variables,
+    )
+    df = validate_meteorological_variables(df)
+    df["vpd"] = compute_vpd(df.T2M_MAX, df.T2M_MIN, df.RH2M)
+    df["dtr"] = compute_dtr(df.T2M_MAX, df.T2M_MIN)
+    sequence_features = ["T2M_MAX", "T2M_MIN", "RH2M", "PRECTOTCORR", "WS10M", "fire_count", "vpd", "dtr", "lat_center", "lon_center"]
+    preprocessing = make_pipeline(SimpleImputer(strategy="median"), StandardScaler())
+    preprocessing.fit(df.loc[df.date.between(periods["train_start"], periods["train_end"]), sequence_features])
+    df[sequence_features] = preprocessing.transform(df[sequence_features])
+    sequences, y, keys = build_sequences(df, sequence_features, seq_len, return_keys=True)
+    train_mask = keys.date.between(periods["train_start"], periods["train_end"]).to_numpy()
+    cal_mask = keys.date.between(periods["calibration_start"], periods["calibration_end"]).to_numpy()
+    test_mask = keys.date.between(periods["test_start"], periods["test_end"]).to_numpy()
+    print("Matched counts:", train_mask.sum(), cal_mask.sum(), test_mask.sum(), flush=True)
+    model = WildfireLSTM(len(sequence_features))
+    loader = DataLoader(TensorDataset(torch.from_numpy(sequences[train_mask]), torch.from_numpy(y[train_mask])),
+                        batch_size=batch_size, shuffle=True, generator=torch.Generator().manual_seed(seed))
+    y_train = y[train_mask]
+    criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([(y_train == 0).sum() / max(1, y_train.sum())], dtype=torch.float32))
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
-
-    print(f"\nTraining LSTM model on {device} ({epochs} epochs)...")
-    train_start = time.time()
-    model.train()
-    for epoch in range(1, epochs + 1):
-        total_loss = 0.0
-        for batch_x, batch_y in train_loader:
-            batch_x, batch_y = batch_x.to(device), batch_y.to(device)
+    started = time.perf_counter()
+    for epoch in range(epochs):
+        model.train()
+        losses = []
+        for x_batch, y_batch in loader:
             optimizer.zero_grad()
-            logits = model(batch_x)
-            loss = criterion(logits, batch_y)
+            loss = criterion(model(x_batch), y_batch)
             loss.backward()
-            nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+            nn.utils.clip_grad_norm_(model.parameters(), 5.)
             optimizer.step()
-            total_loss += loss.item() * len(batch_y)
-        avg_loss = total_loss / len(train_dataset)
-        if epoch % 2 == 0 or epoch == epochs:
-            print(f"  Epoch [{epoch:02d}/{epochs:02d}] Loss: {avg_loss:.4f}")
-
-    lstm_train_time = time.time() - train_start
-    print(f"LSTM training completed in {lstm_train_time:.1f}s")
-
-    # Inference on Test Set (evaluated in memory-efficient batches across all test samples)
+            losses.append(float(loss.detach()))
+        print(f"Epoch {epoch + 1}/{epochs}: loss={np.mean(losses):.5f}", flush=True)
+    training_seconds = time.perf_counter() - started
     model.eval()
-    t_inf_start = time.time()
-    test_dataset = TensorDataset(torch.from_numpy(X_test))
-    test_eval_loader = DataLoader(test_dataset, batch_size=4096, shuffle=False)
-    probs_list = []
-    with torch.no_grad():
-        for (bx,) in test_eval_loader:
-            logits = model(bx.to(device))
-            probs_list.append(torch.sigmoid(logits).cpu().numpy())
-    lstm_probs = np.concatenate(probs_list)
-    lstm_inf_time = (time.time() - t_inf_start) / len(X_test) * 1000.0  # ms per sample
 
-    # Compute metrics for LSTM
-    lstm_pr_auc = float(average_precision_score(y_test, lstm_probs))
-    lstm_roc_auc = float(roc_auc_score(y_test, lstm_probs))
-    lstm_brier = float(brier_score_loss(y_test, lstm_probs))
-    lstm_ece = float(compute_ece(y_test, lstm_probs, 10))
-    lstm_rec_p50 = float(_recall_at_precision(y_test, lstm_probs, 0.50))
+    def infer(mask):
+        probabilities = []
+        with torch.no_grad():
+            for (batch,) in DataLoader(TensorDataset(torch.from_numpy(sequences[mask])), batch_size=4096):
+                probabilities.append(torch.sigmoid(model(batch)).numpy())
+        return np.concatenate(probabilities)
 
-    print("\nLSTM Test Metrics:")
-    print(f"  PR-AUC:     {lstm_pr_auc:.4f}")
-    print(f"  ROC-AUC:    {lstm_roc_auc:.4f}")
-    print(f"  Brier:      {lstm_brier:.4f}")
-    print(f"  ECE:        {lstm_ece:.4f}")
-    print(f"  Recall@P50: {lstm_rec_p50*100:.2f}%")
-    print(f"  Latency:    {lstm_inf_time:.3f} ms/sample")
+    calibration_raw = infer(cal_mask)
+    start = time.perf_counter()
+    raw = infer(test_mask)
+    inference_seconds = time.perf_counter() - start
+    calibration = PlattCalibrator().fit(calibration_raw, y[cal_mask], is_logit=False)
+    calibrated = calibration.calibrate(raw)
+    torch.save(model.state_dict(), models / "lstm_model.pt")
+    joblib.dump(preprocessing, models / "lstm_preprocessing.joblib")
+    joblib.dump(calibration, models / "lstm_calibrator.joblib")
 
-    # Save LSTM model
-    torch.save(model.state_dict(), models_dir / "lstm_model.pt")
-
-    # Load LightGBM benchmarks for direct comparison
-    comp_path = reports_dir / "model_comparison.csv"
-    if comp_path.exists():
-        comp_df = pd.read_csv(comp_path)
-    else:
-        comp_df = pd.DataFrame()
-
-    lstm_row = {
-        "model": "LSTM (PyTorch Recurrent)",
-        "PR-AUC": round(lstm_pr_auc, 4),
-        "ROC-AUC": round(lstm_roc_auc, 4),
-        "Brier": round(lstm_brier, 4),
-        "ECE": round(lstm_ece, 4),
-        "Recall@P50": round(lstm_rec_p50, 4),
-    }
-
-    # Combine into comparison table
-    benchmark_df = pd.concat([comp_df, pd.DataFrame([lstm_row])], ignore_index=True)
-    benchmark_df.to_csv(reports_dir / "lstm_comparison.csv", index=False)
-
-    # Plot PR & ROC Comparison curves
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
-
-    # PR curve
-    p_lstm, r_lstm, _ = precision_recall_curve(y_test, lstm_probs)
-    ax1.plot(r_lstm, p_lstm, label=f"LSTM (PR-AUC={lstm_pr_auc:.3f})", color="#8e44ad", lw=2)
-    ax1.axhline(np.mean(y_test), color="gray", linestyle="--", label=f"Base Rate ({np.mean(y_test)*100:.1f}%)")
-    ax1.set_xlabel("Recall")
-    ax1.set_ylabel("Precision")
-    ax1.set_title("Precision-Recall Curve Comparison")
-    ax1.legend(loc="upper right")
-    ax1.grid(True, alpha=0.3)
-
-    # Summary Bar
-    sns_models = benchmark_df["model"].values
-    sns_prauc = benchmark_df["PR-AUC"].values
-    colors = ["#95a5a6", "#7f8c8d", "#34495e", "#3498db", "#2ecc71", "#8e44ad"]
-    ax2.bar(sns_models, sns_prauc, color=colors[: len(sns_models)])
-    ax2.set_ylabel("PR-AUC (Higher is Better)")
-    ax2.set_title("PR-AUC Benchmark: Tabular GBDT vs Sequential LSTM")
-    ax2.tick_params(axis="x", rotation=35)
-    for i, v in enumerate(sns_prauc):
-        ax2.text(i, v * 0.9, f"{v:.3f}", ha="center", color="white", fontweight="bold")
-    ax2.grid(True, alpha=0.3, axis="y")
-
-    plt.tight_layout()
-    plt.savefig(figures_dir / "lstm_vs_lgbm.png", dpi=150)
-    plt.close()
-
-    print(f"\nSaved LSTM comparison figure: {figures_dir / 'lstm_vs_lgbm.png'}")
-    print(f"Saved benchmark metrics: {reports_dir / 'lstm_comparison.csv'}")
-    return benchmark_df
+    # Refit a tabular control on exactly the sequence-eligible training rows.
+    features = pd.read_parquet(root / "data/processed/features.parquet")
+    matched = keys.merge(features, on=["grid_id", "date"], how="left", validate="one_to_one")
+    np.testing.assert_array_equal(matched.target.to_numpy(), y)
+    columns = joblib.load(models / "feature_cols.joblib")
+    metadata = json.loads((models / "training_metadata.json").read_text())
+    params = {**metadata["best_params"], "verbosity": -1, "n_jobs": 4, "random_state": seed,
+              "deterministic": True, "force_col_wise": True,
+              "scale_pos_weight": float((y_train == 0).sum() / max(1, y_train.sum()))}
+    start = time.perf_counter()
+    tree = lgb.LGBMClassifier(**params).fit(feature_matrix(matched.loc[train_mask], columns), y_train)
+    tree_training = time.perf_counter() - start
+    tree_cal = PlattCalibrator().fit(tree.predict_proba(feature_matrix(matched.loc[cal_mask], columns))[:, 1], y[cal_mask], is_logit=False)
+    start = time.perf_counter()
+    tree_raw = tree.predict_proba(feature_matrix(matched.loc[test_mask], columns))[:, 1]
+    tree_inference = time.perf_counter() - start
+    tree_calibrated = tree_cal.calibrate(tree_raw)
+    test_frame = matched.loc[test_mask]
+    rows = [metric_row(test_frame, p, name) for name, p in [("LSTM raw", raw), ("LSTM Platt", calibrated),
+                                                                         ("Matched LightGBM raw", tree_raw), ("Matched LightGBM Platt", tree_calibrated)]]
+    comparison = pd.DataFrame(rows)
+    comparison.to_csv(output / "matched_lstm.csv", index=False)
+    comparison.to_csv(root / "reports/lstm_comparison.csv", index=False)
+    paired = paired_ap_difference(test_frame.date, y[test_mask], tree_calibrated, calibrated)
+    meta = {"execution_snapshot": execution_snapshot, "seq_len": seq_len, "feature_cols": sequence_features, "epochs_fixed_before_test": epochs,
+            "seed": seed, "training_rows": int(train_mask.sum()), "calibration_rows": int(cal_mask.sum()),
+            "test_rows": int(test_mask.sum()), "same_labels_and_keys_verified": True,
+            "training_stride": 1, "test_stride": 1, "lstm_parameters": sum(p.numel() for p in model.parameters()),
+            "lstm_training_seconds": training_seconds, "lgb_training_seconds": tree_training,
+            "lstm_inference_seconds": inference_seconds, "lgb_inference_seconds": tree_inference,
+            "lstm_ms_per_row_batch4096": inference_seconds / test_mask.sum() * 1000,
+            "lgb_ms_per_row_full_batch": tree_inference / test_mask.sum() * 1000,
+            "sequence_array_bytes": sequences.nbytes, "comparison_note": "Same eligible training/calibration/test keys, different raw sequence versus engineered representations. Hyperparameters inherited from main training-only CV, not chosen using test.",
+            "paired_AP_difference": paired}
+    (output / "matched_lstm_metadata.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    keys.loc[test_mask].to_parquet(output / "matched_lstm_test_keys.parquet", index=False)
+    print(comparison.to_string(index=False), flush=True)
+    return comparison
 
 
 if __name__ == "__main__":
     train_and_evaluate_lstm()
-

@@ -1,0 +1,116 @@
+{
+  "report_type": "historical_drift_analysis",
+  "description": "Retrospective distribution drift comparing historical training baseline (2016-2023) against out-of-time test period (2024-2025). Operational streaming drift monitoring operates on near-real-time telemetry sliding windows and is marked standby while operational ingestion is disconnected.",
+  "monitoring_mode": "retrospective_evaluation",
+  "baseline_period": "<= 2023",
+  "current_period": ">= 2024",
+  "baseline_samples": 1478532,
+  "current_samples": 366344,
+  "summary": {
+    "total_monitored": 11,
+    "stable_count": 9,
+    "moderate_drift_count": 2,
+    "critical_drift_count": 0
+  },
+  "features": [
+    {
+      "feature": "T2M_MAX",
+      "PSI": 0.1503,
+      "KS_statistic": 0.1618,
+      "KS_pvalue": 0.0,
+      "status": "MODERATE_DRIFT",
+      "baseline_mean": 31.996,
+      "current_mean": 33.401
+    },
+    {
+      "feature": "T2M_MIN",
+      "PSI": 0.0836,
+      "KS_statistic": 0.1292,
+      "KS_pvalue": 0.0,
+      "status": "STABLE",
+      "baseline_mean": 21.783,
+      "current_mean": 22.33
+    },
+    {
+      "feature": "RH2M",
+      "PSI": 0.0933,
+      "KS_statistic": 0.1108,
+      "KS_pvalue": 0.0,
+      "status": "STABLE",
+      "baseline_mean": 69.337,
+      "current_mean": 63.569
+    },
+    {
+      "feature": "PRECTOTCORR",
+      "PSI": 0.0088,
+      "KS_statistic": 0.0357,
+      "KS_pvalue": 0.0,
+      "status": "STABLE",
+      "baseline_mean": 3.647,
+      "current_mean": 3.112
+    },
+    {
+      "feature": "WS10M",
+      "PSI": 0.0075,
+      "KS_statistic": 0.0289,
+      "KS_pvalue": 3.9431975379094955e-214,
+      "status": "STABLE",
+      "baseline_mean": 1.597,
+      "current_mean": 1.622
+    },
+    {
+      "feature": "vpd",
+      "PSI": 0.1067,
+      "KS_statistic": 0.1238,
+      "KS_pvalue": 0.0,
+      "status": "MODERATE_DRIFT",
+      "baseline_mean": 1.173,
+      "current_mean": 1.457
+    },
+    {
+      "feature": "dtr",
+      "PSI": 0.0497,
+      "KS_statistic": 0.0943,
+      "KS_pvalue": 0.0,
+      "status": "STABLE",
+      "baseline_mean": 10.212,
+      "current_mean": 11.071
+    },
+    {
+      "feature": "fwi_proxy",
+      "PSI": 0.0735,
+      "KS_statistic": 0.0944,
+      "KS_pvalue": 0.0,
+      "status": "STABLE",
+      "baseline_mean": 0.822,
+      "current_mean": 1.003
+    },
+    {
+      "feature": "fire_count_30d",
+      "PSI": 0.007,
+      "KS_statistic": 0.0362,
+      "KS_pvalue": 0.0,
+      "status": "STABLE",
+      "baseline_mean": 4.625,
+      "current_mean": 5.072
+    },
+    {
+      "feature": "neighbor_fire_7d",
+      "PSI": 0.0109,
+      "KS_statistic": 0.0431,
+      "KS_pvalue": 0.0,
+      "status": "STABLE",
+      "baseline_mean": 8.541,
+      "current_mean": 9.289
+    },
+    {
+      "feature": "dry_days",
+      "PSI": 0.0081,
+      "KS_statistic": 0.0287,
+      "KS_pvalue": 4.9467398616554296e-210,
+      "status": "STABLE",
+      "baseline_mean": 10.026,
+      "current_mean": 13.0
+    }
+  ]
+}

@@ -1,0 +1,534 @@
+[
+  {
+    "method": "GET",
+    "endpoint": "/",
+    "status": 200,
+    "response": {
+      "message": "Brazil Wildfire Risk Forecast: historical replay",
+      "docs": "/docs",
+      "health": "/health",
+      "predict": "/predict",
+      "explain": "/explain",
+      "drift": "/drift"
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/health",
+    "status": 200,
+    "response": {
+      "status": "ok",
+      "model_loaded": true,
+      "available_horizons": [
+        1,
+        3,
+        7
+      ],
+      "supported_inference_modes": {
+        "historical_replay": "Exact cell/date lookup; publication time unknown",
+        "operational_forecast": "Unavailable; not implemented"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/drift",
+    "status": 200,
+    "response": {
+      "total_monitored": 11,
+      "stable_count": 9,
+      "moderate_drift_count": 2,
+      "critical_drift_count": 0
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/predict",
+    "request": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 1
+    },
+    "status": 200,
+    "response": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 1,
+      "probability": 0.06147677370903422,
+      "risk_level": "low",
+      "grid_id": "011_013",
+      "issue_date": "2024-08-15",
+      "observation_cutoff": "2024-08-15",
+      "target_start": "2024-08-16",
+      "target_end": "2024-08-16",
+      "data_timestamp": null,
+      "availability_timestamp": null,
+      "processed_at": "2026-10-26T23:52:40.434876+00:00",
+      "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+      "archive_scope": "full_local_archive",
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "inference_mode": "historical_replay"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/explain",
+    "request": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 1
+    },
+    "status": 200,
+    "response": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 1,
+      "probability": 0.06147677370903422,
+      "risk_level": "low",
+      "grid_id": "011_013",
+      "issue_date": "2024-08-15",
+      "observation_cutoff": "2024-08-15",
+      "target_start": "2024-08-16",
+      "target_end": "2024-08-16",
+      "data_timestamp": null,
+      "availability_timestamp": null,
+      "processed_at": "2026-10-26T23:52:40.440880+00:00",
+      "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+      "archive_scope": "full_local_archive",
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "inference_mode": "historical_replay",
+      "shap_values": {
+        "PRECTOTCORR": 0.25659264565157386,
+        "PRECTOTCORR_mean_14d": -0.019738436770285302,
+        "PRECTOTCORR_mean_7d": 0.001817511349281012,
+        "RH2M": -0.007314586456228349,
+        "RH2M_mean_14d": -0.013495557366090396,
+        "RH2M_mean_7d": 0.0029013687496258467,
+        "T2M_MAX": 0.005446621554062662,
+        "T2M_MAX_mean_14d": 0.0007712426979087844,
+        "T2M_MAX_mean_7d": 0.0023007148833760656,
+        "T2M_MIN": -0.0021762066638367043,
+        "T2M_MIN_mean_14d": -0.013515132524119781,
+        "T2M_MIN_mean_7d": 0.02671826956129058,
+        "WS10M": 0.011745512048899044,
+        "WS10M_mean_14d": 0.034773611274145334,
+        "WS10M_mean_7d": 0.025914009973858346,
+        "doy_cos": -0.043015011524701885,
+        "doy_sin": 0.025280438862521307,
+        "dry_days": 0.05048759116907802,
+        "dtr": 0.047042357592915085,
+        "dtr_mean_14d": 0.00902510244122545,
+        "dtr_mean_7d": 0.00018249312283499146,
+        "fire_count_14d": 0.08996031778096174,
+        "fire_count_30d": 0.01854591848027062,
+        "fire_count_7d": 0.06670472077477244,
+        "fire_count_lastyear": -0.170939260277222,
+        "fwi_proxy": -0.0012160534921558937,
+        "fwi_proxy_mean_14d": 0.012248606023689112,
+        "fwi_proxy_mean_7d": 0.0037683618271702126,
+        "lat_center": 0.13811716552760603,
+        "lon_center": 0.07319696731201067,
+        "month_cos": -0.01884013263679033,
+        "month_sin": -0.012975655585317124,
+        "neighbor_fire_7d": 0.16954773511024912,
+        "precip_sum_14d": -0.00727450631890521,
+        "precip_sum_30d": -0.01313758593671322,
+        "precip_sum_7d": -0.0010538947657797897,
+        "vpd": 0.008298055941765692,
+        "vpd_mean_14d": -0.00628718210480387,
+        "vpd_mean_7d": 0.005225307036689904
+      },
+      "top_positive": [
+        {
+          "feature": "PRECTOTCORR",
+          "shap": 0.25659264565157386
+        },
+        {
+          "feature": "neighbor_fire_7d",
+          "shap": 0.16954773511024912
+        },
+        {
+          "feature": "lat_center",
+          "shap": 0.13811716552760603
+        },
+        {
+          "feature": "fire_count_14d",
+          "shap": 0.08996031778096174
+        },
+        {
+          "feature": "lon_center",
+          "shap": 0.07319696731201067
+        }
+      ],
+      "top_negative": [
+        {
+          "feature": "fire_count_lastyear",
+          "shap": -0.170939260277222
+        },
+        {
+          "feature": "doy_cos",
+          "shap": -0.043015011524701885
+        },
+        {
+          "feature": "PRECTOTCORR_mean_14d",
+          "shap": -0.019738436770285302
+        },
+        {
+          "feature": "month_cos",
+          "shap": -0.01884013263679033
+        },
+        {
+          "feature": "T2M_MIN_mean_14d",
+          "shap": -0.013515132524119781
+        }
+      ],
+      "baseline_log_odds": -0.8841141580562293,
+      "raw_log_odds": -0.1284807137313969,
+      "explanation_scale": "raw_model_log_odds_before_calibration"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/predict",
+    "request": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 3
+    },
+    "status": 200,
+    "response": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 3,
+      "probability": 0.16576281806852294,
+      "risk_level": "low",
+      "grid_id": "011_013",
+      "issue_date": "2024-08-15",
+      "observation_cutoff": "2024-08-15",
+      "target_start": "2024-08-16",
+      "target_end": "2024-08-18",
+      "data_timestamp": null,
+      "availability_timestamp": null,
+      "processed_at": "2026-10-26T23:52:40.448888+00:00",
+      "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+      "archive_scope": "full_local_archive",
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "inference_mode": "historical_replay"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/explain",
+    "request": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 3
+    },
+    "status": 200,
+    "response": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 3,
+      "probability": 0.16576281806852294,
+      "risk_level": "low",
+      "grid_id": "011_013",
+      "issue_date": "2024-08-15",
+      "observation_cutoff": "2024-08-15",
+      "target_start": "2024-08-16",
+      "target_end": "2024-08-18",
+      "data_timestamp": null,
+      "availability_timestamp": null,
+      "processed_at": "2026-10-26T23:52:40.450872+00:00",
+      "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+      "archive_scope": "full_local_archive",
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "inference_mode": "historical_replay",
+      "shap_values": {
+        "PRECTOTCORR": 0.160637682402511,
+        "PRECTOTCORR_mean_14d": 0.009621479630974985,
+        "PRECTOTCORR_mean_7d": 0.0005999364736812701,
+        "RH2M": 0.004495466799743261,
+        "RH2M_mean_14d": -0.0029861571790247136,
+        "RH2M_mean_7d": -5.929529426266776e-05,
+        "T2M_MAX": -0.002589609663007467,
+        "T2M_MAX_mean_14d": -0.0013046121255033986,
+        "T2M_MAX_mean_7d": 0.006109028114505462,
+        "T2M_MIN": 0.0059556274122390725,
+        "T2M_MIN_mean_14d": -0.033900491070172054,
+        "T2M_MIN_mean_7d": 0.026383815173093485,
+        "WS10M": 0.0077451846989914095,
+        "WS10M_mean_14d": 0.046444742450494673,
+        "WS10M_mean_7d": 0.022783535374677394,
+        "doy_cos": -0.0021627768528151626,
+        "doy_sin": 0.02705170276627643,
+        "dry_days": 0.022967076685303008,
+        "dtr": 0.024477846989296975,
+        "dtr_mean_14d": 0.006468280062272307,
+        "dtr_mean_7d": 0.0039157814606424314,
+        "fire_count_14d": 0.0741139400732366,
+        "fire_count_30d": 0.004884062914765448,
+        "fire_count_7d": 0.04998669193809045,
+        "fire_count_lastyear": -0.18654545251529006,
+        "fwi_proxy": 0.004085505273422842,
+        "fwi_proxy_mean_14d": 0.028684436367770363,
+        "fwi_proxy_mean_7d": -0.008642122362803116,
+        "lat_center": 0.15415062314372874,
+        "lon_center": 0.07907316519423248,
+        "month_cos": -0.02575601735615166,
+        "month_sin": -0.014189832916855008,
+        "neighbor_fire_7d": 0.18844623702895308,
+        "precip_sum_14d": -0.001786720497820012,
+        "precip_sum_30d": -0.008394224748351995,
+        "precip_sum_7d": 5.248228173065606e-05,
+        "vpd": 0.0008293488308744931,
+        "vpd_mean_14d": -0.005153657845752786,
+        "vpd_mean_7d": 0.0011832033659573244
+      },
+      "top_positive": [
+        {
+          "feature": "neighbor_fire_7d",
+          "shap": 0.18844623702895308
+        },
+        {
+          "feature": "PRECTOTCORR",
+          "shap": 0.160637682402511
+        },
+        {
+          "feature": "lat_center",
+          "shap": 0.15415062314372874
+        },
+        {
+          "feature": "lon_center",
+          "shap": 0.07907316519423248
+        },
+        {
+          "feature": "fire_count_14d",
+          "shap": 0.0741139400732366
+        }
+      ],
+      "top_negative": [
+        {
+          "feature": "fire_count_lastyear",
+          "shap": -0.18654545251529006
+        },
+        {
+          "feature": "T2M_MIN_mean_14d",
+          "shap": -0.033900491070172054
+        },
+        {
+          "feature": "month_cos",
+          "shap": -0.02575601735615166
+        },
+        {
+          "feature": "month_sin",
+          "shap": -0.014189832916855008
+        },
+        {
+          "feature": "fwi_proxy_mean_7d",
+          "shap": -0.008642122362803116
+        }
+      ],
+      "baseline_log_odds": -0.6555589302472631,
+      "raw_log_odds": 0.012116982232390987,
+      "explanation_scale": "raw_model_log_odds_before_calibration"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/predict",
+    "request": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 7
+    },
+    "status": 200,
+    "response": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 7,
+      "probability": 0.33802109596549995,
+      "risk_level": "medium",
+      "grid_id": "011_013",
+      "issue_date": "2024-08-15",
+      "observation_cutoff": "2024-08-15",
+      "target_start": "2024-08-16",
+      "target_end": "2024-08-22",
+      "data_timestamp": null,
+      "availability_timestamp": null,
+      "processed_at": "2026-10-26T23:52:40.457877+00:00",
+      "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+      "archive_scope": "full_local_archive",
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "inference_mode": "historical_replay"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/explain",
+    "request": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 7
+    },
+    "status": 200,
+    "response": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2024-08-15",
+      "horizon_days": 7,
+      "probability": 0.33802109596549995,
+      "risk_level": "medium",
+      "grid_id": "011_013",
+      "issue_date": "2024-08-15",
+      "observation_cutoff": "2024-08-15",
+      "target_start": "2024-08-16",
+      "target_end": "2024-08-22",
+      "data_timestamp": null,
+      "availability_timestamp": null,
+      "processed_at": "2026-10-26T23:52:40.471268+00:00",
+      "data_source": "INPE BDQueimadas + NASA POWER; processed/features.parquet",
+      "archive_scope": "full_local_archive",
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "inference_mode": "historical_replay",
+      "shap_values": {
+        "PRECTOTCORR": 0.09578329309552597,
+        "PRECTOTCORR_mean_14d": 0.005971805426680569,
+        "PRECTOTCORR_mean_7d": 0.0005324731122718313,
+        "RH2M": 0.004897770266340829,
+        "RH2M_mean_14d": -0.007369425081970905,
+        "RH2M_mean_7d": -0.001020611291187066,
+        "T2M_MAX": -0.0030519218394708244,
+        "T2M_MAX_mean_14d": -0.0014939368495001106,
+        "T2M_MAX_mean_7d": -0.0015122269013486498,
+        "T2M_MIN": 0.00503024563993761,
+        "T2M_MIN_mean_14d": -0.0684218597398185,
+        "T2M_MIN_mean_7d": 0.019924814606158147,
+        "WS10M": 0.008172551369455603,
+        "WS10M_mean_14d": 0.06620452375667443,
+        "WS10M_mean_7d": 0.02595776358971018,
+        "doy_cos": 0.014131882858716164,
+        "doy_sin": 0.03777191469844935,
+        "dry_days": 0.008356173933632171,
+        "dtr": 0.010784420928669576,
+        "dtr_mean_14d": 0.011856405019676263,
+        "dtr_mean_7d": 0.0011185476316284335,
+        "fire_count_14d": 0.06442018421953108,
+        "fire_count_30d": 0.024657519991484054,
+        "fire_count_7d": 0.06026784591479221,
+        "fire_count_lastyear": -0.21053913335660857,
+        "fwi_proxy": 0.006717309438782511,
+        "fwi_proxy_mean_14d": 0.017788721114378705,
+        "fwi_proxy_mean_7d": 0.006395959869667934,
+        "lat_center": 0.1708675678173879,
+        "lon_center": 0.1004907169829786,
+        "month_cos": 0.015232127219006852,
+        "month_sin": -0.004556638281733359,
+        "neighbor_fire_7d": 0.18855388750045507,
+        "precip_sum_14d": 0.002512744082823577,
+        "precip_sum_30d": 0.006488385391422038,
+        "precip_sum_7d": -0.0005710161296214058,
+        "vpd": 0.002059764762573296,
+        "vpd_mean_14d": -0.0022163228530917506,
+        "vpd_mean_7d": 0.0018358152301632485
+      },
+      "top_positive": [
+        {
+          "feature": "neighbor_fire_7d",
+          "shap": 0.18855388750045507
+        },
+        {
+          "feature": "lat_center",
+          "shap": 0.1708675678173879
+        },
+        {
+          "feature": "lon_center",
+          "shap": 0.1004907169829786
+        },
+        {
+          "feature": "PRECTOTCORR",
+          "shap": 0.09578329309552597
+        },
+        {
+          "feature": "WS10M_mean_14d",
+          "shap": 0.06620452375667443
+        }
+      ],
+      "top_negative": [
+        {
+          "feature": "fire_count_lastyear",
+          "shap": -0.21053913335660857
+        },
+        {
+          "feature": "T2M_MIN_mean_14d",
+          "shap": -0.0684218597398185
+        },
+        {
+          "feature": "RH2M_mean_14d",
+          "shap": -0.007369425081970905
+        },
+        {
+          "feature": "month_sin",
+          "shap": -0.004556638281733359
+        },
+        {
+          "feature": "T2M_MAX",
+          "shap": -0.0030519218394708244
+        }
+      ],
+      "baseline_log_odds": -0.43565891411597735,
+      "raw_log_odds": 0.24837112902864616,
+      "explanation_scale": "raw_model_log_odds_before_calibration"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/predict",
+    "request": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2026-08-15"
+    },
+    "status": 404,
+    "response": {
+      "detail": "Exact historical record not found: 011_013 on 2026-08-15"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/predict",
+    "request": {
+      "latitude": -22,
+      "longitude": -40,
+      "date": "2024-08-15"
+    },
+    "status": 422,
+    "response": {
+      "detail": "Coordinates outside pilot coverage (Mato Grosso)"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/predict",
+    "request": {
+      "latitude": -12.5,
+      "longitude": -55.0,
+      "date": "2026-08-15",
+      "inference_mode": "operational_forecast"
+    },
+    "status": 503,
+    "response": {
+      "detail": "Operational forecast mode is unavailable: live acquisition and historical publication-time validation are not implemented."
+    }
+  }
+]

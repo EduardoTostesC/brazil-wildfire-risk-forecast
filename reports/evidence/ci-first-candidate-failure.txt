@@ -1,0 +1,9 @@
+Source: https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40021059899
+Job: test (3.11), ID 120645424653. Verbatim log excerpts; the full log remains linked above.
+2026-10-23T20:43:10.9241161Z tests/test_api_contract.py::test_model_bundle_hashes_match FAILED        [ 25%]
+2026-10-23T20:43:11.7883600Z ________________________ test_model_bundle_hashes_match ________________________
+2026-10-23T20:43:11.7885009Z     def test_model_bundle_hashes_match():
+2026-10-23T20:43:11.7894163Z E         {'training_metadata.json': {'sha256': '8a98d5f9bff89ef2e785976deab48759f9450544b03370de5d5ad5c1a94dc637', 'size_bytes': 36206}} != {'training_metadata.json': {'sha256': '7e594cf3ac07fb06ec3dc0cf6e381c83e3dc3a125a83f3b413e0a3cb066aa930', 'size_bytes': 34870}}
+2026-10-23T20:43:11.7973486Z FAILED tests/test_api_contract.py::test_model_bundle_hashes_match - AssertionError: assert {'feature_col... 997004}, ...} == {'feature_col... 997004}, ...}
+2026-10-23T20:43:11.7975748Z   {'training_metadata.json': {'sha256': '8a98d5f9bff89ef2e785976deab48759f9450544b03370de5d5ad5c1a94dc637', 'size_bytes': 36206}} != {'training_metadata.json': {'sha256': '7e594cf3ac07fb06ec3dc0cf6e381c83e3dc3a125a83f3b413e0a3cb066aa930', 'size_bytes': 34870}}
+2026-10-23T20:43:11.7999142Z ========================= 1 failed, 86 passed in 5.72s =========================

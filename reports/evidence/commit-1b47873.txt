@@ -1,0 +1,571 @@
+commit 1b47873d84894a052712bbdcc5d2616be927cc10
+Author:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+AuthorDate: Wed Oct 21 19:49:01 2026 -0300
+Commit:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+CommitDate: Wed Oct 21 19:49:01 2026 -0300
+
+    docs(release): implement Block E communication layer (scientific technical report, release notes v1.0.0, and documentation links)
+
+diff --git a/README.md b/README.md
+index 3872008..72291b5 100644
+--- a/README.md
++++ b/README.md
+@@ -14,7 +14,7 @@
+ 
+ ---
+ 
+-[🇧🇷 Versão em Português](README.pt-BR.md)
++[🇧🇷 Versão em Português](README.pt-BR.md) · [📄 Technical Whitepaper (Paper)](reports/technical_report.md) · [📦 Release Notes v1.0.0](RELEASE_NOTES.md)
+ 
+ ---
+ 
+@@ -30,9 +30,11 @@
+ - [Error Analysis](#-error-analysis)
+ - [Demo: API & Streamlit Dashboard](#-demo-api--streamlit-dashboard)
+ - [Tech Stack & Architecture Decisions](#-tech-stack--architecture-decisions)
++- [MLOps, Pipeline Orchestration & Monitoring](#-mlops-pipeline-orchestration--monitoring-block-c)
+ - [Repository Structure](#-repository-structure)
+ - [Installation & How to Run](#-installation--how-to-run)
+ - [Free Cloud Deployment](#-free-cloud-deployment)
++- [Technical Whitepaper & Release Notes](#-technical-whitepaper--release-notes)
+ - [Known Limitations & Biases](#-known-limitations--biases)
+ - [Responsible AI & Disclaimer](#-responsible-ai--disclaimer)
+ - [Next Steps & Key Learnings](#-next-steps--key-learnings)
+@@ -632,6 +634,15 @@ docker run -p 8000:8000 wildfire-risk-api
+ 
+ ---
+ 
++## 📄 Technical Whitepaper & Release Notes
++
++- **Full Scientific Whitepaper**: [`reports/technical_report.md`](reports/technical_report.md)  
++  *Operational Wildfire Risk Forecasting in the Brazilian Cerrado-Amazon Ecotone: A Calibrated Machine Learning Pipeline with Strict Temporal and Spatial Validation*. Complete paper containing full problem formulations, spatial block validation, biophysical index derivations (VPD, DTR, FWI), negative deep learning results analysis (LightGBM vs PyTorch LSTM), and 1,000-sample bootstrap significance tests ($p < 0.001$).
++- **Version 1.0.0 Release Notes**: [`RELEASE_NOTES.md`](RELEASE_NOTES.md)  
++  Comprehensive release changelog, verified benchmark summaries, and quickstart instructions.
++
++---
++
+ ## ⚠️ Known Limitations & Biases
+ 
+ 1. **Cloud Occlusion**: Optical and thermal satellite sensors (MODIS) cannot see through dense cloud decks. On overcast or stormy days, active fires may go undetected.
+diff --git a/README.pt-BR.md b/README.pt-BR.md
+index bf957f2..18db00e 100644
+--- a/README.pt-BR.md
++++ b/README.pt-BR.md
+@@ -14,7 +14,7 @@
+ 
+ ---
+ 
+-[🇺🇸 Switch to English Version](README.md)
++[🇺🇸 Switch to English Version](README.md) · [📄 Artigo Técnico Completo (Whitepaper)](reports/technical_report.md) · [📦 Notas de Lançamento v1.0.0](RELEASE_NOTES.md)
+ 
+ ---
+ 
+@@ -30,9 +30,11 @@
+ - [Análise de Erros](#-análise-de-erros)
+ - [Demonstração: API e Streamlit App](#-demonstração-api-e-streamlit-app)
+ - [Stack Tecnológica e Justificativas](#-stack-tecnológica-e-justificativas)
++- [MLOps, Orquestração de Pipeline e Monitoramento](#-mlops-orquestração-de-pipeline-e-monitoramento-bloco-c)
+ - [Estrutura do Repositório](#-estrutura-do-repositório)
+ - [Como Instalar e Executar](#-como-instalar-e-executar)
+ - [Deploy em Nuvem Gratuita](#-deploy-em-nuvem-gratuita)
++- [Artigo Técnico & Notas de Lançamento](#-artigo-técnico--notas-de-lançamento)
+ - [Limitações e Vieses Conhecidos](#-limitações-e-vieses-conhecidos)
+ - [Uso Responsável](#-uso-responsável)
+ - [Próximos Passos e Aprendizados](#-próximos-passos-e-aprendizados)
+@@ -626,6 +628,15 @@ curl -X POST http://localhost:8000/explain \
+ 
+ ---
+ 
++## 📄 Artigo Técnico & Notas de Lançamento
++
++- **Artigo Técnico Completo (Whitepaper)**: [`reports/technical_report.md`](reports/technical_report.md)  
++  *Previsão Operacional de Risco de Queimadas no Ecotono Cerrado-Amazônia: Um Pipeline Calibrado de Machine Learning com Validação Espaço-Temporal Estrita*. Artigo completo em formato de paper científico contendo formulações matemáticas, validação em blocos espaciais, análise de resultados negativos (LightGBM vs PyTorch LSTM) e testes de significância por bootstrap com 1.000 reamostragens ($p < 0,001$).
++- **Notas de Lançamento v1.0.0**: [`RELEASE_NOTES.md`](RELEASE_NOTES.md)  
++  Changelog detalhado da versão, resumo dos benchmarks reais e instruções de início rápido.
++
++---
++
+ ## ⚠️ Limitações e Vieses Conhecidos
+ 
+ 1. **Cobertura de Nuvens**: Sensores ópticos e termais orbitais (como o MODIS) não conseguem penetrar nuvens espessas. Durante dias chuvosos ou tempestades, focos de fogo reais podem não ser detectados.
+diff --git a/RELEASE_NOTES.md b/RELEASE_NOTES.md
+new file mode 100644
+index 0000000..8a0ec80
+--- /dev/null
++++ b/RELEASE_NOTES.md
+@@ -0,0 +1,101 @@
++# Release Notes — v1.0.0
++
++**Brazil Wildfire Risk Forecast (Mato Grosso)**  
++*Production Machine Learning Pipeline for Calibrated Spatiotemporal Fire Hazard Early Warning*  
++**Release Date:** October 2026  
++**Author:** Eduardo Tostes ([github.com/EduardoTostesC](https://github.com/EduardoTostesC))  
++**Repository:** [EduardoTostesC/brazil-wildfire-risk-forecast](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast)  
++
++---
++
++## 🌟 Executive Summary
++
++We are proud to announce the **v1.0.0 release** of `brazil-wildfire-risk-forecast`, an end-to-end, scientifically defensible machine learning system that predicts wildfire probability across regular $0.5^\circ \times 0.5^\circ$ ($\approx 56\text{ km}$) geographic cells in Mato Grosso, Brazil over **1-day, 3-day, and 7-day forward horizons**.
++
++The system ingests 10 consecutive years of satellite hotspot records from INPE's benchmark sensor (`AQUA_M-T`, 290,019 hotspots) and daily NASA POWER (MERRA-2) climate reanalysis across 506 cells, totaling **1,844,876 spatiotemporal observations**.
++
++Every metric and number in this release is derived from actual executions on historical data without data leakage.
++
++---
++
++## 🚀 Key Features & Capabilities
++
++### 1. Multi-Horizon Probabilistic Forecasting
++- **1-Day Horizon ($D+1$, 24h Tactical Immediate):** PR-AUC **0.3680**, ROC-AUC **0.8960**, Brier score **0.0325** (Base rate: 4.26%).
++- **3-Day Horizon ($D+1$ to $D+3$, 72h Short-Term Dispatch):** PR-AUC **0.5341**, ROC-AUC **0.8882**, Brier score **0.0624** (Base rate: 9.67%).
++- **7-Day Horizon ($D+1$ to $D+7$, Weekly Strategic Outlook):** PR-AUC **0.6301**, ROC-AUC **0.8833**, Brier score **0.0927**, Recall@P50 **67.53%** (Base rate: 16.48%).
++
++### 2. Scientific Validation & Methodology
++- **Leakage-Free Feature Engineering (39 features):** Vapor Pressure Deficit (VPD via Tetens formula), Diurnal Temperature Range (DTR), Fire Weather Hazard Index proxy (FWI), consecutive dry spell duration, spatial neighborhood contagion (8 adjacent cells), and cyclical trigonometric encodings.
++- **Strict Out-of-Time Evaluation:** Trained on 2016–2023 ($1,478,532$ observations); evaluated on 2024–2025 holdout ($366,344$ observations).
++- **Contiguous Spatial Block Cross-Validation:** Optuna Bayesian search partitioned folds across three macro-regions (North Amazon transition, Central Cerrado, South Pantanal), eliminating geographical spatial memorization.
++- **Platt Scaling Probability Calibration:** Sigmoidal scaling on out-of-fold log-odds reduced Brier score from **0.1498 to 0.0927** ($38.1\%$ error reduction) while preserving ranking discrimination.
++- **Hypothesis Testing:** Paired bootstrap test (1,000 resamples) confirms LightGBM outperforms Empirical Persistence ($p < 0.001$) and Climatology ($p < 0.001$).
++- **Walk-Forward Validation:** Evaluated annually from 2021 to 2025, demonstrating peak performance (PR-AUC **0.6958**) during the historic 2024 El Niño drought.
++
++### 3. Recurrent Deep Learning Benchmark (Negative Result)
++- Evaluated a 2-layer PyTorch LSTM ($T=14$ day sequence window).
++- LightGBM decisively outperformed the LSTM (PR-AUC **0.6301** vs **0.5947**, ROC-AUC **0.8833** vs **0.8655**), proving the value of axis-aligned decision trees for sharp biophysical fuel moisture thresholds and spatial neighborhood representation.
++
++### 4. Production MLOps Stack
++- **DVC Pipeline DAG ([`dvc.yaml`](dvc.yaml)):** 6-stage reproducible DAG (`build_grid` $\rightarrow$ `process_data` $\rightarrow$ `build_features` $\rightarrow$ `drift` & `train` $\rightarrow$ `explain`).
++- **MLflow Tracking:** Centralized experiment registry with SQLite backend (`sqlite:///mlflow.db`).
++- **Covariate Drift Monitoring ([`src/monitoring/drift_detector.py`](src/monitoring/drift_detector.py)):** Automated Population Stability Index (PSI) and Kolmogorov-Smirnov (KS) tests between baseline (2016–2023) and operational (2024–2025) regimes, capturing the 2024 heatwave via $T2M\_MAX$ ($\text{PSI} = 0.1503$) and $\text{VPD}$ ($\text{PSI} = 0.1067$).
++- **Live Drift API:** Exposed via `GET /drift`.
++
++### 5. Product & Serving Layer
++- **Interactive 5-Tab Streamlit App ([`app/streamlit_app.py`](app/streamlit_app.py)):** Folium risk mapping, top-risk cell rankings, interactive local SHAP waterfall plots, and live model health gauges.
++- **FastAPI REST Service ([`api/main.py`](api/main.py)):** High-performance async service with `/predict`, `/explain` (local SHAP values), `/drift`, and `/health` endpoints.
++- **Production Docker Container ([`Dockerfile`](Dockerfile)):** Debian-slim container with OpenMP `libgomp1` and health check.
++- **Cloud Deploy Ready:** Preconfigured for Streamlit Community Cloud and Hugging Face Spaces.
++
++### 6. Code Quality & Testing
++- 21 automated unit and integration tests passing (`pytest tests/ -v`).
++- 100% compliance with `ruff check .` under PEP-8 and clean architecture standards.
++- Standardized [`pyproject.toml`](pyproject.toml) packaging configuration.
++
++---
++
++## 📊 Benchmark Summary (Out-of-Time Test: 2024–2025, n=366,344)
++
++| Model | PR-AUC (95% CI) | ROC-AUC (95% CI) | Brier Score (95% CI) | Recall @ P50 |
++|---|:---:|:---:|:---:|:---:|
++| Persistence (Empirical) | 0.4293 ($[0.4181, 0.4406]$) | 0.7260 ($[0.7203, 0.7318]$) | 0.1074 ($[0.1054, 0.1093]$) | 52.81% |
++| Climatology | 0.5169 ($[0.5051, 0.5281]$) | 0.8521 ($[0.8483, 0.8561]$) | 0.1079 ($[0.1061, 0.1094]$) | 48.55% |
++| Logistic Regression | 0.5464 ($[0.5355, 0.5590]$) | 0.8276 ($[0.8227, 0.8326]$) | 0.1658 ($[0.1642, 0.1673]$) | 59.35% |
++| LSTM (PyTorch Recurrent) | 0.5947 | 0.8655 | 0.1630 | 60.15% |
++| **LightGBM (Platt Calibrated)** | **0.6301** ($[0.6197, 0.6416]$) | **0.8833** ($[0.8802, 0.8871]$) | **0.0927** ($[0.0911, 0.0942]$) | **67.53%** |
++
++---
++
++## 📦 What's Included in This Release
++
++- **Technical Whitepaper:** [`reports/technical_report.md`](reports/technical_report.md)
++- **Interactive App:** [`app/streamlit_app.py`](app/streamlit_app.py)
++- **FastAPI REST API:** [`api/main.py`](api/main.py)
++- **Serialized Production Models:** [`models/`](models/)
++- **DVC DAG:** [`dvc.yaml`](dvc.yaml)
++- **Automated Tests:** [`tests/test_pipeline.py`](tests/test_pipeline.py)
++- **Comprehensive Documentation:** [`README.md`](README.md) and [`README.pt-BR.md`](README.pt-BR.md)
++
++---
++
++## 🏃 Quickstart
++
++```bash
++# Clone the repository
++git clone https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast.git
++cd brazil-wildfire-risk-forecast
++
++# Install dependencies
++pip install -r requirements.txt
++
++# Run automated test suite (21 tests)
++pytest tests/ -v
++
++# Run the FastAPI REST service
++uvicorn api.main:app --port 8000
++
++# Run the interactive Streamlit dashboard
++streamlit run app/streamlit_app.py
++```
+diff --git a/reports/technical_report.md b/reports/technical_report.md
+new file mode 100644
+index 0000000..228f197
+--- /dev/null
++++ b/reports/technical_report.md
+@@ -0,0 +1,368 @@
++# Operational Wildfire Risk Forecasting in the Brazilian Cerrado-Amazon Ecotone: A Calibrated Machine Learning Pipeline with Strict Temporal and Spatial Validation
++
++**Author:** Eduardo Tostes  
++**Role:** Information Systems Undergraduate & Machine Learning Engineer  
++**Project Repository:** [github.com/EduardoTostesC/brazil-wildfire-risk-forecast](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast)  
++**Date:** October 2026  
++**License:** MIT License  
++
++---
++
++## Abstract
++
++Wildfires in central Brazil cause severe ecological degradation, massive greenhouse gas emissions, and catastrophic economic loss across the Amazon, Cerrado, and Pantanal biomes. Operational firefighting logistics require reliable, calibrated probabilistic forecasts days in advance to pre-position firefighting assets before ignition conditions peak. In this work, we present an end-to-end machine learning system predicting the probability of at least one fire hotspot across regular $0.5^\circ \times 0.5^\circ$ ($\approx 56\text{ km}$) geographic grid cells over 1-day, 3-day, and 7-day forward horizons in the state of Mato Grosso. The pipeline ingests 10 consecutive years (2016–2025) of satellite observations from the INPE reference sensor (`AQUA_M-T`, 290,019 hotspots) and daily NASA POWER (MERRA-2) meteorological reanalysis across 506 grid cells (1,844,876 spatiotemporal observations). 
++
++To ensure strict scientific integrity, all 39 predictive attributes—including Vapor Pressure Deficit (VPD), Diurnal Temperature Range (DTR), cumulative precipitation deficits, spatial neighborhood fire contagion, and historical anniversary burning cycles—are engineered looking strictly backward, completely eliminating data leakage. Validation enforces a strict out-of-time temporal split (training on 2016–2023, testing on 2024–2025; $n=366,344$), contiguous spatial block cross-validation across three macro-ecoregions (Northern Amazon transition, Central Cerrado core, Southern Pantanal basin), multi-year walk-forward expanding window evaluation (2021–2025), and 1,000-resample bootstrap 95% confidence intervals.
++
++On the out-of-time test set, a Platt-calibrated LightGBM model achieves a Precision-Recall AUC (PR-AUC) of **0.6301** (95% CI: $[0.6197, 0.6416]$), a ROC-AUC of **0.8833** ($[0.8802, 0.8871]$), a Brier score of **0.0927** ($[0.0911, 0.0942]$), and a Recall@Precision$\ge$50% of **67.53%**. The model demonstrates statistically significant superiority over empirical persistence (PR-AUC 0.4293, $p < 0.001$) and spatial climatology (PR-AUC 0.5169, $p < 0.001$) via paired bootstrap hypothesis testing. A deep recurrent sequence benchmark (PyTorch LSTM, 14-day sequence window) achieved a PR-AUC of 0.5947, being outperformed by the gradient-boosted decision tree architecture due to sharp physical aridity threshold splitting and explicit spatial neighborhood representation. The production system is containerized with Docker, tracked with MLflow and DVC, monitored for covariate drift via Population Stability Index (PSI), and served via a FastAPI REST service and a multi-tab Streamlit dashboard.
++
++---
++
++## 1. Introduction & Environmental Motivation
++
++Wildfires represent one of the most pressing environmental crises in South America. The state of Mato Grosso, spanning over $903,000\text{ km}^2$, encompasses three of the world's most critical biomes: the Amazon rainforest in the north, the Cerrado savanna across its center, and the Pantanal wetlands in the south. During the dry season (May to October), low atmospheric humidity, high ambient temperatures, and agricultural burning practices converge into uncontrollable wildfire outbreaks. In 2024, intensified by a severe El Niño oscillation, wildfire outbreaks in Mato Grosso burned millions of hectares, overwhelming emergency response teams and blanketing major urban centers with hazardous particulate matter ($PM_{2.5}$).
++
++Fighting canopy and peat fires reactively once they have expanded across thousands of hectares is dangerous, logistically constrained, and economically prohibitive. Conversely, an **early-warning probabilistic forecast window of 1 to 7 days** empowers environmental agencies (such as IBAMA/Prevfogo, ICMBio, and state environmental secretariats) to:
++1. **Pre-position firefighting brigades, water tankers, and air tankers** into high-risk sectors before fires ignite;
++2. **Execute targeted preventive patrols** around indigenous reserves and protected conservation areas;
++3. **Issue proactive agricultural burning suspensions** during forecasted extreme atmospheric drying events.
++
++Deterministic point-ignition prediction (forecasting the exact GPS coordinate of an ignition) is physically ill-posed due to stochastic human ignition behavior and satellite orbital pass gaps. Therefore, this project frames the challenge as a **calibrated probabilistic spatiotemporal risk estimation problem**, providing civil defense authorities with defensible risk probabilities.
++
++---
++
++## 2. Problem Formulation & Spatiotemporal Architecture
++
++### 2.1 Spatial Discretization
++The pilot region of Mato Grosso is partitioned into a uniform latitude-longitude grid:
++- Bounding Box: Latitude $[-18.1^\circ, -7.3^\circ]$, Longitude $[-61.7^\circ, -50.2^\circ]$;
++- Spatial Resolution: $\Delta = 0.5^\circ$ ($\approx 55.6\text{ km}$ latitudinal, $\approx 54.4\text{ km}$ longitudinal at central MT);
++- Grid Cells: $22\text{ rows} \times 23\text{ columns} = 506\text{ cells}$.
++
++Each cell $i \in \{1, \dots, 506\}$ is uniquely identified by its row-column index `rrr_ccc` and represented by its centroid coordinate $(\text{lat}_i, \text{lon}_i)$.
++
++```
++   North MT (Block 0 - Amazon Transition)   lat >= -11.0°   (~36% cells)
++   Central MT (Block 1 - Cerrado Core)     -14.5° <= lat < -11.0° (~32% cells)
++   South MT (Block 2 - Pantanal Basin)     lat < -14.5°    (~32% cells)
++```
++
++### 2.2 Temporal Discretization & Multi-Horizon Targets
++Observations are aggregated at daily resolution ($t \in \{1, \dots, T\}$). For each cell $i$ on day $t$, we define binary fire hazard targets across three operational planning horizons $H \in \{1, 3, 7\}$ days:
++
++$$y_{i,t}^{(H)} = \mathbb{I}\left(\sum_{k=1}^H \text{hotspots}_{i, t+k} \ge 1\right)$$
++
++- **1-Day Horizon ($H=1$, Tactical Immediate):** Predicts fire occurrence on day $t+1$. Base positive rate in test set: **4.26%**.
++- **3-Day Horizon ($H=3$, Short-Term Dispatch):** Predicts at least one fire in the window $[t+1, t+3]$. Base positive rate: **9.67%**.
++- **7-Day Horizon ($H=7$, Strategic Weekly Planning):** Predicts at least one fire in the window $[t+1, t+7]$. Base positive rate: **16.48%**.
++
++### 2.3 Boundary Condition & Margin Integrity
++Because the forward target looks ahead $H$ days into the future, the final $H$ days of any historical time series cannot establish a ground-truth label without future contamination. In this pipeline, the final 7 days of 2025 are strictly masked as `NaN` and dropped during dataset assembly ($3,542$ corrupted edge rows dropped), eliminating temporal truncation corruption.
++
++---
++
++## 3. Data Sources & Feature Engineering
++
++### 3.1 Data Acquisition
++All data sources are official, publicly accessible, and free:
++
++1. **Fire Hotspots — INPE BDQueimadas Program:**
++   - **Satellite & Sensor:** `AQUA_M-T` (MODIS sensor, afternoon equatorial overpass $\approx 13:30$ local solar time).
++   - **Methodological Justification for Single Reference Sensor:** INPE designates AQUA as the benchmark reference satellite for official historical comparisons. Satellite constellations change over time (sensors launch, degrade, or decommission); mixing different satellites introduces artificial detection trends that corrupt long-term ML models. Using AQUA guarantees an unbroken, homogeneous 10-year time series.
++   - **Total Records Processed:** 290,019 fire hotspot detections across Mato Grosso between January 1, 2016, and December 31, 2025.
++
++2. **Meteorological Reanalysis — NASA POWER API:**
++   - **Underlying Atmospheric Model:** MERRA-2 (Modern-Era Retrospective analysis for Research and Applications, Version 2) produced by NASA's Global Modeling and Assimilation Office (GMAO).
++   - **Daily Variables Extracted:**
++     - Maximum 2m Air Temperature ($T2M\_MAX$, $^\circ\text{C}$)
++     - Minimum 2m Air Temperature ($T2M\_MIN$, $^\circ\text{C}$)
++     - 2m Relative Humidity ($RH2M$, $\%$)
++     - Corrected Precipitation Accumulation ($PRECTOTCORR$, $\text{mm/day}$)
++     - 10m Wind Speed ($WS10M$, $\text{m/s}$)
++   - **Justification for Gridded Reanalysis vs. INMET Weather Stations:** While ground stations provide high-precision point measurements, INMET weather stations in Brazil suffer from vast spatial voids, especially in indigenous lands and the northern Amazon basin of Mato Grosso. Spatial interpolation across station voids (e.g., Kriging or spline interpolation) creates severe boundary artifacts. NASA POWER provides uniform, gap-free, physically consistent daily atmospheric reanalysis for every single grid cell.
++
++### 3.2 Feature Engineering (39 Leakage-Free Predictors)
++To capture fire ignition physics, atmospheric drying, vegetative fuel conditioning, and spatial spread without data leakage, 39 features were engineered using information available strictly on or before day $t$:
++
++```
++┌────────────────────────────────────────────────────────────────────────┐
++│                   39 ENGINEERED PREDICTIVE FEATURES                    │
++├────────────────────────┬───────────────────────────────────────────────┤
++│ Category               │ Features                                      │
++├────────────────────────┼───────────────────────────────────────────────┤
++│ Cell Fire History      │ fire_count_7d, fire_count_14d,                │
++│                        │ fire_count_30d                                │
++├────────────────────────┼───────────────────────────────────────────────┤
++│ Inter-Annual Memory    │ fire_count_lastyear (14d window, 365d prior)  │
++├────────────────────────┼───────────────────────────────────────────────┤
++│ Spatial Contagion      │ neighbor_fire_7d (sum of 8 adjacent cells)   │
++├────────────────────────┼───────────────────────────────────────────────┤
++│ Biophysical Aridity    │ vpd, vpd_mean_7d, vpd_mean_14d                │
++│                        │ dtr, dtr_mean_7d, dtr_mean_14d                │
++│                        │ fwi_proxy, fwi_proxy_mean_7d,                 │
++│                        │ fwi_proxy_mean_14d                            │
++├────────────────────────┼───────────────────────────────────────────────┤
++│ Weather Rolling Stats  │ T2M_MAX_mean_7d, T2M_MAX_mean_14d             │
++│                        │ T2M_MIN_mean_7d, T2M_MIN_mean_14d             │
++│                        │ RH2M_mean_7d, RH2M_mean_14d                   │
++│                        │ PRECTOTCORR_mean_7d, PRECTOTCORR_mean_14d     │
++│                        │ WS10M_mean_7d, WS10M_mean_14d                 │
++├────────────────────────┼───────────────────────────────────────────────┤
++│ Hydrological Deficit   │ dry_days (consecutive days with rain < 1 mm) │
++│                        │ precip_sum_7d, precip_sum_14d, precip_sum_30d │
++├────────────────────────┼───────────────────────────────────────────────┤
++│ Cyclical Seasonality   │ month_sin, month_cos                          │
++│                        │ doy_sin, doy_cos (day-of-year encoding)       │
++├────────────────────────┼───────────────────────────────────────────────┤
++│ Spatial Coordinates    │ lat_center, lon_center                        │
++└────────────────────────┴───────────────────────────────────────────────┘
++```
++
++#### Biophysical Aridity Formulations
++1. **Vapor Pressure Deficit (VPD):** Atmospheric moisture demand strongly governs live and dead fuel moisture content. Saturated vapor pressure $e_s(T)$ is computed via the Tetens equation:
++   $$e_s(T) = 0.61078 \exp\left(\frac{17.27 \cdot T}{T + 237.3}\right) \quad [\text{kPa}]$$
++   $$\text{VPD} = e_s(T) \cdot \left(1 - \frac{RH}{100}\right) \quad [\text{kPa}]$$
++2. **Diurnal Temperature Range (DTR):** $\text{DTR} = T_{max} - T_{min}$. High DTR indicates clear-sky conditions, high solar insolation, and strong radiative drying of surface vegetative biomass.
++3. **Fire Weather Hazard Index (FWI Proxy):** A non-linear thermodynamic index combining thermal forcing, wind ventilation, and relative humidity suppression:
++   $$\text{FWI}_{\text{proxy}} = \max\left(0, \frac{(T_{max} - 15) \cdot (1 + WS_{10m})}{RH + 1}\right)$$
++
++---
++
++## 4. Modeling & Scientific Validation Framework
++
++### 4.1 Data Splitting Strategy: Avoiding Spatial and Temporal Leakage
++Random train-test splits on spatiotemporal data severely overestimate performance due to autocorrelation: neighboring cells on identical days share near-identical weather, enabling models to memorize local events. To ensure realistic generalization:
++
++1. **Out-of-Time Temporal Split:**
++   - **Training Set:** January 1, 2016, to December 31, 2023 (8 full years; $1,478,532$ observations);
++   - **Testing Set:** January 1, 2024, to December 24, 2025 (2 full out-of-time years; $366,344$ observations).
++2. **Contiguous Spatial Block Cross-Validation:**
++   During Bayesian hyperparameter tuning with Optuna, training folds are split using `GroupKFold` across three contiguous latitudinal macro-regions:
++   - **Block 0 (North MT, Amazon Ecotone):** $\text{Lat} \ge -11.0^\circ$ ($36\%$ of cells);
++   - **Block 1 (Central MT, Cerrado Plateau):** $-14.5^\circ \le \text{Lat} < -11.0^\circ$ ($32\%$ of cells);
++   - **Block 2 (South MT, Pantanal Basin):** $\text{Lat} < -14.5^\circ$ ($32\%$ of cells).
++   This forces the tree structures to learn generalizable atmospheric and fire relationships rather than memorizing spatial coordinates.
++
++### 4.2 Baselines
++Two non-trivial baselines establish lower bounds for skill:
++1. **Empirical Persistence Baseline:** Rather than using heuristic magic numbers, the empirical probability of a fire in the forward window is derived directly from the training distribution conditioned on recent cell activity:
++   $$P(y_{i,t}=1 \mid \text{fire\_count\_7d}_{i,t} \in \{0, 1, [2, 5], 6+\})$$
++2. **Spatial Climatology Baseline:** The historical empirical frequency of fires in each specific cell during the corresponding 15-day seasonal calendar window across all training years:
++   $$P_{\text{clim}}(i, d) = \frac{1}{|Y_{\text{train}}|} \sum_{y \in Y_{\text{train}}} \mathbb{I}(\text{fire in cell } i \text{ within } d \pm 7\text{ days})$$
++
++### 4.3 Model Architectures
++1. **Logistic Regression:** Linear reference model trained on standardized features (`StandardScaler`, $L_2$ regularization with $C=1.0$).
++2. **LightGBM (Gradient Boosted Trees):** Histogram-based gradient boosting optimized with Optuna (10 Bayesian trials evaluating mean out-of-block PR-AUC). Class imbalance is handled directly via `scale_pos_weight` ($w = N_{\text{neg}} / N_{\text{pos}} \approx 5.07$).
++3. **PyTorch Recurrent LSTM:** Deep learning architecture designed to capture sequential temporal trajectories. For each cell, sequences of $T=14$ consecutive days across 11 physical attributes are processed by a 2-layer LSTM ($64$ hidden units, dropout $0.20$), followed by a linear classification head. Trained with BCEWithLogitsLoss using positive class weighting.
++
++### 4.4 Probability Calibration: Platt Scaling
++Gradient boosted trees optimized with binary loss functions frequently produce uncalibrated probabilities, particularly when using `scale_pos_weight`. While ranking metrics (ROC-AUC, PR-AUC) remain unaffected, raw probability magnitudes drift, degrading operational utility.
++
++To restore calibration without degrading ranking:
++- The year 2023 was isolated as a temporal calibration holdout.
++- Raw LightGBM predicted probabilities $\hat{p}$ are transformed to log-odds: $z = \text{logit}(\hat{p}) = \ln\left(\frac{\hat{p}}{1 - \hat{p}}\right)$.
++- A univariate logistic regressor (Platt Scaling) fits $P(y=1 \mid z) = \frac{1}{1 + \exp(-(\alpha z + \beta))}$.
++- Fitting strictly on holdout log-odds preserves ranking order while drastically improving calibration.
++
++### 4.5 Statistical Significance Testing
++To prove that performance improvements over baselines are statistically meaningful, we executed a **1,000-resample paired bootstrap test**. In each bootstrap iteration $b \in \{1, \dots, 1000\}$:
++- A random sample of size $N$ is drawn with replacement from the test set;
++- PR-AUC, ROC-AUC, and Brier scores are computed for both LightGBM and the comparative baseline;
++- The difference $\Delta_b = \text{PR-AUC}_{\text{LGBM}}^{(b)} - \text{PR-AUC}_{\text{baseline}}^{(b)}$ is recorded.
++The empirical $p$-value is defined as the fraction of bootstrap iterations where $\Delta_b \le 0$.
++
++---
++
++## 5. Experimental Results & Discussion
++
++### 5.1 Primary Benchmark Comparison (7-Day Horizon)
++Evaluated on the out-of-time test set ($2024–2025$, $366,344$ observations, base positive rate $16.48\%$):
++
++| Model | PR-AUC (95% CI) | ROC-AUC (95% CI) | Brier Score (95% CI) | Recall @ Prec $\ge$ 50% |
++|---|:---:|:---:|:---:|:---:|
++| **Persistence (Empirical)** | 0.4293 ($[0.4181, 0.4406]$) | 0.7260 ($[0.7203, 0.7318]$) | 0.1074 ($[0.1054, 0.1093]$) | 52.81% |
++| **Climatology** | 0.5169 ($[0.5051, 0.5281]$) | 0.8521 ($[0.8483, 0.8561]$) | 0.1079 ($[0.1061, 0.1094]$) | 48.55% |
++| **Logistic Regression** | 0.5464 ($[0.5355, 0.5590]$) | 0.8276 ($[0.8227, 0.8326]$) | 0.1658 ($[0.1642, 0.1673]$) | 59.35% |
++| **LSTM (PyTorch Recurrent, T=14d)** | **0.5947** | **0.8655** | **0.1630** | **60.15%** |
++| **LightGBM (Raw)** | 0.6301 ($[0.6197, 0.6416]$) | 0.8833 ($[0.8802, 0.8871]$) | 0.1498 ($[0.1480, 0.1517]$) | 67.53% |
++| **LightGBM (Platt Calibrated)** | **0.6301** ($[0.6197, 0.6416]$) | **0.8833** ($[0.8802, 0.8871]$) | **0.0927** ($[0.0911, 0.0942]$) | **67.53%** |
++
++#### Key Empirical Findings:
++1. **Platt Calibration Efficacy:** Raw LightGBM achieves high discrimination (PR-AUC 0.6301) but poor probability calibration (Brier score 0.1498, worse than climatology's 0.1079 due to `scale_pos_weight` inflation). Platt scaling slashes the Brier score by **$38.1\%$ to 0.0927**, decisively outperforming climatology while retaining exact discrimination metrics.
++2. **Statistical Significance:** In the 1,000 paired bootstrap resamples, LightGBM outperformed both Empirical Persistence and Climatology in $100\%$ of resamples ($p < 0.001$), confirming that skill gains are not an artifact of random sampling.
++3. **Operational Threshold Utility:** At a fixed precision threshold of $50\%$ (meaning 1 in every 2 alerts is a confirmed wildfire event), calibrated LightGBM captures **$67.53\%$ of all wildfire occurrences**, compared to $48.55\%$ for climatology and $52.81\%$ for persistence.
++
++### 5.2 Negative Result Analysis: Why GBDT Outperformed Recurrent Deep Learning
++In academic literature, recurrent architectures (LSTMs, GRUs) are often presumed superior for temporal tasks. However, in our benchmarks, **LightGBM decisively outperformed the PyTorch LSTM** (PR-AUC $0.6301$ vs $0.5947$, ROC-AUC $0.8833$ vs $0.8655$, Brier $0.0927$ vs $0.1630$). 
++
++This negative result is valuable and driven by three fundamental physical and structural factors:
++1. **Tabular Inductive Bias for Biophysical Thresholds:** Tree ensembles construct axis-aligned orthogonal decision boundaries, which match the physics of fuel drying (e.g., ignition risk jumps abruptly when $RH < 25\%$ AND $\text{VPD} > 2.0\text{ kPa}$). LSTMs learn continuous smooth activation surfaces that struggle with sharp physical tipping points.
++2. **Spatial Neighborhood Information:** LightGBM leverages engineered spatial features (`neighbor_fire_7d`), directly representing fire contagion across cell borders. Standard cell-isolated LSTMs process single-cell temporal sequences without graph or neighborhood context.
++3. **Computational & Operational Efficiency:** The LightGBM model trains in under 45 seconds on CPU, whereas the LSTM required several minutes of batch processing. In production REST serving, LightGBM achieves sub-millisecond inference times without specialized GPU hardware.
++
++### 5.3 Multi-Horizon Performance Analysis
++As the forecasting horizon expands, the target base rate increases and discrimination evolves:
++
++| Horizon | Forward Target Window | Test Base Rate | PR-AUC | ROC-AUC | Brier Score | Recall @ P50 |
++|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
++| **1-Day** | $D+1$ (Immediate 24h) | 4.26% | 0.3680 | **0.8960** | **0.0325** | 29.58% |
++| **3-Day** | $D+1$ to $D+3$ (Tactical 72h) | 9.67% | 0.5341 | **0.8882** | **0.0624** | 50.18% |
++| **7-Day** | $D+1$ to $D+7$ (Strategic Weekly) | 16.48% | **0.6301** | **0.8833** | **0.0927** | **67.53%** |
++
++- The **1-day model** exhibits the highest ROC-AUC ($0.8960$) and lowest Brier score ($0.0325$), but a lower PR-AUC ($0.3680$) due to the severe positive class sparsity ($4.26\%$). It serves as an ultra-precise tactical dispatch signal.
++- The **7-day model** provides maximum operational coverage ($67.53\%$ recall at $50\%$ precision), serving as the optimal strategic planning layer.
++
++### 5.4 Temporal Stability via Expanding Window Walk-Forward Validation
++To test whether the model architecture remains stable over time across shifting climatological cycles, an expanding window walk-forward validation was conducted from 2021 through 2025:
++
++| Test Year | Training Period | Train Size | Test Size | Base Positive Rate | PR-AUC | ROC-AUC | Brier Score |
++|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
++| **2021** | 2016–2020 | 924,462 | 184,690 | 17.99% | 0.6391 | 0.8879 | 0.1515 |
++| **2022** | 2016–2021 | 1,109,152 | 184,690 | 18.43% | 0.6476 | 0.8828 | 0.1479 |
++| **2023** | 2016–2022 | 1,293,842 | 184,690 | 18.40% | 0.6392 | 0.8857 | 0.1469 |
++| **2024** | 2016–2023 | 1,478,532 | 185,196 | 21.38% | **0.6958** | 0.8848 | 0.1532 |
++| **2025** | 2016–2024 | 1,663,728 | 181,148 | 11.47% | 0.4998 | 0.8730 | 0.1464 |
++
++- **Resilience to Extreme Climatological Shocks:** In 2024, despite an extraordinary El Niño drought that pushed the base positive rate to $21.38\%$, the model achieved its highest PR-AUC (**0.6958**), proving that the biophysical aridity features successfully captured the severity of the crisis.
++- In 2025, which experienced an unusually wet dry season (base rate dropped to $11.47\%$), ROC-AUC remained high ($0.8730$), though PR-AUC adjusted proportionally to the lower prevalence.
++
++### 5.5 Error Analysis & Model Limitations
++Disaggregating errors across space and time reveals operational failure modes:
++1. **Seasonal Disparity:** Model accuracy peaks above $86\%$ during the wet months (January to April) and drops to $75.05\%$ in October. During the peak transition between the dry and wet seasons (September–October), the first convective rains are erratic; dry lightning strikes ignite fuels without registering sufficient NASA POWER precipitation, creating localized false negatives.
++2. **Regional Disparity:**
++   - **South MT (Pantanal):** Highest operational accuracy ($88.89\%$). Fire occurrence is strictly linked to hydrological flooding and severe drought phases.
++   - **North MT (Amazon transition):** High operational accuracy ($87.38\%$). Fires follow deforestation frontiers and clear weather corridors.
++   - **Central MT (Cerrado):** Lowest operational accuracy ($71.96\%$). High positive rate ($26.06\%$) combined with heavy mechanized agriculture creates frequent localized burning pulses that challenge purely meteorological predictors.
++
++---
++
++## 6. Model Interpretability & Explainability (SHAP)
++
++Using SHAP (SHapley Additive exPlanations) TreeExplainer, exact game-theoretic attributions were computed for the production LightGBM model across 2,000 holdout observations:
++
++```
++Top 10 Global Features by Mean Absolute SHAP Impact:
++1. lat_center          (mean |SHAP| = 0.9947)
++2. fire_count_30d      (mean |SHAP| = 0.8798)
++3. neighbor_fire_7d    (mean |SHAP| = 0.4438)
++4. lon_center          (mean |SHAP| = 0.3512)
++5. fire_count_lastyear (mean |SHAP| = 0.2594)
++6. fire_count_14d      (mean |SHAP| = 0.1593)
++7. fire_count_7d       (mean |SHAP| = 0.1171)
++8. PRECTOTCORR         (mean |SHAP| = 0.0754)
++9. WS10M_mean_14d      (mean |SHAP| = 0.0372)
++10. doy_cos            (mean |SHAP| = 0.0291)
++```
++
++### Biophysical Coherence of SHAP Attributions:
++- **Spatial Positioning (`lat_center`):** Northern cells (Amazon transition) receive lower baseline risk than southern/central Cerrado cells due to higher baseline humidity.
++- **Fire Persistence (`fire_count_30d`, `neighbor_fire_7d`):** Active burning over the preceding month and fire presence in neighboring cells act as massive risk amplifiers ($\text{SHAP} > +1.5$), representing ongoing ignition sources and regional fire spread.
++- **Inter-Annual Burning Memory (`fire_count_lastyear`):** Captures multi-year agricultural burning cycles; pasture renovation and slash-and-burn cycles recur on identical calendar weeks across successive years.
++- **Precipitation Suppression (`PRECTOTCORR`):** Immediate daily rain acts as an instantaneous negative driver ($\text{SHAP} < -0.8$), resetting surface fuel ignition potential.
++
++---
++
++## 7. MLOps Architecture & Production Engineering
++
++A scientifically sound model is useless if it cannot be deployed, monitored, and maintained reliably. The project implements a complete, modern MLOps stack:
++
++```
++                                  +-------------------+
++                                  | INPE & NASA Data  |
++                                  +-------------------+
++                                            |
++                                            v
++                                  +-------------------+
++                                  | DVC Pipeline DAG  |
++                                  |    (dvc.yaml)     |
++                                  +-------------------+
++                                            |
++                         +------------------+------------------+
++                         |                                     |
++                         v                                     v
++               +-------------------+                 +-------------------+
++               |  MLflow Tracking  |                 |  Drift Monitoring |
++               | (sqlite:///mlflow)|                 |    (PSI + KS)     |
++               +-------------------+                 +-------------------+
++                         |                                     |
++                         v                                     v
++               +-------------------+                 +-------------------+
++               | Calibrated Models |                 | /drift API Report |
++               |   (models/*.joblib)                 +-------------------+
++               +-------------------+
++                         |
++           +-------------+-------------+
++           |                           |
++           v                           v
+++---------------------+     +---------------------+
++| FastAPI REST Service|     | Streamlit Dashboard |
++| (predict & explain) |     |  (5-Tab Web UI)     |
+++---------------------+     +---------------------+
++           |                           |
++           +-------------+-------------+
++                         |
++                         v
++               +-------------------+
++               | Docker Container  |
++               | (python:3.12-slim)|
++               +-------------------+
++```
++
++### 7.1 Pipeline DAG with DVC (`dvc.yaml`)
++The pipeline steps (`build_grid` $\rightarrow$ `process_data` $\rightarrow$ `build_features` $\rightarrow$ `drift` & `train` $\rightarrow$ `explain`) are formalized in [`dvc.yaml`](dvc.yaml). Intermediate data dependencies are hashed and cached, enabling one-command deterministic reproduction: `dvc repro`.
++
++### 7.2 Experiment Tracking with MLflow
++Model hyperparameter tuning, metrics across all three horizons, validation plots, and serialized artifacts are automatically tracked in a local SQLite-backed MLflow registry (`sqlite:///mlflow.db`). Experiments can be audited visually via `mlflow ui`.
++
++### 7.3 Automated Covariate Drift Monitoring (`src/monitoring/drift_detector.py`)
++To prevent silent model degradation when climate regimes shift, the system tracks the **Population Stability Index (PSI)** and **Kolmogorov-Smirnov (KS) statistic** between baseline training distributions ($2016–2023$, $1,478,532$ samples) and operational test distributions ($2024–2025$, $366,344$ samples):
++- **Stable Features (9/11, $\text{PSI} < 0.10$):** Precipitation ($\text{PSI} = 0.0088$), wind speed ($\text{PSI} = 0.0075$), 7-day neighbor fires ($\text{PSI} = 0.0109$), DTR ($\text{PSI} = 0.0497$).
++- **Moderate Drift (2/11, $0.10 \le \text{PSI} < 0.25$):**
++  - Maximum Temperature ($T2M\_MAX$, $\text{PSI} = 0.1503$, $p < 0.001$): Mean increased from $32.00^\circ\text{C}$ to $33.40^\circ\text{C}$, detecting the 2024 El Niño heatwave.
++  - Vapor Pressure Deficit ($\text{VPD}$, $\text{PSI} = 0.1067$, $p < 0.001$): Mean increased from $1.17\text{ kPa}$ to $1.46\text{ kPa}$.
++  - Mean consecutive dry days increased from $10.0$ to $13.0$ days.
++- **Critical Drift (0/11, $\text{PSI} \ge 0.25$):** No feature exhibited structural breakdown requiring emergency pipeline halts.
++
++Drift results are compiled into [`reports/drift_report.json`](reports/drift_report.json) and exposed live via the API endpoint `GET /drift`.
++
++### 7.4 REST API & Interactive UI Serving
++- **FastAPI Service ([`api/main.py`](api/main.py)):** High-performance asynchronous endpoints with Pydantic v2 schemas:
++  - `POST /predict`: Evaluates input coordinates, resolves nearest grid cell, validates domain bounds, and returns calibrated probabilities and risk levels across 1d, 3d, or 7d horizons.
++  - `POST /explain`: Delivers on-the-fly SHAP feature attributions, identifying top positive and negative risk contributors.
++  - `GET /health` and `GET /drift`: Expose container health and drift diagnostics.
++- **Streamlit Dashboard ([`app/streamlit_app.py`](app/streamlit_app.py)):** A 5-tab production interface featuring Folium risk mapping, top-risk cell rankings, local interactive SHAP waterfall plots, drift monitoring gauges, and model documentation.
++- **Continuous Integration ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)):** GitHub Actions runner verifying 21 unit/integration tests and Ruff lint compliance across Python 3.11 and 3.12 on every push.
++
++---
++
++## 8. Responsible AI, Limitations & Ethical Considerations
++
++1. **Satellite Detection Limitations:** MODIS sensors cannot penetrate cloud cover. During heavy cloud overcast, active fires burn undetected, temporarily depressing persistence features.
++2. **Orbital Pass Frequency:** AQUA overpasses once daily ($\approx 13:30$ local time). Fires ignited later in the afternoon that burn out by evening are missed by the reference sensor.
++3. **Inability to Discern Legal Intent:** Thermal sensors detect radiant energy ($FRP$), not regulatory authorization. Legal, authorized agricultural management burns appear identical to illegal criminal deforestation fires.
++4. **Spatial Aggregation:** A $0.5^\circ$ grid cell spans $\approx 3,000\text{ km}^2$. Predictions indicate regional area hazard, not pinpoint ignition coordinates.
++5. **Operational Disclaimer:** This system is an academic decision-support prototype. It does not replace or supersede official emergency alerts issued by Brazilian federal authorities (INPE BDQueimadas, Prevfogo/IBAMA, or ICMBio).
++
++---
++
++## 9. Conclusion & Future Roadmap
++
++This research successfully demonstrates that an operational wildfire risk forecasting system can achieve strong discrimination (**PR-AUC 0.6301**, **ROC-AUC 0.8833**) and superior probability calibration (**Brier score 0.0927**) across complex tropical biomes by combining gridded satellite hotspot records with meteorological reanalysis under strict temporal and spatial validation protocols. 
++
++The negative result regarding recurrent deep learning underscores the enduring superiority of gradient-boosted decision trees for tabular environmental data containing non-linear physical thresholds. Furthermore, integrating Platt calibration, DVC DAG orchestration, MLflow tracking, and PSI drift monitoring bridges the gap between academic machine learning and reliable real-world production engineering.
++
++### Future Research Directions:
++- **MapBiomas Land Cover:** Incorporating annual land use layers to distinguish native savanna, dense rainforest, and pasturelands.
++- **Anisotropic Wind Vectors:** Modeling directional fire propagation downwind using vector wind components ($u, v$).
++- **Continental Scaling:** Expanding the grid architecture across the entire Amazon and Cerrado biomes across South America.
++
++---
++
++## References
++
++1. **INPE (Instituto Nacional de Pesquisas Espaciais):** Programa Queimadas / BDQueimadas. Dados abertos de focos de calor por satélite de referência (AQUA_M-T). [dataserver-coids.inpe.br/queimadas](https://dataserver-coids.inpe.br/queimadas/)
++2. **NASA POWER:** Prediction of Worldwide Energy Resources, MERRA-2 Daily Meteorological Reanalysis. [power.larc.nasa.gov](https://power.larc.nasa.gov/)
++3. **Lundberg, S. M., & Lee, S.-I. (2017):** A unified approach to interpreting model predictions. *Advances in Neural Information Processing Systems (NeurIPS 2017)*.
++4. **Ke, G., et al. (2017):** LightGBM: A highly efficient gradient boosting decision tree. *Advances in Neural Information Processing Systems (NeurIPS 2017)*.
++5. **Platt, J. (1999):** Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods. *Advances in Large Margin Classifiers*.
++6. **Yurdakul, M. (2020):** Population Stability Index (PSI) for monitoring credit scoring and machine learning models.

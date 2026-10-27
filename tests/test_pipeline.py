@@ -177,7 +177,7 @@ class TestLeakDetection:
 # ── API Fixture ───────────────────────────────────────────────────────────────
 
 @pytest.fixture
-def client():
+def client(api_registry):
     from fastapi.testclient import TestClient
 
     from api.main import app
@@ -210,7 +210,7 @@ class TestAPI:
             "date": "2024-08-15",
         })
         # May be 503 if model not loaded, but should not be 422 (validation error)
-        assert response.status_code in (200, 503)
+        assert response.status_code == 200
 
     def test_predict_invalid_coordinates(self, client):
         """Test validation rejects out-of-bounds coordinates."""
@@ -317,11 +317,11 @@ class TestAPI:
         response = client.post("/predict", json={
             "latitude": -12.5,
             "longitude": -55.0,
-            "date": "2015-05-01",  # Prior to archive start 2016-01-01
+            "date": "2024-08-16",  # Absent from the explicit fixture archive
             "inference_mode": "historical_replay",
         })
         # Either 422 (date range check) or 404 (exact record not found)
-        assert response.status_code in (404, 422)
+        assert response.status_code == 404
 
 
 # ── Drift Monitoring tests ───────────────────────────────────────────────────
@@ -501,11 +501,11 @@ class TestFeatureEngineeringUnitFunctions:
             "T2M_MIN": [25.0, 18.0, 20.0],  # First row inverted
         })
         cleaned = validate_meteorological_variables(df_raw)
-        assert (cleaned["RH2M"] >= 0.0).all() and (cleaned["RH2M"] <= 100.0).all()
-        assert (cleaned["WS10M"] >= 0.0).all()
-        assert (cleaned["PRECTOTCORR"] >= 0.0).all()
-        # Inverted temperatures should be corrected so T_MAX >= T_MIN
-        assert (cleaned["T2M_MAX"] >= cleaned["T2M_MIN"]).all()
+        assert cleaned.loc[:1, "RH2M"].isna().all()
+        assert pd.isna(cleaned.loc[0, "WS10M"])
+        assert pd.isna(cleaned.loc[0, "PRECTOTCORR"])
+        assert cleaned.loc[0, ["T2M_MAX", "T2M_MIN"]].isna().all()
+        assert cleaned.loc[2, "RH2M"] == 65.0
 
 
 # ── Risk Tiers Consistency Tests ──────────────────────────────────────────────

@@ -1,0 +1,25 @@
+[
+  {
+    "command": [
+      "python",
+      "-m",
+      "dvc",
+      "repro"
+    ],
+    "exit_code": 0,
+    "stdout": "Stage 'build_grid' didn't change, skipping\nStage 'process_data' didn't change, skipping\nStage 'build_features' didn't change, skipping\nStage 'train' didn't change, skipping\nStage 'train_lstm' didn't change, skipping\nStage 'research' didn't change, skipping\nStage 'explain' didn't change, skipping\nStage 'drift' didn't change, skipping\nStage 'decision_diagnostics' didn't change, skipping\nStage 'research_figures' didn't change, skipping\nRunning stage 'artifact_bundle':\n> python -m src.models.artifacts\nModel bundle manifest generated\nUpdating lock file 'dvc.lock'\n\nTo track the changes with git, run:\n\n\tgit add dvc.lock\n\nTo enable auto staging, run:\n\n\tdvc config core.autostage true\nUse `dvc push` to send your updates to remote storage.\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "dvc",
+      "status",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{}\n",
+    "stderr": ""
+  }
+]

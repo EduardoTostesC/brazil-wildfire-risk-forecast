@@ -1,0 +1,134 @@
+[
+  {
+    "n": 254848,
+    "fraction": 0.05,
+    "k": 12743,
+    "cutoff": 0.7742338139745455,
+    "tied_at_cutoff": 1,
+    "remaining_at_cutoff": 1,
+    "expected_true_positives": 10946.0,
+    "true_positive_order_bounds": [
+      10946,
+      10946
+    ],
+    "expected_precision": 0.8589814015537942,
+    "expected_recall": 0.181306213042254,
+    "precision_order_bounds": [
+      0.8589814015537942,
+      0.8589814015537942
+    ],
+    "interpretation": "Fractional expectation under exchangeable ties; bounds are ordering sensitivity, not confidence intervals.",
+    "model": "LightGBM Platt",
+    "legacy_precision": 0.8589814015537942
+  },
+  {
+    "n": 254848,
+    "fraction": 0.1,
+    "k": 25485,
+    "cutoff": 0.6263705767975394,
+    "tied_at_cutoff": 1,
+    "remaining_at_cutoff": 1,
+    "expected_true_positives": 19093.0,
+    "true_positive_order_bounds": [
+      19093,
+      19093
+    ],
+    "expected_precision": 0.7491857955660193,
+    "expected_recall": 0.31625064184320806,
+    "precision_order_bounds": [
+      0.7491857955660193,
+      0.7491857955660193
+    ],
+    "interpretation": "Fractional expectation under exchangeable ties; bounds are ordering sensitivity, not confidence intervals.",
+    "model": "LightGBM Platt",
+    "legacy_precision": 0.7491857955660193
+  },
+  {
+    "n": 254848,
+    "fraction": 0.05,
+    "k": 12743,
+    "cutoff": 0.783410138248848,
+    "tied_at_cutoff": 62,
+    "remaining_at_cutoff": 11,
+    "expected_true_positives": 8947.338709677419,
+    "true_positive_order_bounds": [
+      8939,
+      8950
+    ],
+    "expected_precision": 0.7021375429394505,
+    "expected_recall": 0.1482009956384049,
+    "precision_order_bounds": [
+      0.7014831672290669,
+      0.7023463862512752
+    ],
+    "interpretation": "Fractional expectation under exchangeable ties; bounds are ordering sensitivity, not confidence intervals.",
+    "model": "Climatology",
+    "legacy_precision": 0.7018755395118889
+  },
+  {
+    "n": 254848,
+    "fraction": 0.1,
+    "k": 25485,
+    "cutoff": 0.6682027649769585,
+    "tied_at_cutoff": 558,
+    "remaining_at_cutoff": 505,
+    "expected_true_positives": 16033.840501792114,
+    "true_positive_order_bounds": [
+      16010,
+      16063
+    ],
+    "expected_precision": 0.629148146038537,
+    "expected_recall": 0.2655796548422658,
+    "precision_order_bounds": [
+      0.6282126741220325,
+      0.630292328820875
+    ],
+    "interpretation": "Fractional expectation under exchangeable ties; bounds are ordering sensitivity, not confidence intervals.",
+    "model": "Climatology",
+    "legacy_precision": 0.6286835393368648
+  },
+  {
+    "n": 254848,
+    "fraction": 0.05,
+    "k": 12743,
+    "cutoff": 0.8037233020729642,
+    "tied_at_cutoff": 15020,
+    "remaining_at_cutoff": 12743,
+    "expected_true_positives": 10237.668508655126,
+    "true_positive_order_bounds": [
+      9790,
+      12067
+    ],
+    "expected_precision": 0.8033954727030626,
+    "expected_recall": 0.16957362577071086,
+    "precision_order_bounds": [
+      0.7682649297653614,
+      0.9469512673624735
+    ],
+    "interpretation": "Fractional expectation under exchangeable ties; bounds are ordering sensitivity, not confidence intervals.",
+    "model": "Persistence",
+    "legacy_precision": 0.8055402966334458
+  },
+  {
+    "n": 254848,
+    "fraction": 0.1,
+    "k": 25485,
+    "cutoff": 0.5495660595932165,
+    "tied_at_cutoff": 23958,
+    "remaining_at_cutoff": 10465,
+    "expected_true_positives": 17304.741672927623,
+    "true_positive_order_bounds": [
+      12067,
+      22532
+    ],
+    "expected_precision": 0.6790167421199773,
+    "expected_recall": 0.2866304750952847,
+    "precision_order_bounds": [
+      0.47349421228173433,
+      0.8841279183833628
+    ],
+    "interpretation": "Fractional expectation under exchangeable ties; bounds are ordering sensitivity, not confidence intervals.",
+    "model": "Persistence",
+    "legacy_precision": 0.6777319992152246
+  }
+]

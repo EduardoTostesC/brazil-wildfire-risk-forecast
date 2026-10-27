@@ -13,11 +13,19 @@ information from the future that the model must predict, NOT use as input.
 """
 
 
-import numpy as np
 import pandas as pd
 
 from src.config import get_project_root, load_config
 from src.data.build_grid import assign_to_grid, build_grid
+from src.data.quality import climate_quality, fire_quality
+
+
+def forward_target(counts: pd.Series, horizon: int) -> pd.Series:
+    """Label D using exactly D+1..D+H; incomplete horizons remain unknown."""
+    if horizon < 1:
+        raise ValueError("Horizon must be positive")
+    future = counts.iloc[::-1].shift(1).rolling(horizon, min_periods=horizon).sum().iloc[::-1]
+    return future.gt(0).astype(float).where(future.notna())
 
 
 def process_data(config: dict | None = None) -> pd.DataFrame:
@@ -42,6 +50,22 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
         raise FileNotFoundError(f"Combined fire file not found: {fire_file}")
 
     fire_df = pd.read_csv(fire_file)
+    if not fire_quality(fire_df, satellite=cfg["data"]["satellite"])["valid"]:
+        raise ValueError("Combined fire source failed quality checks")
+    annual_frames = []
+    for year in range(cfg["data"]["start_year"], cfg["data"]["end_year"] + 1):
+        annual_path = fire_dir / f"focos_{state}_{year}.csv"
+        if not annual_path.is_file():
+            raise FileNotFoundError(f"Required annual fire source missing: {annual_path}")
+        annual = pd.read_csv(annual_path)
+        if not fire_quality(annual, year, cfg["data"]["satellite"])["valid"]:
+            raise ValueError(f"Annual fire source failed quality checks: {year}")
+        annual_frames.append(annual)
+    keys = ["lat", "lon", "data_hora_gmt"]
+    expected = pd.MultiIndex.from_frame(pd.concat(annual_frames, ignore_index=True)[keys])
+    combined = pd.MultiIndex.from_frame(fire_df[keys])
+    if len(expected) != len(combined) or len(expected.difference(combined)) or len(combined.difference(expected)):
+        raise ValueError("Combined fire observations differ from the required annual sources")
 
     # 1.1 Hotspot Deduplication & Telemetry Validation
     dedup_cols = ["lat", "lon"]
@@ -49,14 +73,16 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
         dedup_cols.append("data_hora_gmt")
     elif "datahora" in fire_df.columns:
         dedup_cols.append("datahora")
+    else:
+        raise ValueError("Exact observation timestamp required for fire deduplication")
 
     init_count = len(fire_df)
     fire_df = fire_df.drop_duplicates(subset=dedup_cols).copy()
     print(f"  Hotspot deduplication: {init_count:,} -> {len(fire_df):,} records (removed {init_count - len(fire_df):,} duplicate packets)")
 
     # 1.2 Timezone & Date Resolution:
-    # AQUA M-T reference satellite overpasses at ~13:30 local solar time (afternoon pass, ~17:30 UTC).
-    # GMT/UTC dates are mapped directly to corresponding local operational observation days.
+    # Keep the archived UTC calendar date; this is not a publication timestamp.
+    # Regional offset checks for the reference data are recorded separately.
     if "data_hora_gmt" in fire_df.columns:
         fire_df["date"] = pd.to_datetime(
             fire_df["data_hora_gmt"], errors="coerce"
@@ -116,19 +142,10 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
     print(f"Step 3: Creating multi-horizon binary targets (1d, 3d, {horizon}d)...")
     dataset = dataset.sort_values(["grid_id", "date"]).reset_index(drop=True)
 
-    def _compute_horizon_target(group: pd.DataFrame, h: int) -> pd.Series:
-        # Sum of fire_count strictly in [D+1, D+h]
-        rev = group["fire_count"].iloc[::-1]
-        fwd_sum = rev.shift(1).rolling(window=h).sum().iloc[::-1]
-        return pd.Series(
-            np.where(fwd_sum.isna(), np.nan, (fwd_sum > 0).astype(float)),
-            index=group.index,
-        )
-
     for h in [1, 3, horizon]:
         dataset[f"target_{h}d"] = (
-            dataset.groupby("grid_id", group_keys=False)
-            .apply(lambda g, h=h: _compute_horizon_target(g, h))
+            dataset.groupby("grid_id")["fire_count"]
+            .transform(lambda counts, h=h: forward_target(counts, h))
         )
 
     # Primary target is 7-day forward horizon
@@ -153,15 +170,20 @@ def process_data(config: dict | None = None) -> pd.DataFrame:
     climate_frames: list[pd.DataFrame] = []
     for csv_file in sorted(climate_dir.glob("climate_*.csv")):
         cdf = pd.read_csv(csv_file)
+        quality = climate_quality(cdf, date_range.min(), date_range.max(), csv_file.stem.removeprefix("climate_"))
+        if not quality["valid"]:
+            raise ValueError(f"Climate source failed quality checks: {csv_file.name}")
         cdf["date"] = pd.to_datetime(cdf["date"])
         climate_frames.append(cdf)
 
     if climate_frames:
         climate_df = pd.concat(climate_frames, ignore_index=True)
-        dataset = dataset.merge(climate_df, on=["grid_id", "date"], how="left")
+        if set(grid_df.grid_id) != set(climate_df.grid_id):
+            raise ValueError("Climate sources do not cover exactly the configured grid")
+        dataset = dataset.merge(climate_df, on=["grid_id", "date"], how="left", validate="one_to_one")
         print(f"  Climate data merged: {len(climate_df):,} records")
     else:
-        print("  [warn] No climate data found. Proceeding without climate variables.")
+        raise FileNotFoundError("No climate source files: cannot build the configured dataset")
 
     # --- 5. Add grid metadata ---
     print("Step 5: Adding grid metadata...")

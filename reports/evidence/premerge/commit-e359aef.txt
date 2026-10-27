@@ -1,0 +1,330 @@
+commit e359aef8e9ec73f850c02924096e5f5ac4f5ea38
+Author:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+AuthorDate: Fri Oct 23 17:39:30 2026 -0300
+Commit:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+CommitDate: Fri Oct 23 17:39:30 2026 -0300
+
+    test: verify committed snapshot without private data on Python 3.11 and 3.12
+
+diff --git a/reports/TESTES_E_CI.md b/reports/TESTES_E_CI.md
+index 4103699..7b2c982 100644
+--- a/reports/TESTES_E_CI.md
++++ b/reports/TESTES_E_CI.md
+@@ -33,7 +33,22 @@ Os logs incluem as falhas intermediárias, em vez de reescrever a história como
+ Os logs finais, XMLs por versão, manifesto, notebooks, execução DVC e eventual CI do candidato são anexados em `reports/evidence`. Não interpretar a existência de um workflow como sua aprovação. Uma execução limpa sem dados privados é exigida antes da declaração final desta auditoria.
+ 
+ <!-- BEGIN FINAL VALIDATION -->
+-Validação final em andamento; os resultados intermediários acima permanecem identificados por etapa.
++
++Snapshot Git `429c46f`, extra?do por `git archive`, sem diret?rios de dados privados. Verifica??o em dois interpretadores isolados:
++
++| Ambiente | Testes | Falhas | Erros | Skips | Segundos |
++|---|---|---|---|---|---|
++| py311 | 87 | 0 | 0 | 0 | 5.288 |
++| py312 | 87 | 0 | 0 | 0 | 4.940 |
++
++Logs: [3.11](evidence/clean-py311.txt), [3.12](evidence/clean-py312.txt), [snapshot e comandos](evidence/clean-snapshot-validation.json). Ruff aprovado; bundle de artefatos e ambos os geradores conferidos no snapshot.
++
++A reprodu??o DVC executou os oito est?gios cient?ficos originais expandidos e dois est?gios finais de diagn?stico/figuras; `dvc repro` e `dvc status --json` retornaram c?digo 0, com estado final `{}`. Evid?ncia: [dvc-verified.json](evidence/dvc-verified.json), [execu??o completa](evidence/dvc-repro-locked.txt), [est?gios complementares](evidence/dvc-repro-final-stages.txt). As entradas brutas j? estavam no disco; n?o ? uma reaquisi??o independente.
++
++Os dois notebooks foram executados sem erros de c?lula: [log](evidence/executed-notebooks.txt). A API respondeu 12 requisi??es HTTP reais nos cen?rios documentados: [exemplos](evidence/real-http-examples.json). O manifesto final foi verificado: [log](evidence/final-manifest-verification.txt). Links locais foram verificados nos documentos atuais; snapshots hist?ricos s?o exclu?dos dessa checagem.
++
++CI remoto do candidato: pendente de execu??o no GitHub Actions. A falha do commit inicial permanece registrada acima.
++
+ <!-- END FINAL VALIDATION -->
+ 
+ ## Comandos
+diff --git a/reports/evidence/clean-py311.txt b/reports/evidence/clean-py311.txt
+new file mode 100644
+index 0000000..22c6587
+--- /dev/null
++++ b/reports/evidence/clean-py311.txt
+@@ -0,0 +1,98 @@
++============================= test session starts =============================
++platform win32 -- Python 3.11.17, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py311\Scripts\python.exe
++cachedir: .pytest_cache
++rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\release-429c46f6fd
++configfile: pyproject.toml
++plugins: anyio-4.15.1, hydra-core-1.3.7, platformdirs-4.13.5
++collecting ... collected 87 items
++
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[1] PASSED [  1%]
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[3] PASSED [  2%]
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[7] PASSED [  3%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_polygon] PASSED [  4%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_grid_cells] PASSED [  5%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_calibrators] PASSED [  6%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_models] PASSED [  8%]
++tests/test_api_contract.py::test_point_outside_partial_cell_is_rejected PASSED [  9%]
++tests/test_api_contract.py::test_exact_polygon_boundary_included PASSED  [ 10%]
++tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid0] PASSED [ 11%]
++tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid1] PASSED [ 12%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[corrupt] PASSED [ 13%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[missing_column] PASSED [ 14%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[duplicate] PASSED [ 16%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[infinite] PASSED [ 17%]
++tests/test_api_contract.py::test_missing_values_preserved PASSED         [ 18%]
++tests/test_api_contract.py::test_internal_error_controlled PASSED        [ 19%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[1] PASSED [ 20%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[3] PASSED [ 21%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[7] PASSED [ 22%]
++tests/test_api_contract.py::test_linear_and_recurrent_bundles_infer PASSED [ 24%]
++tests/test_api_contract.py::test_model_bundle_hashes_match PASSED        [ 25%]
++tests/test_data_integrity.py::test_climate_cache_rejects_incomplete_duplicates_and_fill PASSED [ 26%]
++tests/test_data_integrity.py::test_manifest_verify_does_not_rewrite_and_detects_mutation PASSED [ 27%]
++tests/test_data_integrity.py::test_missing_boundary_does_not_create_unmasked_grid PASSED [ 28%]
++tests/test_data_integrity.py::test_invalid_boundary_fails_explicitly PASSED [ 29%]
++tests/test_pipeline.py::TestGrid::test_grid_has_required_columns PASSED  [ 31%]
++tests/test_pipeline.py::TestGrid::test_grid_cell_count PASSED            [ 32%]
++tests/test_pipeline.py::TestGrid::test_grid_center_within_bounds PASSED  [ 33%]
++tests/test_pipeline.py::TestGrid::test_assign_to_grid PASSED             [ 34%]
++tests/test_pipeline.py::TestGrid::test_grid_ids_unique PASSED            [ 35%]
++tests/test_pipeline.py::TestLeakDetection::test_no_future_leak_in_fire_features PASSED [ 36%]
++tests/test_pipeline.py::TestLeakDetection::test_target_uses_future_data PASSED [ 37%]
++tests/test_pipeline.py::TestLeakDetection::test_temporal_purging_embargo_prevents_leak PASSED [ 39%]
++tests/test_pipeline.py::TestAPI::test_root_endpoint PASSED               [ 40%]
++tests/test_pipeline.py::TestAPI::test_health_endpoint PASSED             [ 41%]
++tests/test_pipeline.py::TestAPI::test_predict_endpoint_schema PASSED     [ 42%]
++tests/test_pipeline.py::TestAPI::test_predict_invalid_coordinates PASSED [ 43%]
++tests/test_pipeline.py::TestAPI::test_predict_outside_mato_grosso PASSED [ 44%]
++tests/test_pipeline.py::TestAPI::test_predict_multi_horizon PASSED       [ 45%]
++tests/test_pipeline.py::TestAPI::test_predict_invalid_horizon PASSED     [ 47%]
++tests/test_pipeline.py::TestAPI::test_explain_endpoint_schema PASSED     [ 48%]
++tests/test_pipeline.py::TestAPI::test_predict_temporal_contract PASSED   [ 49%]
++tests/test_pipeline.py::TestAPI::test_predict_operational_forecast_returns_503 PASSED [ 50%]
++tests/test_pipeline.py::TestAPI::test_predict_missing_record_returns_404 PASSED [ 51%]
++tests/test_pipeline.py::TestDriftDetector::test_psi_identical_distributions PASSED [ 52%]
++tests/test_pipeline.py::TestDriftDetector::test_psi_shifted_distributions PASSED [ 54%]
++tests/test_pipeline.py::TestDriftDetector::test_drift_api_endpoint PASSED [ 55%]
++tests/test_pipeline.py::TestSequentialModel::test_lstm_forward_shape PASSED [ 56%]
++tests/test_pipeline.py::TestDataProcessing::test_config_loads PASSED     [ 57%]
++tests/test_pipeline.py::TestDataProcessing::test_config_has_required_fields PASSED [ 58%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_platt_calibrator_fit_and_predict PASSED [ 59%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_ece_computation PASSED [ 60%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_operational_decision_metrics PASSED [ 62%]
++tests/test_pipeline.py::TestTerritorialMasking::test_grid_status_values PASSED [ 63%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_vpd PASSED [ 64%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_dtr PASSED [ 65%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_fwi_proxy PASSED [ 66%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_validate_meteorological_variables PASSED [ 67%]
++tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_classification_ranges PASSED [ 68%]
++tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_metadata_matches_config PASSED [ 70%]
++tests/test_pipeline.py::TestOutOfSampleThresholds::test_threshold_selection_and_application PASSED [ 71%]
++tests/test_pipeline.py::TestArtifactCompatibility::test_platt_calibrator_serialization PASSED [ 72%]
++tests/test_pipeline.py::TestArtifactCompatibility::test_loaded_artifacts_predict_successfully PASSED [ 73%]
++tests/test_reporting.py::test_generated_docs_are_current PASSED          [ 74%]
++tests/test_reporting.py::test_reporting_rejects_conflicting_metrics PASSED [ 75%]
++tests/test_reporting.py::test_no_climate_ablation_excludes_rainfall_accumulations PASSED [ 77%]
++tests/test_reporting.py::test_matched_lstm_report_records_identical_evaluation_rows PASSED [ 78%]
++tests/test_reporting.py::test_research_tables_are_current PASSED         [ 79%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-1] PASSED [ 80%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-3] PASSED [ 81%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-7] PASSED [ 82%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-1] PASSED [ 83%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-3] PASSED [ 85%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-7] PASSED [ 86%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-1] PASSED [ 87%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-3] PASSED [ 88%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-7] PASSED [ 89%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-1] PASSED [ 90%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-3] PASSED [ 91%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-7] PASSED [ 93%]
++tests/test_scientific_contracts.py::test_actual_features_ignore_future_and_preserve_unknown_weather PASSED [ 94%]
++tests/test_scientific_contracts.py::test_unknown_spell_never_becomes_observed_dryness PASSED [ 95%]
++tests/test_scientific_contracts.py::test_sequence_endpoint_includes_issue_day_and_returns_exact_keys PASSED [ 96%]
++tests/test_scientific_contracts.py::test_weighted_bootstrap_metrics_match_expanded_rows PASSED [ 97%]
++tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_zero_difference PASSED [ 98%]
++tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
++
++- generated xml file: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\reports\evidence\clean-py311.xml -
++============================= 87 passed in 5.29s ==============================
+diff --git a/reports/evidence/clean-py311.xml b/reports/evidence/clean-py311.xml
+new file mode 100644
+index 0000000..942e08f
+--- /dev/null
++++ b/reports/evidence/clean-py311.xml
+@@ -0,0 +1 @@
++<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="87" time="5.288" timestamp="2026-10-23T17:38:29.513464-03:00" hostname="EduardoPc"><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[1]" time="0.527" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[3]" time="0.022" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[7]" time="0.019" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_polygon]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_grid_cells]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_calibrators]" time="0.007" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_models]" time="0.007" /><testcase classname="tests.test_api_contract" name="test_point_outside_partial_cell_is_rejected" time="0.007" /><testcase classname="tests.test_api_contract" name="test_exact_polygon_boundary_included" time="0.013" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid0]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid1]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[corrupt]" time="0.014" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[missing_column]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[duplicate]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[infinite]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_missing_values_preserved" time="0.018" /><testcase classname="tests.test_api_contract" name="test_internal_error_controlled" time="0.014" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[1]" time="0.018" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[3]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[7]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_linear_and_recurrent_bundles_infer" time="2.132" /><testcase classname="tests.test_api_contract" name="test_model_bundle_hashes_match" time="0.023" /><testcase classname="tests.test_data_integrity" name="test_climate_cache_rejects_incomplete_duplicates_and_fill" time="0.012" /><testcase classname="tests.test_data_integrity" name="test_manifest_verify_does_not_rewrite_and_detects_mutation" time="0.036" /><testcase classname="tests.test_data_integrity" name="test_missing_boundary_does_not_create_unmasked_grid" time="0.002" /><testcase classname="tests.test_data_integrity" name="test_invalid_boundary_fails_explicitly" time="0.003" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_has_required_columns" time="0.085" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_cell_count" time="0.005" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_center_within_bounds" time="0.010" /><testcase classname="tests.test_pipeline.TestGrid" name="test_assign_to_grid" time="0.000" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_ids_unique" time="0.150" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_no_future_leak_in_fire_features" time="0.004" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_target_uses_future_data" time="0.001" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_temporal_purging_embargo_prevents_leak" time="0.000" /><testcase classname="tests.test_pipeline.TestAPI" name="test_root_endpoint" time="0.017" /><testcase classname="tests.test_pipeline.TestAPI" name="test_health_endpoint" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_coordinates" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_outside_mato_grosso" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_multi_horizon" time="0.022" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_horizon" time="0.007" /><testcase classname="tests.test_pipeline.TestAPI" name="test_explain_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_temporal_contract" time="0.013" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_operational_forecast_returns_503" time="0.009" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_missing_record_returns_404" time="0.011" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_identical_distributions" time="0.016" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_shifted_distributions" time="0.001" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_drift_api_endpoint" time="0.009" /><testcase classname="tests.test_pipeline.TestSequentialModel" name="test_lstm_forward_shape" time="0.014" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_loads" time="0.003" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_has_required_fields" time="0.002" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_platt_calibrator_fit_and_predict" time="0.009" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_ece_computation" time="0.001" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_operational_decision_metrics" time="0.001" /><testcase classname="tests.test_pipeline.TestTerritorialMasking" name="test_grid_status_values" time="0.187" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_vpd" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_dtr" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_fwi_proxy" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_validate_meteorological_variables" time="0.004" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_classification_ranges" time="0.000" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_metadata_matches_config" time="0.000" /><testcase classname="tests.test_pipeline.TestOutOfSampleThresholds" name="test_threshold_selection_and_application" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_platt_calibrator_serialization" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_loaded_artifacts_predict_successfully" time="0.008" /><testcase classname="tests.test_reporting" name="test_generated_docs_are_current" time="0.026" /><testcase classname="tests.test_reporting" name="test_reporting_rejects_conflicting_metrics" time="0.026" /><testcase classname="tests.test_reporting" name="test_no_climate_ablation_excludes_rainfall_accumulations" time="0.005" /><testcase classname="tests.test_reporting" name="test_matched_lstm_report_records_identical_evaluation_rows" time="0.008" /><testcase classname="tests.test_reporting" name="test_research_tables_are_current" time="0.026" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_features_ignore_future_and_preserve_unknown_weather" time="0.082" /><testcase classname="tests.test_scientific_contracts" name="test_unknown_spell_never_becomes_observed_dryness" time="0.001" /><testcase classname="tests.test_scientific_contracts" name="test_sequence_endpoint_includes_issue_day_and_returns_exact_keys" time="0.003" /><testcase classname="tests.test_scientific_contracts" name="test_weighted_bootstrap_metrics_match_expanded_rows" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_paired_bootstrap_identical_models_has_zero_difference" time="0.004" /><testcase classname="tests.test_scientific_contracts" name="test_calibrators_require_fit_and_preserve_extreme_numerics" time="0.007" /></testsuite></testsuites>
+\ No newline at end of file
+diff --git a/reports/evidence/clean-py312.txt b/reports/evidence/clean-py312.txt
+new file mode 100644
+index 0000000..f9d9721
+--- /dev/null
++++ b/reports/evidence/clean-py312.txt
+@@ -0,0 +1,98 @@
++============================= test session starts =============================
++platform win32 -- Python 3.12.10, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Scripts\python.exe
++cachedir: .pytest_cache
++rootdir: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\release-429c46f6fd
++configfile: pyproject.toml
++plugins: anyio-4.15.1, hydra-core-1.3.7, platformdirs-4.13.5
++collecting ... collected 87 items
++
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[1] PASSED [  1%]
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[3] PASSED [  2%]
++tests/test_api_contract.py::test_exact_record_and_additive_explanation[7] PASSED [  3%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_polygon] PASSED [  4%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_grid_cells] PASSED [  5%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_calibrators] PASSED [  6%]
++tests/test_api_contract.py::test_missing_required_infrastructure_returns_503[_models] PASSED [  8%]
++tests/test_api_contract.py::test_point_outside_partial_cell_is_rejected PASSED [  9%]
++tests/test_api_contract.py::test_exact_polygon_boundary_included PASSED  [ 10%]
++tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid0] PASSED [ 11%]
++tests/test_api_contract.py::test_absent_or_exterior_cell_rejected[grid1] PASSED [ 12%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[corrupt] PASSED [ 13%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[missing_column] PASSED [ 14%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[duplicate] PASSED [ 16%]
++tests/test_api_contract.py::test_invalid_archive_is_not_404[infinite] PASSED [ 17%]
++tests/test_api_contract.py::test_missing_values_preserved PASSED         [ 18%]
++tests/test_api_contract.py::test_internal_error_controlled PASSED        [ 19%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[1] PASSED [ 20%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[3] PASSED [ 21%]
++tests/test_api_contract.py::test_all_versioned_artifacts_infer[7] PASSED [ 22%]
++tests/test_api_contract.py::test_linear_and_recurrent_bundles_infer PASSED [ 24%]
++tests/test_api_contract.py::test_model_bundle_hashes_match PASSED        [ 25%]
++tests/test_data_integrity.py::test_climate_cache_rejects_incomplete_duplicates_and_fill PASSED [ 26%]
++tests/test_data_integrity.py::test_manifest_verify_does_not_rewrite_and_detects_mutation PASSED [ 27%]
++tests/test_data_integrity.py::test_missing_boundary_does_not_create_unmasked_grid PASSED [ 28%]
++tests/test_data_integrity.py::test_invalid_boundary_fails_explicitly PASSED [ 29%]
++tests/test_pipeline.py::TestGrid::test_grid_has_required_columns PASSED  [ 31%]
++tests/test_pipeline.py::TestGrid::test_grid_cell_count PASSED            [ 32%]
++tests/test_pipeline.py::TestGrid::test_grid_center_within_bounds PASSED  [ 33%]
++tests/test_pipeline.py::TestGrid::test_assign_to_grid PASSED             [ 34%]
++tests/test_pipeline.py::TestGrid::test_grid_ids_unique PASSED            [ 35%]
++tests/test_pipeline.py::TestLeakDetection::test_no_future_leak_in_fire_features PASSED [ 36%]
++tests/test_pipeline.py::TestLeakDetection::test_target_uses_future_data PASSED [ 37%]
++tests/test_pipeline.py::TestLeakDetection::test_temporal_purging_embargo_prevents_leak PASSED [ 39%]
++tests/test_pipeline.py::TestAPI::test_root_endpoint PASSED               [ 40%]
++tests/test_pipeline.py::TestAPI::test_health_endpoint PASSED             [ 41%]
++tests/test_pipeline.py::TestAPI::test_predict_endpoint_schema PASSED     [ 42%]
++tests/test_pipeline.py::TestAPI::test_predict_invalid_coordinates PASSED [ 43%]
++tests/test_pipeline.py::TestAPI::test_predict_outside_mato_grosso PASSED [ 44%]
++tests/test_pipeline.py::TestAPI::test_predict_multi_horizon PASSED       [ 45%]
++tests/test_pipeline.py::TestAPI::test_predict_invalid_horizon PASSED     [ 47%]
++tests/test_pipeline.py::TestAPI::test_explain_endpoint_schema PASSED     [ 48%]
++tests/test_pipeline.py::TestAPI::test_predict_temporal_contract PASSED   [ 49%]
++tests/test_pipeline.py::TestAPI::test_predict_operational_forecast_returns_503 PASSED [ 50%]
++tests/test_pipeline.py::TestAPI::test_predict_missing_record_returns_404 PASSED [ 51%]
++tests/test_pipeline.py::TestDriftDetector::test_psi_identical_distributions PASSED [ 52%]
++tests/test_pipeline.py::TestDriftDetector::test_psi_shifted_distributions PASSED [ 54%]
++tests/test_pipeline.py::TestDriftDetector::test_drift_api_endpoint PASSED [ 55%]
++tests/test_pipeline.py::TestSequentialModel::test_lstm_forward_shape PASSED [ 56%]
++tests/test_pipeline.py::TestDataProcessing::test_config_loads PASSED     [ 57%]
++tests/test_pipeline.py::TestDataProcessing::test_config_has_required_fields PASSED [ 58%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_platt_calibrator_fit_and_predict PASSED [ 59%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_ece_computation PASSED [ 60%]
++tests/test_pipeline.py::TestCalibrationAndMetrics::test_operational_decision_metrics PASSED [ 62%]
++tests/test_pipeline.py::TestTerritorialMasking::test_grid_status_values PASSED [ 63%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_vpd PASSED [ 64%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_dtr PASSED [ 65%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_compute_fwi_proxy PASSED [ 66%]
++tests/test_pipeline.py::TestFeatureEngineeringUnitFunctions::test_validate_meteorological_variables PASSED [ 67%]
++tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_classification_ranges PASSED [ 68%]
++tests/test_pipeline.py::TestRiskTiersConsistency::test_risk_metadata_matches_config PASSED [ 70%]
++tests/test_pipeline.py::TestOutOfSampleThresholds::test_threshold_selection_and_application PASSED [ 71%]
++tests/test_pipeline.py::TestArtifactCompatibility::test_platt_calibrator_serialization PASSED [ 72%]
++tests/test_pipeline.py::TestArtifactCompatibility::test_loaded_artifacts_predict_successfully PASSED [ 73%]
++tests/test_reporting.py::test_generated_docs_are_current PASSED          [ 74%]
++tests/test_reporting.py::test_reporting_rejects_conflicting_metrics PASSED [ 75%]
++tests/test_reporting.py::test_no_climate_ablation_excludes_rainfall_accumulations PASSED [ 77%]
++tests/test_reporting.py::test_matched_lstm_report_records_identical_evaluation_rows PASSED [ 78%]
++tests/test_reporting.py::test_research_tables_are_current PASSED         [ 79%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-1] PASSED [ 80%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-3] PASSED [ 81%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2023-01-01-7] PASSED [ 82%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-1] PASSED [ 83%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-3] PASSED [ 85%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-01-01-7] PASSED [ 86%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-1] PASSED [ 87%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-3] PASSED [ 88%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2024-03-01-7] PASSED [ 89%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-1] PASSED [ 90%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-3] PASSED [ 91%]
++tests/test_scientific_contracts.py::test_actual_target_embargo_future_injection[2025-01-01-7] PASSED [ 93%]
++tests/test_scientific_contracts.py::test_actual_features_ignore_future_and_preserve_unknown_weather PASSED [ 94%]
++tests/test_scientific_contracts.py::test_unknown_spell_never_becomes_observed_dryness PASSED [ 95%]
++tests/test_scientific_contracts.py::test_sequence_endpoint_includes_issue_day_and_returns_exact_keys PASSED [ 96%]
++tests/test_scientific_contracts.py::test_weighted_bootstrap_metrics_match_expanded_rows PASSED [ 97%]
++tests/test_scientific_contracts.py::test_paired_bootstrap_identical_models_has_zero_difference PASSED [ 98%]
++tests/test_scientific_contracts.py::test_calibrators_require_fit_and_preserve_extreme_numerics PASSED [100%]
++
++- generated xml file: C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\reports\evidence\clean-py312.xml -
++============================= 87 passed in 4.94s ==============================
+diff --git a/reports/evidence/clean-py312.xml b/reports/evidence/clean-py312.xml
+new file mode 100644
+index 0000000..8bd2617
+--- /dev/null
++++ b/reports/evidence/clean-py312.xml
+@@ -0,0 +1 @@
++<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="87" time="4.940" timestamp="2026-10-23T17:38:36.747566-03:00" hostname="EduardoPc"><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[1]" time="0.498" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[3]" time="0.020" /><testcase classname="tests.test_api_contract" name="test_exact_record_and_additive_explanation[7]" time="0.019" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_polygon]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_grid_cells]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_calibrators]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_missing_required_infrastructure_returns_503[_models]" time="0.008" /><testcase classname="tests.test_api_contract" name="test_point_outside_partial_cell_is_rejected" time="0.007" /><testcase classname="tests.test_api_contract" name="test_exact_polygon_boundary_included" time="0.014" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid0]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_absent_or_exterior_cell_rejected[grid1]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[corrupt]" time="0.014" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[missing_column]" time="0.017" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[duplicate]" time="0.015" /><testcase classname="tests.test_api_contract" name="test_invalid_archive_is_not_404[infinite]" time="0.017" /><testcase classname="tests.test_api_contract" name="test_missing_values_preserved" time="0.018" /><testcase classname="tests.test_api_contract" name="test_internal_error_controlled" time="0.015" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[1]" time="0.012" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[3]" time="0.010" /><testcase classname="tests.test_api_contract" name="test_all_versioned_artifacts_infer[7]" time="0.009" /><testcase classname="tests.test_api_contract" name="test_linear_and_recurrent_bundles_infer" time="2.108" /><testcase classname="tests.test_api_contract" name="test_model_bundle_hashes_match" time="0.020" /><testcase classname="tests.test_data_integrity" name="test_climate_cache_rejects_incomplete_duplicates_and_fill" time="0.011" /><testcase classname="tests.test_data_integrity" name="test_manifest_verify_does_not_rewrite_and_detects_mutation" time="0.025" /><testcase classname="tests.test_data_integrity" name="test_missing_boundary_does_not_create_unmasked_grid" time="0.002" /><testcase classname="tests.test_data_integrity" name="test_invalid_boundary_fails_explicitly" time="0.003" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_has_required_columns" time="0.006" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_cell_count" time="0.006" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_center_within_bounds" time="0.010" /><testcase classname="tests.test_pipeline.TestGrid" name="test_assign_to_grid" time="0.000" /><testcase classname="tests.test_pipeline.TestGrid" name="test_grid_ids_unique" time="0.158" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_no_future_leak_in_fire_features" time="0.004" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_target_uses_future_data" time="0.001" /><testcase classname="tests.test_pipeline.TestLeakDetection" name="test_temporal_purging_embargo_prevents_leak" time="0.000" /><testcase classname="tests.test_pipeline.TestAPI" name="test_root_endpoint" time="0.010" /><testcase classname="tests.test_pipeline.TestAPI" name="test_health_endpoint" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_endpoint_schema" time="0.014" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_coordinates" time="0.007" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_outside_mato_grosso" time="0.007" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_multi_horizon" time="0.022" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_invalid_horizon" time="0.008" /><testcase classname="tests.test_pipeline.TestAPI" name="test_explain_endpoint_schema" time="0.013" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_temporal_contract" time="0.013" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_operational_forecast_returns_503" time="0.009" /><testcase classname="tests.test_pipeline.TestAPI" name="test_predict_missing_record_returns_404" time="0.011" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_identical_distributions" time="0.005" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_psi_shifted_distributions" time="0.001" /><testcase classname="tests.test_pipeline.TestDriftDetector" name="test_drift_api_endpoint" time="0.008" /><testcase classname="tests.test_pipeline.TestSequentialModel" name="test_lstm_forward_shape" time="0.012" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_loads" time="0.002" /><testcase classname="tests.test_pipeline.TestDataProcessing" name="test_config_has_required_fields" time="0.002" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_platt_calibrator_fit_and_predict" time="0.008" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_ece_computation" time="0.001" /><testcase classname="tests.test_pipeline.TestCalibrationAndMetrics" name="test_operational_decision_metrics" time="0.001" /><testcase classname="tests.test_pipeline.TestTerritorialMasking" name="test_grid_status_values" time="0.159" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_vpd" time="0.001" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_dtr" time="0.001" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_compute_fwi_proxy" time="0.000" /><testcase classname="tests.test_pipeline.TestFeatureEngineeringUnitFunctions" name="test_validate_meteorological_variables" time="0.004" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_classification_ranges" time="0.000" /><testcase classname="tests.test_pipeline.TestRiskTiersConsistency" name="test_risk_metadata_matches_config" time="0.000" /><testcase classname="tests.test_pipeline.TestOutOfSampleThresholds" name="test_threshold_selection_and_application" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_platt_calibrator_serialization" time="0.001" /><testcase classname="tests.test_pipeline.TestArtifactCompatibility" name="test_loaded_artifacts_predict_successfully" time="0.008" /><testcase classname="tests.test_reporting" name="test_generated_docs_are_current" time="0.019" /><testcase classname="tests.test_reporting" name="test_reporting_rejects_conflicting_metrics" time="0.017" /><testcase classname="tests.test_reporting" name="test_no_climate_ablation_excludes_rainfall_accumulations" time="0.001" /><testcase classname="tests.test_reporting" name="test_matched_lstm_report_records_identical_evaluation_rows" time="0.002" /><testcase classname="tests.test_reporting" name="test_research_tables_are_current" time="0.011" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2023-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2024-03-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-1]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-3]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_target_embargo_future_injection[2025-01-01-7]" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_actual_features_ignore_future_and_preserve_unknown_weather" time="0.079" /><testcase classname="tests.test_scientific_contracts" name="test_unknown_spell_never_becomes_observed_dryness" time="0.001" /><testcase classname="tests.test_scientific_contracts" name="test_sequence_endpoint_includes_issue_day_and_returns_exact_keys" time="0.003" /><testcase classname="tests.test_scientific_contracts" name="test_weighted_bootstrap_metrics_match_expanded_rows" time="0.002" /><testcase classname="tests.test_scientific_contracts" name="test_paired_bootstrap_identical_models_has_zero_difference" time="0.004" /><testcase classname="tests.test_scientific_contracts" name="test_calibrators_require_fit_and_preserve_extreme_numerics" time="0.007" /></testsuite></testsuites>
+\ No newline at end of file
+diff --git a/reports/evidence/clean-snapshot-validation.json b/reports/evidence/clean-snapshot-validation.json
+new file mode 100644
+index 0000000..38c4008
+--- /dev/null
++++ b/reports/evidence/clean-snapshot-validation.json
+@@ -0,0 +1,51 @@
++{
++  "commit": "429c46f6fda52c25f0356289be2edeefffa361dc",
++  "snapshot": "release-429c46f6fd",
++  "private_data_present": false,
++  "checks": [
++    {
++      "interpreter": "py311",
++      "command": [
++        "-m",
++        "pytest",
++        "tests/",
++        "-v",
++        "--tb=short",
++        "--junitxml=C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\reports\\evidence\\clean-py311.xml"
++      ],
++      "exit_code": 0,
++      "log_sha256": "50dd46d1a762ef68267adc8e933ab4e758abc2888cb5803cf7cfdfb067a057d4"
++    },
++    {
++      "interpreter": "py312",
++      "command": [
++        "-m",
++        "pytest",
++        "tests/",
++        "-v",
++        "--tb=short",
++        "--junitxml=C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\reports\\evidence\\clean-py312.xml"
++      ],
++      "exit_code": 0,
++      "log_sha256": "354de7fc9511652503790b461ce8e651381de790921000c62487054ce3720860"
++    },
++    {
++      "module": "src.models.artifacts",
++      "exit_code": 0,
++      "stdout": "Model bundle verified\n",
++      "stderr": ""
++    },
++    {
++      "module": "src.reporting.generate_readme_metrics",
++      "exit_code": 0,
++      "stdout": "Documentation metrics verified\n",
++      "stderr": ""
++    },
++    {
++      "module": "src.reporting.generate_research_tables",
++      "exit_code": 0,
++      "stdout": "Research documentation verified\n",
++      "stderr": ""
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/reports/evidence/final-pip-py311.txt b/reports/evidence/final-pip-py311.txt
+new file mode 100644
+index 0000000..18daf99
+Binary files /dev/null and b/reports/evidence/final-pip-py311.txt differ
+diff --git a/reports/evidence/final-pip-py312.txt b/reports/evidence/final-pip-py312.txt
+new file mode 100644
+index 0000000..4628ec8
+Binary files /dev/null and b/reports/evidence/final-pip-py312.txt differ
+diff --git a/reports/evidence/final-ruff.txt b/reports/evidence/final-ruff.txt
+new file mode 100644
+index 0000000..e0a208c
+Binary files /dev/null and b/reports/evidence/final-ruff.txt differ

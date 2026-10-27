@@ -1,11 +1,14 @@
 {
   "report_type": "historical_drift_analysis",
-  "description": "Retrospective distribution drift comparing historical training baseline (2016-2023) against out-of-time test period (2024-2025). Operational streaming drift monitoring operates on near-real-time telemetry sliding windows and is marked standby while operational ingestion is disconnected.",
+  "description": "Retrospective covariate distribution comparison; the reference includes training and calibration years. No continuous monitoring is implemented. Covariate shift alone does not establish concept drift or predictive degradation.",
   "monitoring_mode": "retrospective_evaluation",
+  "continuous_monitoring": false,
+  "performance_degradation_assessed": false,
+  "inference_limitations": "PSI is descriptive covariate shift. KS p-values assume independent samples and are not inferentially valid for these dependent cell-days. Neither establishes concept drift.",
   "baseline_period": "<= 2023",
   "current_period": ">= 2024",
-  "baseline_samples": 1478532,
-  "current_samples": 366344,
+  "baseline_samples": 1028544,
+  "current_samples": 254848,
   "summary": {
     "total_monitored": 11,
     "stable_count": 9,
@@ -15,102 +18,102 @@
   "features": [
     {
       "feature": "T2M_MAX",
-      "PSI": 0.1503,
-      "KS_statistic": 0.1618,
+      "PSI": 0.1486,
+      "KS_statistic": 0.1581,
       "KS_pvalue": 0.0,
       "status": "MODERATE_DRIFT",
-      "baseline_mean": 31.996,
-      "current_mean": 33.401
+      "baseline_mean": 32.204,
+      "current_mean": 33.597
     },
     {
       "feature": "T2M_MIN",
-      "PSI": 0.0836,
-      "KS_statistic": 0.1292,
+      "PSI": 0.0824,
+      "KS_statistic": 0.129,
       "KS_pvalue": 0.0,
       "status": "STABLE",
-      "baseline_mean": 21.783,
-      "current_mean": 22.33
+      "baseline_mean": 21.82,
+      "current_mean": 22.359
     },
     {
       "feature": "RH2M",
-      "PSI": 0.0933,
-      "KS_statistic": 0.1108,
+      "PSI": 0.0899,
+      "KS_statistic": 0.1069,
       "KS_pvalue": 0.0,
       "status": "STABLE",
-      "baseline_mean": 69.337,
-      "current_mean": 63.569
+      "baseline_mean": 68.356,
+      "current_mean": 62.706
     },
     {
       "feature": "PRECTOTCORR",
-      "PSI": 0.0088,
-      "KS_statistic": 0.0357,
-      "KS_pvalue": 0.0,
+      "PSI": 0.0082,
+      "KS_statistic": 0.0319,
+      "KS_pvalue": 2.9806229692113914e-181,
       "status": "STABLE",
-      "baseline_mean": 3.647,
-      "current_mean": 3.112
+      "baseline_mean": 3.528,
+      "current_mean": 3.028
     },
     {
       "feature": "WS10M",
-      "PSI": 0.0075,
-      "KS_statistic": 0.0289,
-      "KS_pvalue": 3.9431975379094955e-214,
+      "PSI": 0.0074,
+      "KS_statistic": 0.028,
+      "KS_pvalue": 4.956967616650572e-140,
       "status": "STABLE",
-      "baseline_mean": 1.597,
-      "current_mean": 1.622
+      "baseline_mean": 1.654,
+      "current_mean": 1.688
     },
     {
       "feature": "vpd",
-      "PSI": 0.1067,
-      "KS_statistic": 0.1238,
+      "PSI": 0.1034,
+      "KS_statistic": 0.1206,
       "KS_pvalue": 0.0,
       "status": "MODERATE_DRIFT",
-      "baseline_mean": 1.173,
-      "current_mean": 1.457
+      "baseline_mean": 1.219,
+      "current_mean": 1.5
     },
     {
       "feature": "dtr",
-      "PSI": 0.0497,
-      "KS_statistic": 0.0943,
+      "PSI": 0.0489,
+      "KS_statistic": 0.0929,
       "KS_pvalue": 0.0,
       "status": "STABLE",
-      "baseline_mean": 10.212,
-      "current_mean": 11.071
+      "baseline_mean": 10.384,
+      "current_mean": 11.238
     },
     {
       "feature": "fwi_proxy",
-      "PSI": 0.0735,
-      "KS_statistic": 0.0944,
+      "PSI": 0.072,
+      "KS_statistic": 0.0958,
       "KS_pvalue": 0.0,
       "status": "STABLE",
-      "baseline_mean": 0.822,
-      "current_mean": 1.003
+      "baseline_mean": 0.865,
+      "current_mean": 1.057
     },
     {
       "feature": "fire_count_30d",
-      "PSI": 0.007,
-      "KS_statistic": 0.0362,
+      "PSI": 0.0154,
+      "KS_statistic": 0.0554,
       "KS_pvalue": 0.0,
       "status": "STABLE",
-      "baseline_mean": 4.625,
-      "current_mean": 5.072
+      "baseline_mean": 6.711,
+      "current_mean": 7.291
     },
     {
       "feature": "neighbor_fire_7d",
-      "PSI": 0.0109,
-      "KS_statistic": 0.0431,
+      "PSI": 0.0223,
+      "KS_statistic": 0.0623,
       "KS_pvalue": 0.0,
       "status": "STABLE",
-      "baseline_mean": 8.541,
-      "current_mean": 9.289
+      "baseline_mean": 12.004,
+      "current_mean": 12.955
     },
     {
       "feature": "dry_days",
-      "PSI": 0.0081,
-      "KS_statistic": 0.0287,
-      "KS_pvalue": 4.9467398616554296e-210,
+      "PSI": 0.0063,
+      "KS_statistic": 0.0283,
+      "KS_pvalue": 8.425359104183391e-143,
       "status": "STABLE",
-      "baseline_mean": 10.026,
-      "current_mean": 13.0
+      "baseline_mean": 11.001,
+      "current_mean": 13.95
     }
   ]
 }

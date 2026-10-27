@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'audit/**' ]
   pull_request:
     branches: [ main ]
 
@@ -10,23 +10,26 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6; Node.js 24
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6; Node.js 24
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+        cache-dependency-path: requirements-cpu.lock
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install torch --index-url https://download.pytorch.org/whl/cpu
-        pip install -r requirements.txt
+        pip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock
+        python -m pip check
+        python -m pip freeze > environment.txt
 
     - name: Lint with Ruff
       run: |
@@ -34,5 +37,81 @@ jobs:
 
     - name: Run Test Suite
       run: |
-        pytest tests/ -v
+        python -m pytest tests/ -v --junitxml=test-results.xml
+
+    - name: Verify generated documentation
+      run: |
+        python -m src.reporting.generate_readme_metrics --check
+        python -m src.reporting.generate_research_tables --check
+        python scripts/verify_frozen_protocol.py
+
+    - name: Preserve validation evidence
+      if: always()
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6; Node.js 24
+      with:
+        name: validation-python-${{ matrix.python-version }}
+        path: |
+          test-results.xml
+          environment.txt
+
+  docker:
+    name: Docker build and HTTP smoke
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6; Node.js 24
+
+    - name: Build CPU image
+      run: docker build --tag wildfire-audit:ci .
+
+    - name: Validate container API, artifacts and published port
+      run: |
+        mkdir -p reports/evidence
+        docker run --detach --name wildfire-api --publish 127.0.0.1:8000:8000 wildfire-audit:ci
+        curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8000/health
+        docker exec wildfire-api python -m src.models.artifacts --verify
+        docker exec wildfire-api python scripts/smoke_api.py --base-url http://127.0.0.1:8000
+        docker cp wildfire-api:/app/reports/evidence/real-http-examples.json reports/evidence/docker-http-examples.json
+        test "$(docker exec wildfire-api id -u)" = 1000
+        for attempt in $(seq 1 30); do
+          if test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-api)" = healthy; then break; fi
+          sleep 2
+        done
+        test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-api)" = healthy
+        docker image inspect wildfire-audit:ci > reports/evidence/docker-image.json
+
+    - name: Validate Streamlit container entrypoint
+      run: |
+        docker run --detach --name wildfire-dashboard --publish 127.0.0.1:8501:8501 \
+          --health-cmd 'curl --fail --silent http://localhost:8501/_stcore/health' \
+          --health-interval 2s --health-start-period 5s \
+          wildfire-audit:ci python -m streamlit run app/streamlit_app.py --server.address 0.0.0.0
+        curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8501/_stcore/health
+        curl --fail http://127.0.0.1:8501/ > reports/evidence/docker-streamlit.html
+        for attempt in $(seq 1 30); do
+          if test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-dashboard)" = healthy; then break; fi
+          sleep 2
+        done
+        test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-dashboard)" = healthy
+
+    - name: Collect container evidence
+      if: always()
+      run: |
+        mkdir -p reports/evidence
+        docker logs wildfire-api > reports/evidence/docker-api.log 2>&1 || true
+        docker logs wildfire-dashboard > reports/evidence/docker-dashboard.log 2>&1 || true
+        docker inspect wildfire-api wildfire-dashboard > reports/evidence/docker-containers.json || true
+
+    - name: Preserve Docker evidence
+      if: always()
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6; Node.js 24
+      with:
+        name: validation-docker
+        path: reports/evidence/docker-*
+
+    - name: Stop temporary containers
+      if: always()
+      run: |
+        docker rm --force wildfire-api wildfire-dashboard || true
 

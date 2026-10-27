@@ -1,0 +1,201 @@
+{
+  "reference": "03adf8d667f97d5e83a5a44b47c33e9a26d15f99",
+  "training_recorded_commit": "dbbc21b34a667fe60a14a811aa1169b54435fde1",
+  "training_recorded_dirty": true,
+  "recorded_train_source_sha256": "dc830b35acf4abea6c5714010b5d07e55487c7e7f9a539b6de34f905f9734cf0",
+  "committed_train_sha256_lf": "77249a6b41665fad57e6a6116ae1dd46257dca07a47342c386b204fea813c8a1",
+  "committed_train_sha256_crlf": "dc830b35acf4abea6c5714010b5d07e55487c7e7f9a539b6de34f905f9734cf0",
+  "research_recorded_commit": "c59dbeb880e6fbe70d9ddeb961fd39850a08ac16",
+  "research_recorded_dirty": null,
+  "research_source_same_at_recorded_commit_and_reference": true,
+  "lstm_original_execution_snapshot_present": false,
+  "dvc_source_checks": [
+    {
+      "stage": "train",
+      "path": "config.yaml",
+      "dvc_md5": "684582c1c1e3c94e2f70719ebac70703",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "requirements.lock",
+      "dvc_md5": "a9a0427b9519b1cb5b36b4ce30450906",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/config.py",
+      "dvc_md5": "7a0ebaf7e7205114cf889eae3bcb397c",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/data/manifest.py",
+      "dvc_md5": "6b8b6e0426e90fcc5789ff9417f60a30",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/data/quality.py",
+      "dvc_md5": "755112cff122fc4bfce15928d03fe035",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/models/calibration.py",
+      "dvc_md5": "665e72f1db2be264b0eaf8b80b5e66c6",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/models/evaluation.py",
+      "dvc_md5": "e9e7d1b24f6a5f354e4c430aab587741",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/models/inference.py",
+      "dvc_md5": "c4e914386c0bb1af2aa77afe4cbe1764",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/models/risk_tiers.py",
+      "dvc_md5": "20f6e07ec2a8ef2221037916e354ee9d",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/models/tracking.py",
+      "dvc_md5": "a58161e227d72aaf36268dceb08559cc",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train",
+      "path": "src/models/train.py",
+      "dvc_md5": "8c013ee46641874cc8e037ef021e5f58",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "config.yaml",
+      "dvc_md5": "684582c1c1e3c94e2f70719ebac70703",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "requirements.lock",
+      "dvc_md5": "a9a0427b9519b1cb5b36b4ce30450906",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/config.py",
+      "dvc_md5": "7a0ebaf7e7205114cf889eae3bcb397c",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/data/build_grid.py",
+      "dvc_md5": "ee6a05801cb057806426af5e2a6916a3",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/data/manifest.py",
+      "dvc_md5": "6b8b6e0426e90fcc5789ff9417f60a30",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/data/quality.py",
+      "dvc_md5": "755112cff122fc4bfce15928d03fe035",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/models/calibration.py",
+      "dvc_md5": "665e72f1db2be264b0eaf8b80b5e66c6",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/models/evaluation.py",
+      "dvc_md5": "e9e7d1b24f6a5f354e4c430aab587741",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/models/inference.py",
+      "dvc_md5": "c4e914386c0bb1af2aa77afe4cbe1764",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/models/research.py",
+      "dvc_md5": "eee16c059e08aee6508ae262fe7b0211",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "research",
+      "path": "src/models/train.py",
+      "dvc_md5": "8c013ee46641874cc8e037ef021e5f58",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "config.yaml",
+      "dvc_md5": "684582c1c1e3c94e2f70719ebac70703",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "requirements.lock",
+      "dvc_md5": "a9a0427b9519b1cb5b36b4ce30450906",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "src/features/build_features.py",
+      "dvc_md5": "9ad91a252f38fa367050dd116c92101a",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "src/models/calibration.py",
+      "dvc_md5": "665e72f1db2be264b0eaf8b80b5e66c6",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "src/models/evaluation.py",
+      "dvc_md5": "e9e7d1b24f6a5f354e4c430aab587741",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "src/models/inference.py",
+      "dvc_md5": "c4e914386c0bb1af2aa77afe4cbe1764",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "src/models/research.py",
+      "dvc_md5": "eee16c059e08aee6508ae262fe7b0211",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "src/models/train.py",
+      "dvc_md5": "8c013ee46641874cc8e037ef021e5f58",
+      "matches_committed_bytes_lf_or_crlf": true
+    },
+    {
+      "stage": "train_lstm",
+      "path": "src/models/train_lstm.py",
+      "dvc_md5": "75ffedc66ddd695bc3018e7462f352f6",
+      "matches_committed_bytes_lf_or_crlf": true
+    }
+  ],
+  "limits": "Matching committed source and DVC fingerprints corroborates provenance but does not retroactively capture every loaded source byte at runtime. Original metadata are preserved in Git; do not relabel the original execution."
+}

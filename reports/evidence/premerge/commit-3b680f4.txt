@@ -1,0 +1,46 @@
+commit 3b680f45e07954aa384c01afdd4fa662d07ace46
+Author:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+AuthorDate: Fri Oct 23 17:40:34 2026 -0300
+Commit:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+CommitDate: Fri Oct 23 17:40:34 2026 -0300
+
+    ci: validate audit branches without requiring pull-request integration permissions
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 01693e3..626db21 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -2,7 +2,7 @@ name: CI Pipeline
+ 
+ on:
+   push:
+-    branches: [ main ]
++    branches: [ main, 'audit/**' ]
+   pull_request:
+     branches: [ main ]
+ 
+diff --git a/docs/PUBLICACAO.md b/docs/PUBLICACAO.md
+index 68a67d7..711611e 100644
+--- a/docs/PUBLICACAO.md
++++ b/docs/PUBLICACAO.md
+@@ -11,6 +11,8 @@ O repositório público foi consultado no início: branch principal `main`, duas
+ 
+ Não reescrever tags históricas. Não apresentar o texto anterior como artigo aceito ou auditoria independente.
+ 
++A branch `audit/reproducibility-2026-10-23` foi enviada. A criação de PR pela integração retornou `403 Resource not accessible by integration`; nenhum PR foi criado por essa chamada. A revisão pode ser aberta no [comparador](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/compare/main...audit/reproducibility-2026-10-23?expand=1). O CI também aceita pushes em `audit/**`, sem depender da criação de PR.
++
+ ## Demonstração
+ 
+ O dashboard foi exercitado localmente com a amostra real; veja os screenshots e o log de navegador em reports/evidence. Não há URL pública validada nesta auditoria.
+diff --git a/reports/PENDENCIAS_REAIS.md b/reports/PENDENCIAS_REAIS.md
+index df83b75..060ed36 100644
+--- a/reports/PENDENCIAS_REAIS.md
++++ b/reports/PENDENCIAS_REAIS.md
+@@ -9,6 +9,7 @@ Este documento diferencia limitações ainda abertas das verificações locais c
+ | Dependente de infraestrutura | Previsão operacional | Não existe ingestão contínua, validação em tempo de emissão, monitoramento de SLA e estudo operacional. A API retorna 503 |
+ | Dependente de infraestrutura | Docker runtime | Executável Docker ausente no host. Construir imagem, iniciar container e exercer endpoints/healthcheck em máquina com Docker |
+ | Dependente de plataforma externa | Demo pública | Sem deployment Streamlit/Space autenticado validado. Publicar o candidato, testar as cinco abas e os três horizontes e só então divulgar a URL |
++| Dependente de permissão externa | Criar pull request | O push da branch de auditoria foi autorizado e concluído, mas a integração GitHub respondeu 403 ao criar PR. Abrir pelo comparador da branch ou conceder a permissão específica de pull requests. O CI da auditoria roda por push |
+ | Dependente de revisão externa | Submissão científica | Revisão atual é interna. Resolver proveniência temporal, auditar os novos resultados e buscar replicação/revisão independente antes de alegar prontidão acadêmica |
+ | Pendente de pesquisa | Risco de Fogo oficial do INPE | Não havia série histórica comparável com horários e cobertura admissíveis. Definir protocolo antes de consultar resultados e registrar a indisponibilidade se persistir |
+ | Pendente de pesquisa | Incerteza espacial ampliada | Três regiões e bootstrap de datas não estimam incerteza de novos estados. Definir mais blocos/novas regiões e desenho de reamostragem apropriado |

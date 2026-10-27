@@ -1,0 +1,972 @@
+{
+  "head": "0f05555922e485ae067d35e95c722d4ffce41af4",
+  "branch": "main",
+  "os": "Windows-10-10.0.19045-SP0",
+  "python": "3.12.10",
+  "versions": {
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "lightgbm": "4.7.0",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "shapely": "2.2.0",
+    "torch": "2.14.1+cpu",
+    "pytest": "9.1.1",
+    "ruff": "0.17.1",
+    "mlflow": "3.17.1",
+    "dvc": "3.67.1",
+    "streamlit": "1.66.0"
+  },
+  "docker": null,
+  "history": [
+    {
+      "sha": "26c4ee8ef56242e2b88819f97882929698cfa6e1",
+      "subject": "feat: complete end-to-end wildfire risk forecast pipeline",
+      "files": [
+        "A\t.gitignore",
+        "A\tDockerfile",
+        "A\tLICENSE",
+        "A\tMakefile",
+        "A\tREADME.md",
+        "A\tREADME.pt-BR.md",
+        "A\tapi/main.py",
+        "A\tapp/streamlit_app.py",
+        "A\tconfig.yaml",
+        "A\tdata/sample/climate_sample.csv",
+        "A\tdata/sample/features_sample.parquet",
+        "A\tdata/sample/fire_sample.csv",
+        "A\tdata/sample/grid_sample.csv",
+        "A\tmodels/feature_cols.joblib",
+        "A\tmodels/lightgbm_model.joblib",
+        "A\tmodels/logistic_regression.joblib",
+        "A\tmodels/scaler.joblib",
+        "A\tmodels/training_metadata.json",
+        "A\tnotebooks/01_eda.ipynb",
+        "A\tnotebooks/02_modeling.ipynb",
+        "A\treports/feature_importance.csv",
+        "A\treports/figures/accuracy_by_month.png",
+        "A\treports/figures/calibration_curve.png",
+        "A\treports/figures/shap_bar.png",
+        "A\treports/figures/shap_summary.png",
+        "A\treports/model_comparison.csv",
+        "A\trequirements.txt",
+        "A\tsrc/__init__.py",
+        "A\tsrc/config.py",
+        "A\tsrc/data/__init__.py",
+        "A\tsrc/data/build_grid.py",
+        "A\tsrc/data/download_climate.py",
+        "A\tsrc/data/download_fire.py",
+        "A\tsrc/data/process_data.py",
+        "A\tsrc/features/__init__.py",
+        "A\tsrc/features/build_features.py",
+        "A\tsrc/models/__init__.py",
+        "A\tsrc/models/explain.py",
+        "A\tsrc/models/train.py",
+        "A\ttests/test_pipeline.py"
+      ]
+    },
+    {
+      "sha": "aadb0173a13d9bb5952fb0457a746ec8635220a1",
+      "subject": "docs: embed charts in READMEs and execute notebooks with outputs",
+      "files": [
+        "M\tLICENSE",
+        "M\tREADME.md",
+        "M\tREADME.pt-BR.md",
+        "M\tapp/streamlit_app.py",
+        "M\tnotebooks/01_eda.ipynb",
+        "M\tnotebooks/02_modeling.ipynb"
+      ]
+    },
+    {
+      "sha": "c472af5107b7bef399a253f1e3c46ae11dcd3754",
+      "subject": "docs: add comprehensive technical audit report (AUDIT.md)",
+      "files": [
+        "A\tAUDIT.md"
+      ]
+    },
+    {
+      "sha": "b34e2f60cf2036e4456fd95ceccf0727f9ab10f9",
+      "subject": "feat(ml): implement Block A scientific rigor improvements",
+      "files": [
+        "A\t.github/workflows/ci.yml",
+        "M\tREADME.md",
+        "M\tREADME.pt-BR.md",
+        "M\tapi/main.py",
+        "M\tapp/streamlit_app.py",
+        "M\tdata/sample/features_sample.parquet",
+        "M\tmodels/lightgbm_model.joblib",
+        "A\tmodels/platt_calibrator.joblib",
+        "M\tmodels/training_metadata.json",
+        "M\tnotebooks/02_modeling.ipynb",
+        "M\treports/feature_importance.csv",
+        "M\treports/figures/accuracy_by_month.png",
+        "A\treports/figures/accuracy_by_region.png",
+        "M\treports/figures/calibration_curve.png",
+        "M\treports/figures/shap_bar.png",
+        "M\treports/figures/shap_summary.png",
+        "M\treports/model_comparison.csv",
+        "A\treports/walk_forward_metrics.csv",
+        "A\trun_pipeline.ps1",
+        "M\tsrc/data/process_data.py",
+        "M\tsrc/models/train.py",
+        "M\ttests/test_pipeline.py"
+      ]
+    },
+    {
+      "sha": "ecfd84329be5a280ad7c0b5fb6e2ef56903f84cf",
+      "subject": "feat(ml): implement Block B model evolution",
+      "files": [
+        "M\tREADME.md",
+        "M\tREADME.pt-BR.md",
+        "M\tapi/main.py",
+        "M\tapp/streamlit_app.py",
+        "M\tconfig.yaml",
+        "M\tdata/sample/features_sample.parquet",
+        "M\tmodels/feature_cols.joblib",
+        "A\tmodels/lightgbm_1d.joblib",
+        "A\tmodels/lightgbm_3d.joblib",
+        "M\tmodels/lightgbm_model.joblib",
+        "M\tmodels/logistic_regression.joblib",
+        "A\tmodels/lstm_model.pt",
+        "M\tmodels/platt_calibrator.joblib",
+        "A\tmodels/platt_calibrator_1d.joblib",
+        "A\tmodels/platt_calibrator_3d.joblib",
+        "M\tmodels/scaler.joblib",
+        "M\tmodels/training_metadata.json",
+        "M\tnotebooks/02_modeling.ipynb",
+        "M\treports/feature_importance.csv",
+        "M\treports/figures/accuracy_by_month.png",
+        "M\treports/figures/accuracy_by_region.png",
+        "M\treports/figures/calibration_curve.png",
+        "A\treports/figures/lstm_vs_lgbm.png",
+        "M\treports/figures/shap_bar.png",
+        "M\treports/figures/shap_summary.png",
+        "A\treports/lstm_comparison.csv",
+        "M\treports/model_comparison.csv",
+        "A\treports/multi_horizon_comparison.csv",
+        "M\treports/walk_forward_metrics.csv",
+        "M\trequirements.txt",
+        "M\tsrc/data/process_data.py",
+        "M\tsrc/features/build_features.py",
+        "M\tsrc/models/train.py",
+        "A\tsrc/models/train_lstm.py",
+        "M\ttests/test_pipeline.py"
+      ]
+    },
+    {
+      "sha": "599a9ab533090f1fa16db975edad811f1248bafe",
+      "subject": "feat(mlops): implement Block C MLOps pipeline (DVC DAG, MLflow tracking, drift monitoring, CI and Docker)",
+      "files": [
+        "A\t.dvc/.gitignore",
+        "A\t.dvc/config",
+        "A\t.dvcignore",
+        "M\t.github/workflows/ci.yml",
+        "M\t.gitignore",
+        "M\tDockerfile",
+        "M\tMakefile",
+        "M\tREADME.md",
+        "M\tREADME.pt-BR.md",
+        "M\tapi/main.py",
+        "M\tapp/streamlit_app.py",
+        "A\tdvc.yaml",
+        "M\tmodels/lightgbm_1d.joblib",
+        "M\tmodels/lightgbm_3d.joblib",
+        "M\tmodels/lightgbm_model.joblib",
+        "M\tmodels/platt_calibrator.joblib",
+        "M\tmodels/platt_calibrator_1d.joblib",
+        "M\tmodels/platt_calibrator_3d.joblib",
+        "M\tmodels/training_metadata.json",
+        "A\tpyproject.toml",
+        "A\treports/drift_report.json",
+        "M\treports/figures/accuracy_by_month.png",
+        "M\treports/figures/accuracy_by_region.png",
+        "M\treports/figures/calibration_curve.png",
+        "A\treports/figures/drift_summary.png",
+        "M\treports/model_comparison.csv",
+        "M\treports/multi_horizon_comparison.csv",
+        "M\treports/walk_forward_metrics.csv",
+        "M\trequirements.txt",
+        "M\tsrc/config.py",
+        "M\tsrc/data/process_data.py",
+        "M\tsrc/features/build_features.py",
+        "M\tsrc/models/explain.py",
+        "M\tsrc/models/train.py",
+        "M\tsrc/models/train_lstm.py",
+        "A\tsrc/monitoring/__init__.py",
+        "A\tsrc/monitoring/drift_detector.py",
+        "M\ttests/test_pipeline.py"
+      ]
+    },
+    {
+      "sha": "f54cd79903cab8b485990cddc26e16160b6eb713",
+      "subject": "feat(product): implement Block D product layer (multi-tab Streamlit dashboard, SHAP explainability, /explain API, and cloud deploy configs)",
+      "files": [
+        "A\t.streamlit/config.toml",
+        "A\tREADME.hf.md",
+        "M\tREADME.md",
+        "M\tREADME.pt-BR.md",
+        "M\tapi/main.py",
+        "M\tapp/streamlit_app.py",
+        "M\tdvc.yaml",
+        "A\tpackages.txt",
+        "M\tpyproject.toml",
+        "M\tsrc/monitoring/__init__.py",
+        "M\ttests/test_pipeline.py"
+      ]
+    },
+    {
+      "sha": "1b47873d84894a052712bbdcc5d2616be927cc10",
+      "subject": "docs(release): implement Block E communication layer (scientific technical report, release notes v1.0.0, and documentation links)",
+      "files": [
+        "M\tREADME.md",
+        "M\tREADME.pt-BR.md",
+        "A\tRELEASE_NOTES.md",
+        "A\treports/technical_report.md"
+      ]
+    },
+    {
+      "sha": "d4268b198cac08a7e224f36d39651626a1d5b717",
+      "subject": "audit: Phase 1 baseline technical and scientific audit report and archived metrics",
+      "files": [
+        "A\treports/audit_baseline.md",
+        "A\treports/baseline_v1/drift_report.json",
+        "A\treports/baseline_v1/feature_importance.csv",
+        "A\treports/baseline_v1/lstm_comparison.csv",
+        "A\treports/baseline_v1/model_comparison.csv",
+        "A\treports/baseline_v1/multi_horizon_comparison.csv",
+        "A\treports/baseline_v1/training_metadata.json",
+        "A\treports/baseline_v1/walk_forward_metrics.csv"
+      ]
+    },
+    {
+      "sha": "17a0c7b26ff48a5f94eb5308f1cf7678d80dce67",
+      "subject": "feat: implement spatiotemporal audit fixes, out-of-sample calibration, territorial masking, and scientific acceptance reports",
+      "files": [
+        "M\tDockerfile",
+        "M\tREADME.md",
+        "M\tREADME.pt-BR.md",
+        "M\tapi/main.py",
+        "M\tapp/streamlit_app.py",
+        "A\tdata/data_manifest.json",
+        "A\tdata/geo/mato_grosso_ibge.geojson",
+        "M\tdvc.yaml",
+        "M\tmodels/lightgbm_1d.joblib",
+        "M\tmodels/lightgbm_3d.joblib",
+        "M\tmodels/lightgbm_model.joblib",
+        "M\tmodels/logistic_regression.joblib",
+        "M\tmodels/lstm_model.pt",
+        "M\tmodels/platt_calibrator.joblib",
+        "M\tmodels/platt_calibrator_1d.joblib",
+        "M\tmodels/platt_calibrator_3d.joblib",
+        "M\tmodels/scaler.joblib",
+        "M\tmodels/training_metadata.json",
+        "A\treports/AUDITORIA_FINAL.md",
+        "A\treports/REPRODUCIBILIDADE.md",
+        "A\treports/VALIDACAO_CIENTIFICA.md",
+        "A\treports/ablation_study.csv",
+        "M\treports/audit_baseline.md",
+        "M\treports/feature_importance.csv",
+        "M\treports/figures/calibration_curve.png",
+        "A\treports/figures/error_analysis_breakdown.png",
+        "M\treports/figures/lstm_vs_lgbm.png",
+        "M\treports/figures/shap_bar.png",
+        "M\treports/figures/shap_summary.png",
+        "M\treports/lstm_comparison.csv",
+        "M\treports/model_comparison.csv",
+        "M\treports/multi_horizon_comparison.csv",
+        "A\treports/operational_decision_metrics.csv",
+        "M\treports/technical_report.md",
+        "M\treports/walk_forward_metrics.csv",
+        "M\trequirements.txt",
+        "M\tsrc/data/build_grid.py",
+        "A\tsrc/data/manifest.py",
+        "A\tsrc/models/calibration.py",
+        "M\tsrc/models/train.py",
+        "M\tsrc/models/train_lstm.py",
+        "M\ttests/test_pipeline.py"
+      ]
+    },
+    {
+      "sha": "0f05555922e485ae067d35e95c722d4ffce41af4",
+      "subject": "feat: complete spatiotemporal audit corrections, out-of-sample thresholds, and acceptance reports",
+      "files": [
+        "M\tAUDIT.md",
+        "M\tREADME.md",
+        "M\tRELEASE_NOTES.md",
+        "M\tapi/main.py",
+        "M\tapp/streamlit_app.py",
+        "M\tdvc.yaml",
+        "M\tmodels/lightgbm_1d.joblib",
+        "M\tmodels/lightgbm_3d.joblib",
+        "M\tmodels/lightgbm_model.joblib",
+        "M\tmodels/platt_calibrator.joblib",
+        "M\tmodels/platt_calibrator_1d.joblib",
+        "M\tmodels/platt_calibrator_3d.joblib",
+        "M\tmodels/training_metadata.json",
+        "M\treports/AUDITORIA_FINAL.md",
+        "M\treports/REPRODUCIBILIDADE.md",
+        "M\treports/VALIDACAO_CIENTIFICA.md",
+        "M\treports/ablation_study.csv",
+        "M\treports/drift_report.json",
+        "M\treports/feature_importance.csv",
+        "M\treports/figures/calibration_curve.png",
+        "M\treports/figures/error_analysis_breakdown.png",
+        "M\treports/figures/lstm_vs_lgbm.png",
+        "M\treports/figures/shap_bar.png",
+        "M\treports/figures/shap_summary.png",
+        "M\treports/lstm_comparison.csv",
+        "M\treports/model_comparison.csv",
+        "M\treports/multi_horizon_comparison.csv",
+        "M\treports/operational_decision_metrics.csv",
+        "M\treports/technical_report.md",
+        "M\treports/walk_forward_metrics.csv",
+        "M\tsrc/data/download_fire.py",
+        "M\tsrc/data/process_data.py",
+        "M\tsrc/features/build_features.py",
+        "A\tsrc/models/risk_tiers.py",
+        "M\tsrc/models/train.py",
+        "M\tsrc/models/train_lstm.py",
+        "M\tsrc/monitoring/drift_detector.py",
+        "M\ttests/test_pipeline.py"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "file": ".dvc/.gitignore",
+      "size": 8,
+      "sha256": "56326d749401841d23e69493167468b16e53a4b55837da1d5352a8c697c7599b"
+    },
+    {
+      "file": ".dvc/config",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".dvcignore",
+      "size": 142,
+      "sha256": "caf35ffe00329e1ac4bcec1947f19d1cd85955d7f4327e942cd647fb7a5a7bc6"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "size": 780,
+      "sha256": "2f8e69b35229ed8bde0ae6f658684d3aad5f93a5bb7d0867d90b3e7d038ef20f"
+    },
+    {
+      "file": ".gitignore",
+      "size": 495,
+      "sha256": "c81f8119165f514946fcc0d915466846b7a58551e06699fcfb0579ca41bfe607"
+    },
+    {
+      "file": ".streamlit/config.toml",
+      "size": 144,
+      "sha256": "8edac5205b3c05a959aa2b728021954f8d04f6f256062357ce8e8db9cbb65ac8"
+    },
+    {
+      "file": "AUDIT.md",
+      "size": 18062,
+      "sha256": "7ba226a679ec604f30a513eb8c4cc32528bc5459b724cedad41620df93d07530"
+    },
+    {
+      "file": "Dockerfile",
+      "size": 1225,
+      "sha256": "a1a6159913b139c7b3f9eb5dfb2f97011f29793c7ef9bfa85929005b9b12793b"
+    },
+    {
+      "file": "LICENSE",
+      "size": 1072,
+      "sha256": "21ff223f38d07d7eb810c088269124b1e0f08c8cf7f49fabcc12f36ec25f6ef2"
+    },
+    {
+      "file": "Makefile",
+      "size": 798,
+      "sha256": "546126ff6da2587194c34fd2c35daa12ea7bfb36324d40042e18ce5a13137759"
+    },
+    {
+      "file": "README.hf.md",
+      "size": 562,
+      "sha256": "5636cd05054754c05a2f75ebc2d2e096143cfc70e18fc035ce7eebc1ed0777a5"
+    },
+    {
+      "file": "README.md",
+      "size": 45347,
+      "sha256": "9c3f3267a666e3c26e9daf0102ff03a9b8f2ca17422fb90e28245f8404d2f1cd"
+    },
+    {
+      "file": "README.pt-BR.md",
+      "size": 45242,
+      "sha256": "6c86685b9c600f346f011d694423c1d3be4be585c30b123f64e05bd97e5958e7"
+    },
+    {
+      "file": "RELEASE_NOTES.md",
+      "size": 7783,
+      "sha256": "21886d050be433e22d17418fad848554bdce099411fbdd941f7190763e8aa6d4"
+    },
+    {
+      "file": "api/main.py",
+      "size": 20641,
+      "sha256": "ef48d5d834a54210a2d6f742ec3855325dc5e0112fb38615d900c6ee437ef4fe"
+    },
+    {
+      "file": "app/streamlit_app.py",
+      "size": 32935,
+      "sha256": "c855fb624e564e5948157154ffe0f95c886247570d7a54c7685f65017dfaaaed"
+    },
+    {
+      "file": "config.yaml",
+      "size": 1035,
+      "sha256": "17948f2d9c9c9d19f1213736ab7a079c88fed8b62ee3a2fb729f0f78d11a08df"
+    },
+    {
+      "file": "data/data_manifest.json",
+      "size": 7152,
+      "sha256": "968260a67af71b5b13d5d7dd349e09d0d3ce2ded08bf806cf1a46a848d756bb9"
+    },
+    {
+      "file": "data/geo/mato_grosso_ibge.geojson",
+      "size": 57267,
+      "sha256": "ffc4789c7518d5ff10882c18e1e1671a2a7de9187718e4b305f7735d04bcc554"
+    },
+    {
+      "file": "data/sample/climate_sample.csv",
+      "size": 17292,
+      "sha256": "1180d3e83c559c4b5b5dc70f34803ef119c0b7504f0be1d12a3a8ab0d274d550"
+    },
+    {
+      "file": "data/sample/features_sample.parquet",
+      "size": 424631,
+      "sha256": "80cdad8e0fd5278556cf12e89b05b7f0431068f5ac009028eea902f229cfe7f0"
+    },
+    {
+      "file": "data/sample/fire_sample.csv",
+      "size": 66835,
+      "sha256": "6743c9adbda98cf9fc7ed36901514c2a44479ffb27e7bf09895f92dbf661f18b"
+    },
+    {
+      "file": "data/sample/grid_sample.csv",
+      "size": 1111,
+      "sha256": "8e9857efab99701b53aac76e85573f8a91b0641574f7b4bae17ad998a5f8ef32"
+    },
+    {
+      "file": "dvc.yaml",
+      "size": 2600,
+      "sha256": "fa1e435efd5fca2da7697548f487d4fd34c4b90ca7211f5085fede0cd90e5337"
+    },
+    {
+      "file": "models/feature_cols.joblib",
+      "size": 593,
+      "sha256": "d162c45e571ad81730eadbe8c04274e4b23be9a1d8ae163b7d1edeabcfc58f11"
+    },
+    {
+      "file": "models/lightgbm_1d.joblib",
+      "size": 698692,
+      "sha256": "ef1a59df52b5ceafcb35e868a790c2e3ff244780597dd315cc3f3af58e1883a8"
+    },
+    {
+      "file": "models/lightgbm_3d.joblib",
+      "size": 702196,
+      "sha256": "d6b9c47c7f6321f25715f0daa57ba6b1e4fec8656190a107476ab36fc381ed06"
+    },
+    {
+      "file": "models/lightgbm_model.joblib",
+      "size": 703252,
+      "sha256": "f374c2ae136ae4230b0275bc4979bedba013555c6e76ce3c8cb8b2fae1fa0355"
+    },
+    {
+      "file": "models/logistic_regression.joblib",
+      "size": 1019,
+      "sha256": "fa05faa7be35df63e8d6bf52ee7d20d6a2a3eaa8e2c0ccb8b57406d16e526cf1"
+    },
+    {
+      "file": "models/lstm_model.pt",
+      "size": 89911,
+      "sha256": "86dab03ea7572aafe534c54d473ddba33a7b48f53013a9e43b4d2bf565ac432c"
+    },
+    {
+      "file": "models/platt_calibrator.joblib",
+      "size": 138,
+      "sha256": "503e157a9e5401956c129bfa9e81df25d1c33a4a773a2964a898d2643e66b145"
+    },
+    {
+      "file": "models/platt_calibrator_1d.joblib",
+      "size": 138,
+      "sha256": "7b80cd5a59e30457a774a43fa40b41e1de91857c0115d190116c2c285908ea0a"
+    },
+    {
+      "file": "models/platt_calibrator_3d.joblib",
+      "size": 138,
+      "sha256": "64f7ff3dec6244440c52257dfd5321cafe8437fe9bff7066dd403f72db63e488"
+    },
+    {
+      "file": "models/scaler.joblib",
+      "size": 1503,
+      "sha256": "445bc84da400d4f80ae82c97a7afcecc21d99399dc953f798772b0c7f34c5ea6"
+    },
+    {
+      "file": "models/training_metadata.json",
+      "size": 6350,
+      "sha256": "bbe515084bb2d8e064be90e3eb9fd05d1b62b4c954a95fda545a199bb876c653"
+    },
+    {
+      "file": "notebooks/01_eda.ipynb",
+      "size": 509120,
+      "sha256": "43794f9d7886cead11dd6e4e95594c3513b85774808adaeb6b8bc5062d778c1f"
+    },
+    {
+      "file": "notebooks/02_modeling.ipynb",
+      "size": 826262,
+      "sha256": "c52db59c536f8c0dee229c8ba926e9aa7ae2231a5f395e371fae0565a7d644bf"
+    },
+    {
+      "file": "packages.txt",
+      "size": 165,
+      "sha256": "8c30f774ed2cba9005ba2e48d11f2e2abd834b3278a3c93dc2b3b9104437ed2a"
+    },
+    {
+      "file": "pyproject.toml",
+      "size": 853,
+      "sha256": "225d70d642ee7e4b69c8d16aabe7d1b9853963971ef03d13700cd6ce163b71a9"
+    },
+    {
+      "file": "reports/AUDITORIA_FINAL.md",
+      "size": 20169,
+      "sha256": "a73064629ff0eb34949bfddf0cb9ebb2a60ffe77583152faeb2cd53b601eeea6"
+    },
+    {
+      "file": "reports/REPRODUCIBILIDADE.md",
+      "size": 8196,
+      "sha256": "dafee9a1d73418c8f6654bf56206f11a639c4bc5a6478391e06532a24fc4fcaa"
+    },
+    {
+      "file": "reports/VALIDACAO_CIENTIFICA.md",
+      "size": 16490,
+      "sha256": "97c2cac0eca1e76dab975e5601dcaa69034c408fcdbefa35b4933eba591eab4c"
+    },
+    {
+      "file": "reports/ablation_study.csv",
+      "size": 643,
+      "sha256": "997de379cbb0c97171a1d2099190b204476d6ec7755eb500397d9e568eafaf49"
+    },
+    {
+      "file": "reports/audit_baseline.md",
+      "size": 18203,
+      "sha256": "d57357334cce7bb0ac0cf729cf5b4c0274709d927425aa5f3800c9669abac32f"
+    },
+    {
+      "file": "reports/baseline_v1/drift_report.json",
+      "size": 2660,
+      "sha256": "12344c6a54b749ade4895248e6208ab2a48e665caafc423fe66cf37971faf852"
+    },
+    {
+      "file": "reports/baseline_v1/feature_importance.csv",
+      "size": 1377,
+      "sha256": "e9020100c7f620fb3cbf8a8afec07ecf0a5129625421cc8c5867da4ad6ae8e34"
+    },
+    {
+      "file": "reports/baseline_v1/lstm_comparison.csv",
+      "size": 334,
+      "sha256": "07028c875230af396f8eca0efc749dd3427f2170e36a23647c7787ac1a3d293e"
+    },
+    {
+      "file": "reports/baseline_v1/model_comparison.csv",
+      "size": 281,
+      "sha256": "ad0deb4c08ff5ed205dc25d4f13eadfe510f1aca6145f85a9a7ce035f669aa1f"
+    },
+    {
+      "file": "reports/baseline_v1/multi_horizon_comparison.csv",
+      "size": 216,
+      "sha256": "2d587e7d9365ededba7921e3fb9a82c38ea96028f76278cf081cd95a71f69427"
+    },
+    {
+      "file": "reports/baseline_v1/training_metadata.json",
+      "size": 3898,
+      "sha256": "25d29d15197dc5feb0ef34d4536ba0182f38af86dcdf475d811bbf622a1b9ab5"
+    },
+    {
+      "file": "reports/baseline_v1/walk_forward_metrics.csv",
+      "size": 372,
+      "sha256": "126bfe72dd18192e1a395623dc6fb40c7853b651cbce76c7b994f5d35c26c0ee"
+    },
+    {
+      "file": "reports/drift_report.json",
+      "size": 3066,
+      "sha256": "ac029fc4eb3aa92b16bda7963af18ab4d07d38efa7890a056f331588c4b94220"
+    },
+    {
+      "file": "reports/feature_importance.csv",
+      "size": 1366,
+      "sha256": "3293f7a0127ff3648cb4ebfaa99d3158ced216a0b0c85ad41f1557902ebf529a"
+    },
+    {
+      "file": "reports/figures/accuracy_by_month.png",
+      "size": 32903,
+      "sha256": "5e763e7df3df9b476719ea1d4b5fa0d1143a992982342cbbb25258962ee31241"
+    },
+    {
+      "file": "reports/figures/accuracy_by_region.png",
+      "size": 30893,
+      "sha256": "43c7ae025400a1a7af073840df51409dc798f3501fa4da4b3bcf528282e5382e"
+    },
+    {
+      "file": "reports/figures/calibration_curve.png",
+      "size": 127639,
+      "sha256": "01165b5c16f41f0290672de354d8dcb882b2a576842bf8510042995f44fba487"
+    },
+    {
+      "file": "reports/figures/drift_summary.png",
+      "size": 73801,
+      "sha256": "7e282f9d2573d283d500c05af69c98a624ab1db0c613fcca722c6dfbb08c4c6a"
+    },
+    {
+      "file": "reports/figures/error_analysis_breakdown.png",
+      "size": 58951,
+      "sha256": "6db5cb9f8e46668e27e252e4cba839e60bde6a0c6d275e9168fd1fdde26eae6f"
+    },
+    {
+      "file": "reports/figures/lstm_vs_lgbm.png",
+      "size": 127160,
+      "sha256": "b9de91b2ce2ba5cd13fb0f9278a33096fbfaaa142fcdd2fc09eca28d5631ff0e"
+    },
+    {
+      "file": "reports/figures/shap_bar.png",
+      "size": 86506,
+      "sha256": "b5e60d3fbb305e251a6866b228fb4868d4318fafcac9c28e66b5631fcc4d3fd3"
+    },
+    {
+      "file": "reports/figures/shap_summary.png",
+      "size": 171968,
+      "sha256": "95c0acd7de9d9ed863a8d636fed1c3abef95d7d371e9033a86dc115b95057650"
+    },
+    {
+      "file": "reports/lstm_comparison.csv",
+      "size": 531,
+      "sha256": "28b85a56231f6d1710ff1af8f9c95556973ce5dcfedb5acbbe9bdc0ecd9ad082"
+    },
+    {
+      "file": "reports/model_comparison.csv",
+      "size": 468,
+      "sha256": "89eb0da05a9313c5e564ca30dca143c8cda01908b0a27cc0036e9fcd33592296"
+    },
+    {
+      "file": "reports/multi_horizon_comparison.csv",
+      "size": 240,
+      "sha256": "c8e152bd23c072ee831c3035f70b90d7dffed74f92f8dde3d1781953da821602"
+    },
+    {
+      "file": "reports/operational_decision_metrics.csv",
+      "size": 618,
+      "sha256": "bcb52c0b44028cc752c8ae5e01559b2cff9b8260d3f7ec70260bd2bcc1c17d9f"
+    },
+    {
+      "file": "reports/technical_report.md",
+      "size": 38959,
+      "sha256": "a7ab71c39dd107a2596f21c27824571592afd26f5ea581a11ee755357ff1c3bf"
+    },
+    {
+      "file": "reports/walk_forward_metrics.csv",
+      "size": 582,
+      "sha256": "83c0722b3f2d9903a81bdcb747e627d1f32af3a9731f1966cac929f6a5007789"
+    },
+    {
+      "file": "requirements.txt",
+      "size": 584,
+      "sha256": "a68778e1167c94f8a055b69632ce28f55cce506aa2421082c1970bfcc8f50966"
+    },
+    {
+      "file": "run_pipeline.ps1",
+      "size": 3241,
+      "sha256": "4bb5d3a03d16e27b1641f55a1fd4f7350ad963cb8bca61025e346d84b7ee6087"
+    },
+    {
+      "file": "src/__init__.py",
+      "size": 33,
+      "sha256": "00fdf57a0e3b898103bc2d7df34b112d7b7ff16722da97c6cdff7f8536d5a6e8"
+    },
+    {
+      "file": "src/config.py",
+      "size": 751,
+      "sha256": "4cf4586335c86447f22428da992060b980af8ac28dcf3280b85488bffa7b257d"
+    },
+    {
+      "file": "src/data/__init__.py",
+      "size": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "file": "src/data/build_grid.py",
+      "size": 5682,
+      "sha256": "d44ffca82e9474bfd7ceb913b3cf44a92ce50dc595dbe7c32e5f10a6d951d432"
+    },
+    {
+      "file": "src/data/download_climate.py",
+      "size": 5795,
+      "sha256": "81c9154b34beace1a25c368f7fb99085045766fc45ef146f3ebd5ca51f1f84e3"
+    },
+    {
+      "file": "src/data/download_fire.py",
+      "size": 5982,
+      "sha256": "bdac3c4b81ffe1dc715c63f1c53c1e313c0de1433eb714c49fbcff0f8eaa23e0"
+    },
+    {
+      "file": "src/data/manifest.py",
+      "size": 4477,
+      "sha256": "9d0e066f07dbef1070f1ebd1c8f74fc6072cad7bb2a5b304f2c588b16cb84be2"
+    },
+    {
+      "file": "src/data/process_data.py",
+      "size": 7684,
+      "sha256": "bcb49ee7a837dbeffde00fcdafe5919977da79bd07884c8050f464aa46b94710"
+    },
+    {
+      "file": "src/features/__init__.py",
+      "size": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "file": "src/features/build_features.py",
+      "size": 10042,
+      "sha256": "0d015eda3ac6cc7210893c0496bbf209a78ed8900161c1e51ab9c8912dfd103a"
+    },
+    {
+      "file": "src/models/__init__.py",
+      "size": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "file": "src/models/calibration.py",
+      "size": 5657,
+      "sha256": "4f8c528530dc8791255bcc23d139f7c1f5afe8ce43377f51ba3b24dea69fc76a"
+    },
+    {
+      "file": "src/models/explain.py",
+      "size": 5983,
+      "sha256": "b4e4288e89f508eeb61030bf031f3c2743e035f153cc0058efaec39548737a59"
+    },
+    {
+      "file": "src/models/risk_tiers.py",
+      "size": 2851,
+      "sha256": "ea86db72ca359c40c0c4385b9407740a0b8b24c6cdb067b9496eed8e8311d589"
+    },
+    {
+      "file": "src/models/train.py",
+      "size": 46232,
+      "sha256": "1b99f668d9b31b46b3ff904492b1a8472906564a54cec50622c462a031151764"
+    },
+    {
+      "file": "src/models/train_lstm.py",
+      "size": 12919,
+      "sha256": "66453477a6b9ecf15624a7670219d05220a2ebfc5bd31bd83a99bd386e6571c3"
+    },
+    {
+      "file": "src/monitoring/__init__.py",
+      "size": 47,
+      "sha256": "0fc9106fa334f7afc164bab50878c12bd96da1f7c7338a0593ff30a5ac6c923d"
+    },
+    {
+      "file": "src/monitoring/drift_detector.py",
+      "size": 7562,
+      "sha256": "935628719600213b2b718d608b02a515172a0a2e8ab3881ac0f5e6333463f69b"
+    },
+    {
+      "file": "tests/test_pipeline.py",
+      "size": 25637,
+      "sha256": "83d1a089a6d570a48ef64ad15a3cee6b92c319e0a82e476951a9ecb3acf65c29"
+    }
+  ],
+  "datasets": [
+    {
+      "file": "data/processed/dataset.parquet",
+      "shape": [
+        1844876,
+        16
+      ],
+      "schema": {
+        "grid_id": "str",
+        "date": "datetime64[us]",
+        "fire_count": "int64",
+        "target_1d": "int64",
+        "target_3d": "int64",
+        "target_7d": "int64",
+        "target": "int64",
+        "T2M_MAX": "float64",
+        "T2M_MIN": "float64",
+        "RH2M": "float64",
+        "PRECTOTCORR": "float64",
+        "WS10M": "float64",
+        "grid_row": "int64",
+        "grid_col": "int64",
+        "lat_center": "float64",
+        "lon_center": "float64"
+      },
+      "missing": {
+        "grid_id": 0,
+        "date": 0,
+        "fire_count": 0,
+        "target_1d": 0,
+        "target_3d": 0,
+        "target_7d": 0,
+        "target": 0,
+        "T2M_MAX": 0,
+        "T2M_MIN": 0,
+        "RH2M": 0,
+        "PRECTOTCORR": 0,
+        "WS10M": 0,
+        "grid_row": 0,
+        "grid_col": 0,
+        "lat_center": 0,
+        "lon_center": 0
+      },
+      "date_min": "2016-01-01 00:00:00",
+      "date_max": "2025-12-24 00:00:00",
+      "duplicates": 0,
+      "cells": 506
+    },
+    {
+      "file": "data/processed/features.parquet",
+      "shape": [
+        1844876,
+        47
+      ],
+      "schema": {
+        "grid_id": "str",
+        "date": "datetime64[us]",
+        "target_1d": "int64",
+        "target_3d": "int64",
+        "target_7d": "int64",
+        "target": "int64",
+        "T2M_MAX": "float64",
+        "T2M_MIN": "float64",
+        "RH2M": "float64",
+        "PRECTOTCORR": "float64",
+        "WS10M": "float64",
+        "grid_row": "int64",
+        "grid_col": "int64",
+        "lat_center": "float64",
+        "lon_center": "float64",
+        "fire_count_7d": "float64",
+        "fire_count_14d": "float64",
+        "fire_count_30d": "float64",
+        "fire_count_lastyear": "float64",
+        "neighbor_fire_7d": "float64",
+        "T2M_MAX_mean_7d": "float64",
+        "T2M_MAX_mean_14d": "float64",
+        "T2M_MIN_mean_7d": "float64",
+        "T2M_MIN_mean_14d": "float64",
+        "RH2M_mean_7d": "float64",
+        "RH2M_mean_14d": "float64",
+        "PRECTOTCORR_mean_7d": "float64",
+        "PRECTOTCORR_mean_14d": "float64",
+        "precip_sum_7d": "float64",
+        "precip_sum_14d": "float64",
+        "precip_sum_30d": "float64",
+        "WS10M_mean_7d": "float64",
+        "WS10M_mean_14d": "float64",
+        "vpd": "float64",
+        "dtr": "float64",
+        "fwi_proxy": "float64",
+        "vpd_mean_7d": "float64",
+        "vpd_mean_14d": "float64",
+        "dtr_mean_7d": "float64",
+        "dtr_mean_14d": "float64",
+        "fwi_proxy_mean_7d": "float64",
+        "fwi_proxy_mean_14d": "float64",
+        "dry_days": "int64",
+        "month_sin": "float64",
+        "month_cos": "float64",
+        "doy_sin": "float64",
+        "doy_cos": "float64"
+      },
+      "missing": {
+        "grid_id": 0,
+        "date": 0,
+        "target_1d": 0,
+        "target_3d": 0,
+        "target_7d": 0,
+        "target": 0,
+        "T2M_MAX": 0,
+        "T2M_MIN": 0,
+        "RH2M": 0,
+        "PRECTOTCORR": 0,
+        "WS10M": 0,
+        "grid_row": 0,
+        "grid_col": 0,
+        "lat_center": 0,
+        "lon_center": 0,
+        "fire_count_7d": 0,
+        "fire_count_14d": 0,
+        "fire_count_30d": 0,
+        "fire_count_lastyear": 181148,
+        "neighbor_fire_7d": 0,
+        "T2M_MAX_mean_7d": 0,
+        "T2M_MAX_mean_14d": 0,
+        "T2M_MIN_mean_7d": 0,
+        "T2M_MIN_mean_14d": 0,
+        "RH2M_mean_7d": 0,
+        "RH2M_mean_14d": 0,
+        "PRECTOTCORR_mean_7d": 0,
+        "PRECTOTCORR_mean_14d": 0,
+        "precip_sum_7d": 0,
+        "precip_sum_14d": 0,
+        "precip_sum_30d": 0,
+        "WS10M_mean_7d": 0,
+        "WS10M_mean_14d": 0,
+        "vpd": 0,
+        "dtr": 0,
+        "fwi_proxy": 0,
+        "vpd_mean_7d": 0,
+        "vpd_mean_14d": 0,
+        "dtr_mean_7d": 0,
+        "dtr_mean_14d": 0,
+        "fwi_proxy_mean_7d": 0,
+        "fwi_proxy_mean_14d": 0,
+        "dry_days": 0,
+        "month_sin": 0,
+        "month_cos": 0,
+        "doy_sin": 0,
+        "doy_cos": 0
+      },
+      "date_min": "2016-01-01 00:00:00",
+      "date_max": "2025-12-24 00:00:00",
+      "duplicates": 0,
+      "cells": 506
+    },
+    {
+      "file": "data/processed/grid.csv",
+      "shape": [
+        506,
+        11
+      ],
+      "schema": {
+        "grid_id": "str",
+        "grid_row": "int64",
+        "grid_col": "int64",
+        "lat_center": "float64",
+        "lon_center": "float64",
+        "lat_min": "float64",
+        "lat_max": "float64",
+        "lon_min": "float64",
+        "lon_max": "float64",
+        "state_status": "str",
+        "state_coverage_pct": "float64"
+      },
+      "missing": {
+        "grid_id": 0,
+        "grid_row": 0,
+        "grid_col": 0,
+        "lat_center": 0,
+        "lon_center": 0,
+        "lat_min": 0,
+        "lat_max": 0,
+        "lon_min": 0,
+        "lon_max": 0,
+        "state_status": 0,
+        "state_coverage_pct": 0
+      },
+      "state_status": {
+        "inside": 266,
+        "outside": 154,
+        "partial": 86
+      }
+    }
+  ]
+}

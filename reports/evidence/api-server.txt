@@ -1,0 +1,41 @@
+INFO:     Started server process [4836]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8005 (Press CTRL+C to quit)
+INFO:     127.0.0.1:52855 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52868 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52869 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52870 - "GET /drift HTTP/1.1" 200 OK
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:52873 - "POST /predict HTTP/1.1" 200 OK
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:52888 - "POST /explain HTTP/1.1" 200 OK
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:52891 - "POST /predict HTTP/1.1" 200 OK
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:52892 - "POST /explain HTTP/1.1" 200 OK
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:52895 - "POST /predict HTTP/1.1" 200 OK
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:52896 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52897 - "POST /predict HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52900 - "POST /predict HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:52901 - "POST /predict HTTP/1.1" 503 Service Unavailable

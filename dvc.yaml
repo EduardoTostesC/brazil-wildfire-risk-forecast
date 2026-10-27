@@ -4,6 +4,7 @@ stages:
     deps:
       - config.yaml
       - src/data/build_grid.py
+      - src/config.py
       - data/geo/mato_grosso_ibge.geojson
     outs:
       - data/processed/grid.csv:
@@ -15,6 +16,11 @@ stages:
       - config.yaml
       - data/processed/grid.csv
       - src/data/process_data.py
+      - src/data/build_grid.py
+      - src/config.py
+      - data/raw/fire
+      - data/raw/climate
+      - data/geo/mato_grosso_ibge.geojson
     outs:
       - data/processed/dataset.parquet:
           cache: false
@@ -25,6 +31,8 @@ stages:
       - config.yaml
       - data/processed/dataset.parquet
       - src/features/build_features.py
+      - src/data/quality.py
+      - src/config.py
     outs:
       - data/processed/features.parquet:
           cache: false
@@ -37,6 +45,15 @@ stages:
       - src/models/train.py
       - src/models/calibration.py
       - src/models/risk_tiers.py
+      - src/models/inference.py
+      - src/models/evaluation.py
+      - src/models/tracking.py
+      - src/models/provenance.py
+      - src/data/manifest.py
+      - src/data/quality.py
+      - src/config.py
+      - requirements.lock
+      - data/processed/grid.csv
     outs:
       - models/lightgbm_model.joblib:
           cache: false
@@ -53,6 +70,16 @@ stages:
       - models/feature_cols.joblib:
           cache: false
       - models/training_metadata.json:
+          cache: false
+      - models/logistic_regression.joblib:
+          cache: false
+      - models/logistic_calibrator.joblib:
+          cache: false
+      - models/scaler.joblib:
+          cache: false
+      - reports/figures/calibration_curve.png:
+          cache: false
+      - reports/figures/error_analysis_breakdown.png:
           cache: false
     metrics:
       - reports/model_comparison.csv:
@@ -73,11 +100,81 @@ stages:
       - data/processed/grid.csv
       - reports/model_comparison.csv
       - src/models/train_lstm.py
+      - src/models/provenance.py
+      - src/config.py
+      - src/models/research.py
+      - src/models/train.py
+      - src/models/calibration.py
+      - src/models/evaluation.py
+      - src/models/inference.py
+      - src/features/build_features.py
+      - models/feature_cols.joblib
+      - models/training_metadata.json
+      - data/processed/features.parquet
+      - config.yaml
+      - requirements.lock
     outs:
       - models/lstm_model.pt:
           cache: false
+      - models/lstm_preprocessing.joblib:
+          cache: false
+      - models/lstm_calibrator.joblib:
+          cache: false
+      - reports/research/matched_lstm.csv:
+          cache: false
+      - reports/research/matched_lstm_metadata.json:
+          cache: false
+      - reports/research/matched_lstm_test_keys.parquet:
+          cache: false
     metrics:
       - reports/lstm_comparison.csv:
+          cache: false
+
+  research:
+    cmd: python -m src.models.research
+    deps:
+      - config.yaml
+      - requirements.lock
+      - src/config.py
+      - src/models/research.py
+      - src/models/provenance.py
+      - src/models/train.py
+      - src/models/calibration.py
+      - src/models/evaluation.py
+      - src/models/inference.py
+      - src/data/manifest.py
+      - src/data/quality.py
+      - src/data/build_grid.py
+      - data/geo/mato_grosso_ibge.geojson
+      - data/processed/features.parquet
+      - data/processed/grid.csv
+      - data/raw/climate
+      - models/feature_cols.joblib
+      - models/lightgbm_model.joblib
+      - models/platt_calibrator.joblib
+      - models/training_metadata.json
+    outs:
+      - reports/research/no_recent_fire.csv:
+          cache: false
+      - reports/research/spatial_generalization.csv:
+          cache: false
+      - reports/research/ablation.csv:
+          cache: false
+      - reports/research/climate_slices.csv:
+          cache: false
+      - reports/research/oracle.csv:
+          cache: false
+      - reports/research/yearly_prevalence.csv:
+          cache: false
+      - reports/research/baselines.csv:
+          cache: false
+      - reports/research/bootstrap_sensitivity.json:
+          cache: false
+      - reports/research/metadata.json:
+          cache: false
+      - reports/research/simple_logistic.joblib:
+          cache: false
+      - reports/research/simple_logistic_calibrator.joblib:
           cache: false
 
   explain:
@@ -85,8 +182,19 @@ stages:
     deps:
       - models/lightgbm_model.joblib
       - src/models/explain.py
+      - src/models/inference.py
+      - src/data/build_grid.py
+      - src/config.py
+      - config.yaml
+      - models/feature_cols.joblib
+      - data/processed/features.parquet
+      - data/geo/mato_grosso_ibge.geojson
     outs:
       - reports/figures/shap_summary.png:
+          cache: false
+      - reports/figures/shap_bar.png:
+          cache: false
+      - reports/feature_importance.csv:
           cache: false
 
   drift:
@@ -94,9 +202,76 @@ stages:
     deps:
       - data/processed/features.parquet
       - src/monitoring/drift_detector.py
+      - src/data/build_grid.py
+      - src/config.py
+      - config.yaml
+      - data/geo/mato_grosso_ibge.geojson
     outs:
       - reports/figures/drift_summary.png:
           cache: false
     metrics:
       - reports/drift_report.json:
+          cache: false
+
+  decision_diagnostics:
+    cmd: python -m src.reporting.decision_diagnostics
+    deps:
+      - src/reporting/decision_diagnostics.py
+      - src/models/evaluation.py
+      - src/models/train.py
+      - src/models/inference.py
+      - src/models/calibration.py
+      - src/config.py
+      - config.yaml
+      - models/training_metadata.json
+      - models/lightgbm_model.joblib
+      - models/platt_calibrator.joblib
+      - data/processed/features.parquet
+      - data/processed/grid.csv
+    outs:
+      - reports/research/frozen_threshold_diagnostics.csv:
+          cache: false
+      - reports/research/no_fire_paired_difference.json:
+          cache: false
+
+  research_figures:
+    cmd: python -m src.reporting.plot_research
+    deps:
+      - src/reporting/plot_research.py
+      - src/config.py
+      - reports/research/no_recent_fire.csv
+      - reports/research/spatial_generalization.csv
+      - reports/research/oracle.csv
+      - reports/research/matched_lstm.csv
+    outs:
+      - reports/figures/research_summary.png:
+          cache: false
+      - reports/figures/research_summary.svg:
+          cache: false
+      - reports/figures/lstm_vs_lgbm.png:
+          cache: false
+
+  artifact_bundle:
+    cmd: python -m src.models.artifacts
+    deps:
+      - src/models/artifacts.py
+      - src/data/manifest.py
+      - src/data/quality.py
+      - src/config.py
+      - models/feature_cols.joblib
+      - models/lightgbm_model.joblib
+      - models/lightgbm_1d.joblib
+      - models/lightgbm_3d.joblib
+      - models/platt_calibrator.joblib
+      - models/platt_calibrator_1d.joblib
+      - models/platt_calibrator_3d.joblib
+      - models/logistic_regression.joblib
+      - models/logistic_calibrator.joblib
+      - models/scaler.joblib
+      - models/lstm_model.pt
+      - models/lstm_calibrator.joblib
+      - models/lstm_preprocessing.joblib
+      - models/training_metadata.json
+    outs:
+      - models/artifact_manifest.json:
           cache: false

@@ -1,4 +1,4 @@
-"""Streamlit dashboard — Brazil Wildfire Risk Forecast (Block D).
+"""Streamlit dashboard — retrospective satellite hotspot risk in Mato Grosso.
 
 Multi-tab interactive dashboard featuring:
 - Tab 1: Interactive Folium risk map with horizon selector and date picker.
@@ -8,11 +8,9 @@ Multi-tab interactive dashboard featuring:
 - Tab 5: About — data sources, methodology, and model performance.
 """
 
+import os
 import sys
-import warnings
 from pathlib import Path
-
-warnings.filterwarnings("ignore")
 
 # Add project root to path
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +39,8 @@ st.set_page_config(
     },
 )
 
+from src.data.build_grid import _load_ibge_polygon, build_grid
+from src.models.inference import calibrated_probabilities, feature_matrix
 from src.models.risk_tiers import DEFAULT_RISK_CONFIG
 
 # ── Theme constants ───────────────────────────────────────────────────────────
@@ -81,37 +81,24 @@ def _load_dataframe():
     """Load the feature dataset (full or sample fallback)."""
     full = _PROJECT_ROOT / "data" / "processed" / "features.parquet"
     sample = _PROJECT_ROOT / "data" / "sample" / "features_sample.parquet"
-    is_sample = not full.exists()
+    is_sample = os.environ.get("WILDFIRE_USE_SAMPLE") == "1" or not full.exists()
     path = sample if is_sample else full
     if not path.exists():
         return None, is_sample
     df = pd.read_parquet(path)
     df["date"] = pd.to_datetime(df["date"])
+    grid = build_grid()
+    valid = grid.loc[grid.state_status != "outside", "grid_id"]
+    df = df[df.grid_id.isin(valid)]
+    df = df[df.date >= "2024-01-01"]
     return df, is_sample
 
 
 def _add_predictions(df: pd.DataFrame, models, calibrators, feature_cols, horizon: int) -> pd.DataFrame:
     """Add probability and risk_level columns for a given forecast horizon."""
-    from scipy.special import logit
-
     model = models.get(horizon)
     calibrator = calibrators.get(horizon)
-    if model is None or not feature_cols:
-        return df
-
-    X = df[feature_cols].values.astype(np.float32)
-    X = np.nan_to_num(X, nan=0.0)
-    raw = model.predict_proba(X)[:, 1]
-
-    if calibrator is not None:
-        if hasattr(calibrator, "calibrate"):
-            prob = calibrator.calibrate(raw)
-        else:
-            logits = logit(np.clip(raw, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-            res = calibrator.predict_proba(logits)
-            prob = res[:, 1] if res.ndim == 2 else res.ravel()
-    else:
-        prob = raw
+    prob = calibrated_probabilities(model, calibrator, feature_matrix(df, feature_cols))
 
     df = df.copy()
     df["probability"] = prob
@@ -150,9 +137,10 @@ def _build_risk_map(df_day: pd.DataFrame, selected_grid: str | None = None) -> f
 
     clat = df_day["lat_center"].mean()
     clon = df_day["lon_center"].mean()
-    m = folium.Map(location=[clat, clon], zoom_start=6, tiles="CartoDB positron")
+    m = folium.Map(location=[clat, clon], zoom_start=6, tiles="OpenStreetMap")
 
-    folium.TileLayer("OpenStreetMap", name="OpenStreetMap", show=False).add_to(m)
+    folium.GeoJson(_load_ibge_polygon(_PROJECT_ROOT).__geo_interface__, name="Archived IBGE state boundary",
+                   style_function=lambda feature: {"color": "#34495e", "weight": 2, "fillOpacity": 0}).add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
 
     for _, row in df_day.iterrows():
@@ -186,14 +174,14 @@ def _build_risk_map(df_day: pd.DataFrame, selected_grid: str | None = None) -> f
             ),
         ).add_to(m)
 
-    legend_html = """
+    legend_html = f"""
     <div style="position:fixed;bottom:30px;left:30px;z-index:1000;
                 background:white;padding:12px 16px;border-radius:8px;
                 border:1px solid #ccc;font-size:13px;line-height:1.6;">
         <b>🔥 Fire Risk</b><br>
-        <span style="color:#27ae60">●</span> Low (&lt;20%)<br>
-        <span style="color:#f39c12">●</span> Medium (20-50%)<br>
-        <span style="color:#e74c3c">●</span> High (&gt;50%)
+        <span style="color:#27ae60">●</span> Low (&lt;{DEFAULT_RISK_CONFIG.low_cutoff:.0%})<br>
+        <span style="color:#f39c12">●</span> Medium ({DEFAULT_RISK_CONFIG.low_cutoff:.0%}–{DEFAULT_RISK_CONFIG.high_cutoff:.0%})<br>
+        <span style="color:#e74c3c">●</span> High (≥{DEFAULT_RISK_CONFIG.high_cutoff:.0%})
     </div>
     """
     m.get_root().html.add_child(folium.Element(legend_html))
@@ -219,9 +207,7 @@ def tab_risk_map(df: pd.DataFrame, is_sample: bool, models, calibrators, feature
         index=0,
     )
 
-    df_pred = _add_predictions(df, models, calibrators, feature_cols, horizon)
-
-    available_dates = sorted(df_pred["date"].dt.date.unique())
+    available_dates = sorted(df["date"].dt.date.unique())
     default_idx = min(len(available_dates) * 3 // 4, len(available_dates) - 1)
     selected_date = st.sidebar.date_input(
         "📅 Date",
@@ -236,7 +222,7 @@ def tab_risk_map(df: pd.DataFrame, is_sample: bool, models, calibrators, feature
         default=["Low", "Medium", "High"],
     )
 
-    df_day = df_pred[df_pred["date"].dt.date == selected_date].copy()
+    df_day = _add_predictions(df[df["date"].dt.date == selected_date], models, calibrators, feature_cols, horizon)
     if risk_filter and "risk_level" in df_day.columns:
         df_day = df_day[df_day["risk_level"].isin(risk_filter)]
 
@@ -288,8 +274,8 @@ def tab_risk_map(df: pd.DataFrame, is_sample: bool, models, calibrators, feature
 def tab_ranking(df: pd.DataFrame, models, calibrators, feature_cols):
     st.markdown("### 🏆 Highest-Risk Cell Ranking")
     st.markdown(
-        "Top cells by mean fire probability across the **test period (2024–2025)**. "
-        "Cells ranked highest signal persistent structural risk (vegetation, chronic drought, ignition history)."
+        "Top cells by mean predicted probability over the available historical interval. "
+        "In demonstration mode this interval is a selected week, not the full evaluation period."
     )
 
     horizon = st.selectbox(
@@ -337,7 +323,7 @@ def tab_ranking(df: pd.DataFrame, models, calibrators, feature_cols):
         st.markdown("#### 📍 Top Cells on Map")
         m = folium.Map(
             location=[agg["lat"].mean(), agg["lon"].mean()],
-            zoom_start=6, tiles="CartoDB positron",
+            zoom_start=6, tiles="OpenStreetMap",
         )
         for i, row in agg.iterrows():
             prob = float(row["mean_prob"])
@@ -403,9 +389,9 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
 
     st.markdown("### 🔍 Local SHAP Explanation — Why this cell is at risk?")
     st.markdown(
-        "Select any grid cell to see which variables are **pushing the fire probability up or down** "
-        "for a specific date. SHAP (SHapley Additive exPlanations) distributes the model's output "
-        "fairly among all features using cooperative game theory."
+        "Inspect feature contributions to the **raw model log-odds** for an exact cell/date. "
+        "This tab uses the dedicated **7-day model**; the map and ranking have their own horizon selectors. "
+        "Contributions are not a decomposition of calibrated probability or a causal effect."
     )
 
     model = models.get(7)
@@ -431,18 +417,11 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
     row_df = df[mask]
 
     if row_df.empty:
-        # Find closest date for this cell
-        cell_df = df[df["grid_id"] == sel_cell]
-        if cell_df.empty:
-            st.warning("No data for this cell.")
-            return
-        closest_idx = (cell_df["date"].dt.date.apply(lambda d: abs((d - sel_date).days))).idxmin()
-        row_df = cell_df.loc[[closest_idx]]
-        st.warning(f"No data for {sel_date} — showing closest available date: {row_df['date'].dt.date.iloc[0]}")
+        st.warning(f"No exact historical record for {sel_cell} on {sel_date}.")
+        return
 
     # Feature vector for this row
-    X_row = row_df[feature_cols].values.astype(np.float32)
-    X_row = np.nan_to_num(X_row, nan=0.0)
+    X_row = feature_matrix(row_df, feature_cols)
 
     with st.spinner("Computing SHAP values…"):
         explainer = shap.TreeExplainer(model)
@@ -451,21 +430,9 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
             shap_vals = shap_vals[1]  # positive class for LightGBM
         sv = shap_vals[0]  # shape (n_features,)
 
-    from scipy.special import logit
     calibrator = calibrators.get(7)
-    raw_prob = float(model.predict_proba(X_row)[0, 1])
-    if calibrator is not None:
-        try:
-            if hasattr(calibrator, "calibrate"):
-                prob = float(calibrator.calibrate(np.array([raw_prob]))[0])
-            else:
-                logit_val = logit(np.clip(raw_prob, 1e-6, 1 - 1e-6)).reshape(-1, 1)
-                res = calibrator.predict_proba(logit_val)
-                prob = float(res[0, 1] if res.ndim == 2 else res[0])
-        except Exception:
-            prob = raw_prob
-    else:
-        prob = raw_prob
+    prob = float(calibrated_probabilities(model, calibrator, X_row)[0])
+    st.caption("SHAP explains raw model log-odds before Platt calibration. It does not decompose the calibrated probability or establish causality.")
     level = "High" if prob >= RISK_THRESHOLDS["Medium"] else "Medium" if prob >= RISK_THRESHOLDS["Low"] else "Low"
 
     # Summary metrics
@@ -524,12 +491,12 @@ def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
 
 | SHAP value | Meaning |
 |---|---|
-| **Positive** 🔴 | This feature value **increases** the predicted fire probability for this cell/date |
-| **Negative** 🔵 | This feature value **decreases** the predicted fire probability for this cell/date |
+| **Positive** 🔴 | Positive contribution to the raw model log-odds for this cell/date |
+| **Negative** 🔵 | Negative contribution to the raw model log-odds for this cell/date |
 | **Magnitude** | Larger absolute value = stronger influence |
 
-**Example:** if `dry_days = 25` has SHAP = +0.15, it means the long dry spell is pushing
-the probability up by approximately +0.15 log-odds relative to the model baseline.
+**Example:** SHAP = +0.15 contributes +0.15 to the raw log-odds relative to the model
+baseline. It is not a +0.15 change in calibrated probability or evidence of causality.
         """)
 
 
@@ -539,9 +506,10 @@ the probability up by approximately +0.15 log-odds relative to the model baselin
 def tab_drift():
     st.markdown("### 🩺 Model & Data Health Dashboard")
     st.markdown(
-        "Monitors whether the climatological input distributions in the **operational period (2024–2025)** "
-        "have shifted relative to the **training baseline (2016–2023)**. "
-        "Significant drift signals that retraining may be needed."
+        "Compares historical input distributions in **2024–2025** with a "
+        "**2016–2023 reference that includes training and calibration**. "
+        "This is a stored retrospective report, without continuous monitoring. "
+        "Covariate shift alone does not establish concept drift or worse predictions."
     )
 
     drift = _load_drift_report()
@@ -566,17 +534,19 @@ def tab_drift():
     c4.metric("🚨 Critical Drift", critical, delta=None)
 
     if critical > 0:
-        st.error(f"🚨 {critical} feature(s) with critical drift detected. Retraining is recommended.")
+        st.info(f"{critical} feature(s) exceed the conventional PSI 0.25 cutoff. This does not establish performance degradation.")
     elif moderate > 0:
-        st.warning(f"⚠️ {moderate} feature(s) with moderate drift. Monitor closely and consider retraining.")
+        st.info(f"{moderate} feature(s) fall in the conventional PSI 0.10–0.25 interval.")
     else:
-        st.success("✅ All monitored features are within stable distribution bounds.")
+        st.info("All compared features have PSI below 0.10; predictive stability is not established by this result.")
+
+    st.caption("PSI categories are descriptive conventions. KS reference p-values assume independent observations; dependent cell-days violate that assumption.")
 
     # Comparison metadata
     st.markdown(
         f"**Baseline:** `{drift.get('baseline_period', '2016–2023')}` "
         f"— {drift.get('baseline_samples', 0):,} samples  \n"
-        f"**Operational:** `{drift.get('current_period', '2024–2025')}` "
+        f"**Historical comparison:** `{drift.get('current_period', '2024–2025')}` "
         f"— {drift.get('current_samples', 0):,} samples"
     )
 
@@ -609,15 +579,15 @@ def tab_drift():
         st.plotly_chart(fig, use_container_width=True)
 
         # Mean comparison table
-        st.markdown("#### 📊 Feature Mean Shift (Training → Operational)")
+        st.markdown("#### 📊 Historical Feature Mean Comparison")
         shift_df = feat_df[["feature", "baseline_mean", "current_mean", "PSI", "KS_statistic", "KS_pvalue", "status"]].copy()
         shift_df["mean_delta"] = shift_df["current_mean"] - shift_df["baseline_mean"]
         shift_df["mean_delta_pct"] = (shift_df["mean_delta"] / shift_df["baseline_mean"].abs().replace(0, 1)) * 100
-        shift_df.columns = ["Feature", "Baseline Mean", "Operational Mean", "PSI", "KS Stat", "KS p-value", "Status", "Δ Mean", "Δ %"]
+        shift_df.columns = ["Feature", "Baseline Mean", "Comparison Mean", "PSI", "KS Stat", "KS reference p-value", "Status", "Δ Mean", "Δ %"]
         st.dataframe(
             shift_df.style.format({
-                "Baseline Mean": "{:.3f}", "Operational Mean": "{:.3f}",
-                "PSI": "{:.4f}", "KS Stat": "{:.4f}", "KS p-value": "{:.2e}",
+                "Baseline Mean": "{:.3f}", "Comparison Mean": "{:.3f}",
+                "PSI": "{:.4f}", "KS Stat": "{:.4f}", "KS reference p-value": "{:.2e}",
                 "Δ Mean": "{:+.3f}", "Δ %": "{:+.1f}%",
             }),
             use_container_width=True,
@@ -628,8 +598,8 @@ def tab_drift():
     if wf is not None:
         st.markdown("#### 📈 Model Stability — Walk-Forward Expanding Window")
         st.markdown(
-            "Each year is used as the test set, with all prior years for training. "
-            "Stable PR-AUC across years indicates the model generalises well over time."
+            "Each year is evaluated after training on prior years with target-window purging. "
+            "AP depends on yearly prevalence; these historical comparisons do not establish stability in future years."
         )
         fig2 = go.Figure()
         fig2.add_trace(go.Scatter(
@@ -670,7 +640,7 @@ def tab_about():
     comp = _load_comparison_csv("model_comparison.csv")
     horizon_comp = _load_comparison_csv("multi_horizon_comparison.csv")
 
-    st.markdown("#### 🏆 Model Benchmark (Out-of-Time Test: 2024–2025, n=366,344)")
+    st.markdown("#### Model benchmark — retrospective evaluation; consult run metadata for dates and sample counts")
     if comp is not None:
         comp_display = comp.copy()
         for col in ["PR-AUC", "ROC-AUC", "Brier", "Recall@P50"]:
@@ -689,9 +659,7 @@ def tab_about():
     fig_cols = st.columns(2)
     figs = [
         ("calibration_curve.png", "Probability Calibration (Reliability Diagram)"),
-        ("accuracy_by_month.png", "Operational Accuracy by Month"),
-        ("accuracy_by_region.png", "Accuracy by Spatial Region (MT)"),
-        ("lstm_vs_lgbm.png", "LSTM vs LightGBM PR/ROC Curves"),
+        ("error_analysis_breakdown.png", "Retrospective evaluation by month, year and region"),
         ("shap_bar.png", "SHAP Global Feature Importance"),
         ("shap_summary.png", "SHAP Beeswarm Summary"),
     ]
@@ -706,22 +674,22 @@ def tab_about():
     st.markdown("""
 | Source | Variable | Period | License |
 |--------|----------|--------|---------|
-| **INPE Queimadas** (AQUA_M-T satellite) | Fire hotspots | 2016–2025 | Brazilian Open Government Data |
+| **INPE Queimadas** (reference-product archive) | Fire hotspots | 2016–2025 | Public access; verify redistribution terms before republishing |
 | **NASA POWER** (MERRA-2 reanalysis) | T2M_MAX, T2M_MIN, RH2M, PRECTOTCORR, WS10M | 2016–2025 | NASA Open Data Policy |
     """)
 
     st.markdown("#### ⚠️ Limitations")
     st.markdown("""
 1. **Cloud cover**: MODIS cannot detect fires under dense clouds.
-2. **Orbital frequency**: AQUA observes each cell once/day (~1:30 PM local time).
+2. **Sensor coverage**: The reference product does not establish complete daily observation of every cell.
 3. **Spatial granularity**: A 0.5° cell (~56 km) indicates aggregate area risk, not a precise ignition point.
-4. **Pilot scope**: Currently limited to Mato Grosso state; generalisation to other biomes requires retraining.
+4. **Pilot scope**: Evaluation is limited to Mato Grosso; transfer to other states or biomes requires separate validation.
     """)
 
     st.markdown("#### 🤝 Responsible Use")
     st.warning(
-        "This is an academic decision-support tool. "
-        "**Do not use as a substitute for official emergency warnings** from INPE, CENSIPAM, IBAMA, or ICMBio."
+        "This is a retrospective research prototype. Visual bands are conventions. "
+        "**Do not use this prototype to guide emergency response or resource mobilization.**"
     )
 
     st.markdown("---")
@@ -748,12 +716,16 @@ def main():
     st.title("🔥 Brazil Wildfire Risk Forecast")
     st.caption(
         "LightGBM + Platt Calibration · INPE fire data (2016–2025) · NASA POWER climate reanalysis · "
-        "Mato Grosso pilot region · **PR-AUC: 0.6301 · ROC-AUC: 0.8833 · Brier: 0.0927**"
+        "Mato Grosso · Historical replay / Análise retrospectiva"
     )
 
     # Load shared resources
     models, calibrators, feature_cols = _load_models()
     df, is_sample = _load_dataframe()
+    st.info("Historical replay / Replay histórico: observed daily data; historical publication times are unknown. Operational forecasts are unavailable. Visual risk tiers are conventions, not validated action thresholds.")
+    if set(models) != {1, 3, 7} or set(calibrators) != {1, 3, 7} or not feature_cols:
+        st.error("Required model/calibrator pairs are unavailable.")
+        return
 
     if df is None:
         st.error("❌ No data found. Please run: `make all` to download and process the full dataset.")

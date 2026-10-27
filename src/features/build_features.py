@@ -1,9 +1,9 @@
 """Feature engineering for wildfire risk prediction.
 
-All features use ONLY information available up to day D (the prediction date).
-No future data leaks into features. This is enforced by:
+Features use observations dated no later than D in retrospective replay.
+Observation date does not establish publication or operational availability:
 1. All rolling windows look BACKWARD in time.
-2. Fire count on day D itself IS available (the satellite has already passed).
+2. Fire counts include day D; their historical publication time is unknown.
 3. The target uses days D+1 to D+7 (strictly future).
 
 Features created:
@@ -24,18 +24,15 @@ from src.config import get_project_root, load_config
 def validate_meteorological_variables(df: pd.DataFrame) -> pd.DataFrame:
     """Validate and enforce physical atmospheric boundaries on meteorological inputs."""
     df = df.copy()
-    if "RH2M" in df.columns:
-        df["RH2M"] = np.clip(df["RH2M"], 0.0, 100.0)
-    if "WS10M" in df.columns:
-        df["WS10M"] = np.clip(df["WS10M"], 0.0, None)
-    if "PRECTOTCORR" in df.columns:
-        df["PRECTOTCORR"] = np.clip(df["PRECTOTCORR"], 0.0, None)
+    from src.data.quality import CLIMATE_LIMITS
+    for column, (low, high) in CLIMATE_LIMITS.items():
+        if column in df:
+            values = pd.to_numeric(df[column], errors="coerce")
+            df[column] = values.where(np.isfinite(values) & values.between(low, high))
     if "T2M_MAX" in df.columns and "T2M_MIN" in df.columns:
         inverted = df["T2M_MAX"] < df["T2M_MIN"]
         if inverted.any():
-            t_max_orig = df.loc[inverted, "T2M_MAX"].copy()
-            df.loc[inverted, "T2M_MAX"] = df.loc[inverted, "T2M_MIN"]
-            df.loc[inverted, "T2M_MIN"] = t_max_orig
+            df.loc[inverted, ["T2M_MAX", "T2M_MIN"]] = np.nan
     return df
 
 
@@ -60,7 +57,7 @@ def compute_fwi_proxy(t_max: np.ndarray, ws: np.ndarray, rh: np.ndarray) -> np.n
     )
 
 
-def build_features(config: dict | None = None) -> pd.DataFrame:
+def engineer_features(df: pd.DataFrame, config: dict | None = None) -> pd.DataFrame:
     """Load the processed dataset and add engineered features.
 
     Args:
@@ -70,12 +67,12 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
         DataFrame with all features added, saved to data/processed/features.parquet.
     """
     cfg = config or load_config()
-    root = get_project_root()
-
-    # Load processed dataset
-    ds_path = root / "data" / "processed" / "dataset.parquet"
-    df = pd.read_parquet(ds_path)
     df = df.sort_values(["grid_id", "date"]).reset_index(drop=True)
+    if df.duplicated(["grid_id", "date"]).any():
+        raise ValueError("Duplicate cell/date observations")
+    gaps = df.groupby("grid_id")["date"].diff().dropna()
+    if not gaps.eq(pd.Timedelta(days=1)).all():
+        raise ValueError("Feature windows require consecutive daily observations")
     df = validate_meteorological_variables(df)
 
     print(f"Loaded dataset: {df.shape}")
@@ -86,13 +83,13 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
     for window in [7, 14, 30]:
         df[f"fire_count_{window}d"] = (
             df.groupby("grid_id")["fire_count"]
-            .transform(lambda s: s.rolling(window, min_periods=1).sum())
+            .transform(lambda s: s.rolling(window, min_periods=window).sum())
         )
 
     # Same period last year (365 days ago ± 7 days window)
     df["fire_count_lastyear"] = (
         df.groupby("grid_id")["fire_count"]
-        .transform(lambda s: s.shift(358).rolling(14, min_periods=1).sum())
+        .transform(lambda s: s.shift(358).rolling(14, min_periods=14).sum())
     )
 
     # --- 2. Neighbor fire counts ---
@@ -109,14 +106,14 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
         for window in [7, 14]:
             df[f"{var}_mean_{window}d"] = (
                 df.groupby("grid_id")[var]
-                .transform(lambda s: s.rolling(window, min_periods=1).mean())
+                .transform(lambda s: s.rolling(window, min_periods=window).mean())
             )
         if var == "PRECTOTCORR":
             # Accumulated precipitation
             for window in [7, 14, 30]:
                 df[f"precip_sum_{window}d"] = (
                     df.groupby("grid_id")[var]
-                    .transform(lambda s: s.rolling(window, min_periods=1).sum())
+                    .transform(lambda s: s.rolling(window, min_periods=window).sum())
                 )
 
     # --- 4. Biophysical & Fire Weather Indices ---
@@ -126,7 +123,7 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
         df["dtr"] = compute_dtr(df["T2M_MAX"].values, df["T2M_MIN"].values)
         df["fwi_proxy"] = compute_fwi_proxy(
             df["T2M_MAX"].values,
-            df["WS10M"].values if "WS10M" in df.columns else np.zeros(len(df)),
+            df["WS10M"].values if "WS10M" in df.columns else np.full(len(df), np.nan),
             df["RH2M"].values,
         )
 
@@ -134,22 +131,18 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
             for window in [7, 14]:
                 df[f"{col}_mean_{window}d"] = (
                     df.groupby("grid_id")[col]
-                    .transform(lambda s: s.rolling(window, min_periods=1).mean())
+                    .transform(lambda s: s.rolling(window, min_periods=window).mean())
                 )
 
     # --- 5. Dry spell (consecutive days without rain) ---
     print("  [5/6] Dry spell (missing precipitation separated from 0mm)...")
     if "PRECTOTCORR" in df.columns:
-        precip_valid = df["PRECTOTCORR"].notna()
-        # Strictly positive rain test: dry day requires valid observation < 1.0mm
-        df["is_dry"] = np.where(precip_valid, (df["PRECTOTCORR"] < 1.0).astype(int), 0)
         df["dry_days"] = (
-            df.groupby("grid_id")["is_dry"]
-            .transform(_consecutive_count)
+            df.groupby("grid_id")["PRECTOTCORR"]
+            .transform(observed_dry_spell)
         )
-        df = df.drop(columns=["is_dry"])
     else:
-        df["dry_days"] = 0
+        df["dry_days"] = np.nan
 
     # --- 6. Seasonality and position ---
     print("  [6/6] Seasonality and position...")
@@ -171,20 +164,37 @@ def build_features(config: dict | None = None) -> pd.DataFrame:
     cols_to_drop = [c for c in cols_to_drop if c in df.columns]
     df = df.drop(columns=cols_to_drop)
 
-    # --- Save ---
-    out_path = root / "data" / "processed" / "features.parquet"
-    df.to_parquet(out_path, index=False)
-
     feature_cols = [
         c for c in df.columns
         if not c.startswith("target") and c not in ("grid_id", "date", "grid_row", "grid_col")
     ]
-    print(f"\nFeatures saved: {out_path}")
     print(f"  Shape: {df.shape}")
     print(f"  Feature count: {len(feature_cols)}")
     print(f"  Features: {feature_cols}")
 
     return df
+
+
+def build_features(config: dict | None = None) -> pd.DataFrame:
+    root = get_project_root()
+    df = engineer_features(pd.read_parquet(root / "data/processed/dataset.parquet"), config)
+    df.to_parquet(root / "data/processed/features.parquet", index=False)
+    return df
+
+
+def observed_dry_spell(series: pd.Series) -> pd.Series:
+    """A gap makes spell length unknown until an observed wet day resets it."""
+    count = np.nan
+    output = []
+    for value in series:
+        if pd.isna(value):
+            count = np.nan
+        elif value >= 1:
+            count = 0.0
+        else:
+            count += 1
+        output.append(count)
+    return pd.Series(output, index=series.index, dtype=float)
 
 
 def _consecutive_count(series: pd.Series) -> pd.Series:
@@ -200,17 +210,14 @@ def _add_neighbor_features(df: pd.DataFrame, cfg: dict) -> None:
     """Add fire counts from neighboring grid cells (in-place).
 
     For each cell, sums fire_count_7d from the 8 surrounding cells.
-    This captures spatial fire spread patterns.
+    This represents neighboring detection history; it does not identify fire propagation.
     """
     # Build a lookup of (row, col) neighbors
     if "grid_row" not in df.columns or "grid_col" not in df.columns:
-        df["neighbor_fire_7d"] = 0
-        return
+        raise ValueError("Grid coordinates required for neighbor features")
 
     # Pivot: date × grid_id → fire_count_7d
-    fire_7d_pivot = df.pivot_table(
-        index="date", columns="grid_id", values="fire_count_7d", fill_value=0
-    )
+    fire_7d_pivot = df.pivot(index="date", columns="grid_id", values="fire_count_7d")
 
     # For each cell, identify its 8 neighbors and sum
     grid_lookup = df[["grid_id", "grid_row", "grid_col"]].drop_duplicates()
@@ -232,7 +239,7 @@ def _add_neighbor_features(df: pd.DataFrame, cfg: dict) -> None:
     neighbor_sums = {}
     for gid, neighbors in neighbor_map.items():
         if neighbors:
-            neighbor_sums[gid] = fire_7d_pivot[neighbors].sum(axis=1)
+            neighbor_sums[gid] = fire_7d_pivot[neighbors].sum(axis=1, skipna=False)
         else:
             neighbor_sums[gid] = pd.Series(0, index=fire_7d_pivot.index)
 
@@ -249,7 +256,6 @@ def _add_neighbor_features(df: pd.DataFrame, cfg: dict) -> None:
     df["neighbor_fire_7d"] = df.set_index(["grid_id", "date"]).join(
         neighbor_melted, how="left"
     )["neighbor_fire_7d"].values
-    df["neighbor_fire_7d"] = df["neighbor_fire_7d"].fillna(0)
 
 
 if __name__ == "__main__":

@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "brazil-wildfire-risk-forecast"
-version = "1.0.0"
-description = "Production ML pipeline predicting 1-day, 3-day, and 7-day wildfire risk across regular geographic grid cells in Mato Grosso, Brazil."
+version = "2.1.0"
+description = "Retrospective satellite hotspot risk experiments and historical replay for Mato Grosso, Brazil."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 authors = [
     { name = "Eduardo Tostes" }
 ]
@@ -37,5 +37,12 @@ python_files = ["test_*.py"]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::UserWarning",
+]
+markers = [
+    "artifacts: inference using tracked model and sample artifacts",
+    "integration: controlled end-to-end component integration",
+    "pipeline: full historical data and training required",
+    "download: external source acquisition required",
+    "performance: measured performance rather than correctness",
 ]
 

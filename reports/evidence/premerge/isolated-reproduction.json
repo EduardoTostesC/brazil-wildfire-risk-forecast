@@ -1,0 +1,19 @@
+{
+  "reference": "eaef23b6d378d7f5fbfb5580a10940fdd88b4813",
+  "checkout": "C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\.venv\\premerge-replay-eaef23b",
+  "raw_input_files_linked_read_only_by_convention": 517,
+  "command": [
+    "python",
+    "-m",
+    "dvc",
+    "repro",
+    "--force"
+  ],
+  "note": "Local independent checkout, not an external replication. Raw input hardlinks are read; outputs are separate files.",
+  "exit_code": 0,
+  "status": {
+    "exit_code": 0,
+    "stdout": "{}\n",
+    "stderr": ""
+  }
+}

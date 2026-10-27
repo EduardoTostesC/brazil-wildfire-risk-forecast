@@ -1,0 +1,9 @@
+Source: https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40420262000
+Commit: 3478d9495738bc91e65ba5ea856fb32cf61a90c4
+Job: 121913490008
+Status: completed/success (API verified)
+Verbatim excerpts:
+2026-10-26T23:35:06.1591239Z #10 103.6 No broken requirements found.
+2026-10-26T23:36:53.6698757Z {"status":"ok","model_loaded":true,"available_horizons":[1,3,7],"supported_inference_modes":{"historical_replay":"Exact cell/date lookup; publication time unknown","operational_forecast":"Unavailable; not implemented"}}Model bundle verified
+2026-10-26T23:36:54.2357071Z Verified 12 actual HTTP responses
+

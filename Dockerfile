@@ -1,4 +1,5 @@
-FROM python:3.12-slim
+# Exact multi-platform base resolved and exercised by the audit CI.
+FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
 
 # Prevent Python from writing .pyc files and buffer stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -13,11 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies: install CPU-only PyTorch first to reduce image size
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# The CPU lock includes hashes for the PyTorch CPU wheels as well.
+COPY requirements-cpu.lock .
+RUN pip install --no-cache-dir --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-cpu.lock && pip check
 
 # Create non-root system user for security compliance
 RUN useradd -m -u 1000 appuser && \

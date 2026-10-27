@@ -1,0 +1,636 @@
+commit d4268b198cac08a7e224f36d39651626a1d5b717
+Author:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+AuthorDate: Wed Oct 21 20:25:42 2026 -0300
+Commit:     Eduardo Tostes <eduardotostesc@users.noreply.github.com>
+CommitDate: Wed Oct 21 20:25:42 2026 -0300
+
+    audit: Phase 1 baseline technical and scientific audit report and archived metrics
+
+diff --git a/reports/audit_baseline.md b/reports/audit_baseline.md
+new file mode 100644
+index 0000000..e66c396
+--- /dev/null
++++ b/reports/audit_baseline.md
+@@ -0,0 +1,217 @@
++# Baseline Technical & Scientific Audit Report
++**Project:** Brazil Wildfire Risk Forecast (`brazil-wildfire-risk-forecast`)  
++**Commit Hash Audited:** `1b47873d84894a052712bbdcc5d2616be927cc10`  
++**Date:** October 2026  
++**Auditing Committee:** Senior ML/MLOps Engineer, Spatiotemporal Data Scientist, Remote Sensing Researcher, Python/FastAPI/Streamlit Software Engineer, Independent Scientific Reproducibility Auditor.
++
++---
++
++## 1. Executive Summary
++
++This report establishes the baseline technical and scientific audit of the `brazil-wildfire-risk-forecast` repository. The project has substantial foundations: 10 years of INPE satellite data and NASA POWER climate reanalysis, structured modular Python packages, multi-horizon targets, automated tests, DVC DAG, MLflow tracking, and Docker/Streamlit serving.
++
++However, an exhaustive line-by-line inspection and runtime audit across the entire codebase revealed critical methodological, architectural, and data integrity flaws:
++1. **Model Serialization Incompatibility (CI Crash):** Model artifacts were serialized with `scikit-learn 1.9.1` (where `multi_class` was removed), but `requirements.txt` pins `scikit-learn==1.5.2`. Loading these models under scikit-learn 1.5.2 triggers `AttributeError: 'LogisticRegression' object has no attribute 'multi_class'`, breaking GitHub Actions CI.
++2. **Synthetic Mock Inference in API (`_build_features`):** The API does not compute or lookup current observations; instead, it matches an arbitrary historical row with a similar day-of-year (e.g., from 2017) to predict any requested date (even 2026), overwriting query coordinates with row data.
++3. **Temporal Label Leakage Across Boundaries:** For a 7-day forward horizon, training labels for December 25–31, 2023 incorporate fire events from January 1–7, 2024 (the out-of-time test set). No temporal purging or embargo was enforced.
++4. **In-Sample Probability Calibration:** The LightGBM model was trained on 2016–2023, and then its in-sample predictions on 2023 were used to fit the Platt scaling calibrator. The calibrator was fitted on overconfident training predictions, not an independent holdout.
++5. **Missing Geographic Masking (154 Cells Outside Mato Grosso):** The grid was created as a bounding box without territorial polygon clipping. Over 30% of the grid (154 of 506 cells) lies outside Mato Grosso and received 0 fires for 10 years straight because INPE data was state-filtered, artificially inflating negative observations by >560,000 samples.
++6. **Data Imputation Distortions:** `nan_to_num(nan=0.0)` replaces missing temperatures with 0.0°C (an extreme freeze in tropical Mato Grosso), and missing precipitation is imputed as rainless, corrupting the physical features.
++7. **Silent Tracking Failures in MLflow:** A key mismatch (`r['Model']` vs `r['model']`) threw a `KeyError` that was silently swallowed, preventing experiment logging during `train.py`.
++8. **Unfair Recurrent Benchmark Evaluation:** The PyTorch LSTM was evaluated on a 4-day downsampled subset (91,080 samples) rather than the full test set (366,344 samples) used for LightGBM.
++
++All original baseline artifacts and reports have been permanently preserved in `reports/baseline_v1/` for transparent before-and-after comparison.
++
++---
++
++## 2. Prioritized Issue Inventory
++
++| ID | Priority | Module / File | Root Cause | Impact | Status |
++|:---:|:---:|:---|:---|:---|:---:|
++| **ISSUE-01** | **P0** | `models/*.joblib`, `requirements.txt:5`, `.github/workflows/ci.yml:29` | Sklearn version mismatch (1.9.1 vs 1.5.2) removing `multi_class` | CI crashes on `/predict` and `/explain` | Confirmed |
++| **ISSUE-02** | **P0** | `api/main.py:152-203` | Mock day-of-year matching in `_build_features` & coordinate overwrite | Fictitious inference for real dates | Confirmed |
++| **ISSUE-03** | **P0** | `src/models/train.py:289-294`, `process_data.py:124` | Lack of temporal purging/embargo for 7-day forward labels at year boundaries | Training labels leak test-set events | Confirmed |
++| **ISSUE-04** | **P0** | `src/models/train.py:413-435` | Platt calibrator fitted on 2023 in-sample predictions from model trained on 2016–2023 | Overfitted, non-independent calibration | Confirmed |
++| **ISSUE-05** | **P1** | `src/data/build_grid.py:25-48`, `process_data.py:82-96` | Rectangular grid without IBGE territorial mask (154 cells outside MT) | 560k+ false negative samples | Confirmed |
++| **ISSUE-06** | **P1** | `src/models/train.py:303`, `build_features.py:106` | Indiscriminate `nan_to_num(0.0)` and `fillna(0)` on climate | Unphysical temperature/drought features | Confirmed |
++| **ISSUE-07** | **P1** | `src/data/download_fire.py`, `download_climate.py` | Missing data verification manifests, checksums, and retry backoff | Silent data corruption or missingness | Confirmed |
++| **ISSUE-08** | **P1** | `src/features/build_features.py:90`, `README.md` | Target conflation with burned area; heuristic called `fwi_proxy` | Misleading biophysical claims | Confirmed |
++| **ISSUE-09** | **P1** | `src/models/train.py:158-216` | IID sample bootstrap with sub-sampling; claims of $p=0.0000$ | Inaccurate statistical uncertainty | Confirmed |
++| **ISSUE-10** | **P1** | `src/models/train_lstm.py:83-114` | LSTM test set evaluated with `stride=4` (91k samples vs 366k for GBDT) | Unfair, non-aligned comparison | Confirmed |
++| **ISSUE-11** | **P2** | `src/models/train.py:615` | Dictionary key case mismatch (`r['Model']` vs `r['model']`) silently caught | MLflow experiment logging fails silently | Confirmed |
++| **ISSUE-12** | **P2** | `Dockerfile:31`, `run_pipeline.ps1` | Docker runs as root; scripts lack strict error termination | Security & DevOps gaps | Confirmed |
++| **ISSUE-13** | **P2** | `README.md`, `README.pt-BR.md`, `technical_report.md` | Unsubstantiated claims ("real-time", "holdout calibration", "zero leak") | Scientific communication discrepancies | Confirmed |
++
++---
++
++## 3. Detailed Audit by Component
++
++### 3.1 P0: GitHub Actions and Model Serialization
++- **Affected File:** `models/platt_calibrator.joblib`, `models/platt_calibrator_1d.joblib`, `models/platt_calibrator_3d.joblib`, `requirements.txt:5`, `.github/workflows/ci.yml:29`.
++- **Root Cause:**
++  ```python
++  # In scikit-learn 1.9.1, LogisticRegression removed the `multi_class` attribute.
++  # When pickled in 1.9.1, the joblib dictionary does not contain 'multi_class'.
++  # In scikit-learn 1.5.2 (pinned in requirements.txt), predict_proba() executes:
++  # if self.multi_class == "ovr": ... -> AttributeError!
++  ```
++- **Evidence:** Confirmed via Python inspection:
++  `hasattr(joblib.load('models/platt_calibrator.joblib'), 'multi_class') == False`.
++- **Correction Strategy:**
++  1. Implement a standalone, version-agnostic Platt scaling class (`PlattCalibrator`) storing raw coefficients $(\alpha, \beta)$ and computing the logistic sigmoid natively via `scipy.special.expit` or NumPy without relying on sklearn internal attributes.
++  2. Regenerate all serialized artifacts under a controlled environment.
++  3. Record artifact metadata in `training_metadata.json` (`sklearn_version`, `python_version`, `numpy_version`, `timestamp`, `sha256`).
++- **Acceptance Criteria:** `pytest tests/ -v` and API `/predict` and `/explain` endpoints must execute cleanly across Python 3.11 and 3.12 without attribute errors.
++
++### 3.2 P0: API Feature Construction (`_build_features`)
++- **Affected File:** `api/main.py:152-203`.
++- **Root Cause:**
++  Lines 189–197 match any input date to an arbitrary past record with the closest day of the year:
++  ```python
++  target_doy = day_of_year
++  cell_doy = cell_data["date"].dt.dayofyear
++  closest_idx = (cell_doy - target_doy).abs().idxmin()
++  row = cell_data.loc[closest_idx]
++  for col in _feature_cols:
++      if col in row.index and pd.notna(row[col]):
++          features[col] = float(row[col])  # Overwrites query lat_center/lon_center!
++  ```
++  This returns mock predictions based on random historical years. Furthermore, line 201 has a duplicated return statement, and lines 284–285 silently fall back to the 7-day model if a 1-day or 3-day model is missing.
++- **Correction Strategy:**
++  1. Replace this logic with an explicit temporal inference contract supporting:
++     - `historical_replay`: Retrospective inference requiring exact data from `issue_date`.
++     - `operational_forecast`: Real-time operational mode. If live stream data is absent, return HTTP 503 Service Unavailable with an informative message.
++  2. Implement an explicit contract schema: `issue_date`, `observation_cutoff`, `target_start`, `target_end`, `data_timestamp`, `data_source`, `model_version`, `inference_mode`.
++  3. Never overwrite query spatial coordinates with cell centroid values unless documented.
++  4. Remove silent horizon fallbacks: if horizon 1d or 3d is requested and unavailable, raise HTTP 503.
++- **Acceptance Criteria:** Querying a specific date returns features from that exact date, and querying unsupported dates returns a clear error code instead of fictitious data.
++
++### 3.3 P0: Temporal Leakage & Embargo
++- **Affected File:** `src/models/train.py:289-294`, `src/data/process_data.py:124-126`.
++- **Root Cause:**
++  For forward horizon $H=7$, targets on day $D$ look forward to $[D+1, D+7]$. Training with `date.dt.year <= 2023` means rows from December 25 to December 31, 2023, have target labels constructed using fire counts from January 1 to January 7, 2024 (the test set).
++- **Evidence:** `train_df["date"].max()` is `2023-12-31`. For that row, `target_7d` is computed over `2024-01-01` to `2024-01-07`.
++- **Correction Strategy:**
++  1. Implement strict temporal purging: training samples must end at `test_start_date - H days` (e.g. December 24, 2023 for 7d; December 28 for 3d; December 30 for 1d).
++  2. Enforce the same purge across all folds in walk-forward expanding window validation (e.g. 2020 vs 2021).
++  3. Add automated tests that assert `max(train_df['date']) + pd.Timedelta(days=H) < min(test_df['date'])`.
++- **Acceptance Criteria:** Zero label overlap across temporal boundaries, verified by automated unit tests.
++
++### 3.4 P0: In-Sample Calibration
++- **Affected File:** `src/models/train.py:413-435`.
++- **Root Cause:**
++  `final_model.fit(X_train, y_train)` fits on all of 2016–2023. Then lines 426–434 predict on `val_cal_mask = train_df["date"].dt.year == 2023` using `final_model`. Because the tree model already memorized 2023, the calibrator is trained on in-sample, overconfident probabilities.
++- **Correction Strategy:**
++  1. Implement true out-of-sample calibration:
++     - Approach A (Out-of-Fold): Generate out-of-fold predictions across training folds or walk-forward windows.
++     - Approach B (Strict Temporal Holdout): Train the base model on 2016–2022; calibrate strictly on independent 2023 out-of-sample predictions.
++  2. Compare Platt Scaling and Isotonic Regression against uncalibrated probabilities.
++  3. Compute Brier score, Log Loss, and Expected Calibration Error (ECE) on the untouched 2024–2025 test set.
++- **Acceptance Criteria:** Calibrator is fitted exclusively on probabilities from observations never seen by the underlying tree model.
++
++### 3.5 P1: Geographic Masking (154 Cells Outside Mato Grosso)
++- **Affected File:** `src/data/build_grid.py`, `src/data/process_data.py`.
++- **Root Cause:**
++  The grid was generated as a bounding box ($[-18.1, -7.3] \times [-61.7, -50.2]$) with 506 cells. Intersecting with the official IBGE Mato Grosso boundary (SIRGAS 2000, EPSG:4674) shows:
++  - 266 cells strictly inside;
++  - 86 cells partially intersecting;
++  - 154 cells completely outside Mato Grosso.
++  Because INPE fires were filtered by `estado == 'MATO GROSSO'`, the 154 outside cells were assigned 0 fires for 10 years straight, inserting $>560,000$ artificial zero observations into the dataset.
++- **Correction Strategy:**
++  1. Fetch and store official IBGE Mato Grosso boundary polygon.
++  2. Compute and store `state_status` (`inside`, `partial`, `outside`) and `coverage_pct` in `grid.csv`.
++  3. Filter out `outside` cells from the modeling dataset, retaining `inside` and `partial` cells with documented coverage metadata.
++  4. Recompute target prevalence and assess the impact on performance metrics.
++- **Acceptance Criteria:** Zero cells completely outside the state boundary participate in model training or testing.
++
++### 3.6 P1: Missing Data Imputation & Physical Features
++- **Affected File:** `src/models/train.py:303`, `src/features/build_features.py:106`.
++- **Root Cause:**
++  `np.nan_to_num(X, nan=0.0)` sets missing temperature and humidity to 0.0°C and 0.0%, creating impossible meteorological conditions for tropical Brazil. In `build_features.py`, missing precipitation is imputed with 0.0 and counted as a dry spell day.
++- **Correction Strategy:**
++  1. Leverage LightGBM's native missing value handling (retaining NaNs in tree training).
++  2. For linear models, fit median imputation strictly on the training set.
++  3. Compute feature completeness metrics per cell and variable.
++- **Acceptance Criteria:** Missing meteorological values are not converted to physically impossible zero values.
++
++### 3.7 P1: Scientific Definition of Target & Aridity Index
++- **Affected File:** `src/features/build_features.py:90`, `README.md`, `reports/technical_report.md`.
++- **Root Cause:**
++  The target is "occurrence of $\ge 1$ satellite hotspot in a 56 km cell", which is an ignition/hazard proxy, not burned area or severity. The formula `(T2M_MAX - 15) * (1 + WS10M) / (RH2M + 1)` was labeled `fwi_proxy`, creating confusion with the official Canadian Forest Fire Weather Index (FWI) system.
++- **Correction Strategy:**
++  1. Rename/clarify index as `fire_weather_hazard` or `aridity_index` and document its heuristic formulation.
++  2. Explicitly document that the target represents satellite hotspot detection, with known caveats (cloud occlusion, AQUA 13:30 pass, non-detection of small/short-lived fires).
++- **Acceptance Criteria:** Documentation and code accurately reflect what the model predicts.
++
++### 3.8 P1: Statistical Uncertainty & Resampling
++- **Affected File:** `src/models/train.py:158-216`.
++- **Root Cause:**
++  Bootstrap resampling drew individual observations independently with an arbitrary sample cap ($50,000$), ignoring spatiotemporal autocorrelation. Paired test reported $p=0.0000$.
++- **Correction Strategy:**
++  1. Implement block/cluster bootstrap (resampling by temporal blocks or spatial units) to account for correlation.
++  2. Report $p$-values as $p < 0.001$ rather than absolute zero.
++- **Acceptance Criteria:** Bootstrap intervals and tests account for non-IID spatiotemporal structure.
++
++### 3.9 P1: Fair Deep Learning (LSTM) Benchmark Alignment
++- **Affected File:** `src/models/train_lstm.py:83-114`.
++- **Root Cause:**
++  `sample_stride = 4` was applied to both train and test sets, reducing the test evaluation to 91,080 samples compared to 366,344 samples for LightGBM.
++- **Correction Strategy:**
++  1. Align evaluation: test set for LSTM must match the exact dates and instances of the tabular benchmark.
++  2. If sequence creation requires downsampling for memory, report metrics on the identical matched evaluation subset for both models.
++- **Acceptance Criteria:** Comparison between GBDT and LSTM is strictly aligned on identical test instances.
++
++### 3.10 P2: MLflow Silent Tracking Bug
++- **Affected File:** `src/models/train.py:614-635`.
++- **Root Cause:**
++  `compute_metrics` returns `"model"` (lowercase), but the MLflow loop queried `r["Model"]` (capitalized). The resulting `KeyError` was silently swallowed.
++- **Correction Strategy:**
++  1. Standardize dictionary key access: `r.get("model") or r.get("Model")`.
++  2. Validate that runs are logged to `mlflow.db` and raise explicit exceptions on failure.
++- **Acceptance Criteria:** MLflow contains verified runs with logged parameters, metrics, and artifacts.
++
++---
++
++## 4. Preserved Baseline Results
++
++Before making any corrections, the baseline results from commit `1b47873` were archived in `reports/baseline_v1/`:
++- `reports/baseline_v1/model_comparison.csv`
++- `reports/baseline_v1/multi_horizon_comparison.csv`
++- `reports/baseline_v1/lstm_comparison.csv`
++- `reports/baseline_v1/walk_forward_metrics.csv`
++- `reports/baseline_v1/drift_report.json`
++- `reports/baseline_v1/training_metadata.json`
++
++### Archived Baseline Performance (7-Day Horizon, Out-of-Time Test 2024–2025):
++- **Empirical Persistence:** PR-AUC = 0.4293, ROC-AUC = 0.7260, Brier = 0.1074
++- **Spatial Climatology:** PR-AUC = 0.5169, ROC-AUC = 0.8521, Brier = 0.1079
++- **Logistic Regression:** PR-AUC = 0.5464, ROC-AUC = 0.8276, Brier = 0.1658
++- **PyTorch LSTM (stride=4):** PR-AUC = 0.5947, ROC-AUC = 0.8655, Brier = 0.1630
++- **LightGBM (In-sample Calibrated):** PR-AUC = 0.6301, ROC-AUC = 0.8833, Brier = 0.0927
++
++---
++
++## 5. Action Plan & Phased Roadmap
++
++- **FASE 2 (P0 - Correções Críticas):**
++  - [ ] Standalone version-independent calibrator & artifact compatibility.
++  - [ ] API inference overhaul: temporal contract (`historical_replay` vs `operational_forecast`).
++  - [ ] Strict temporal purging & embargo across test and walk-forward boundaries.
++  - [ ] Independent out-of-fold / holdout probability calibration.
++- **FASE 3 (P1 - Correção Geográfica e Qualidade dos Dados):**
++  - [ ] Official IBGE territorial masking (`state_status`, `coverage_pct`).
++  - [ ] Data manifest with SHA-256 hashes and download retries.
++  - [ ] Missing value policy without unphysical zero imputation.
++  - [ ] Refined target definition and index nomenclature.
++- **FASE 4 (P1 - Validação Científica):**
++  - [ ] Spatiotemporal validation redesign and block bootstrap.
++  - [ ] Fair LSTM alignment and feature ablation study.
++  - [ ] Operational classification metrics and threshold analysis.
++- **FASE 5 (P2 - Engenharia e MLOps):**
++  - [ ] Expanded automated test suite (regression & contract tests).
++  - [ ] Fix CI workflow and MLflow tracking bug.
++  - [ ] Secure Docker container and robust scripts.
++- **FASE 6 & 7 (Comunicação e Integridade):**
++  - [ ] Synchronized documentation, updated benchmarks, and final validation reports.
++- **FASE 8 (Aceitação Final):**
++  - [ ] End-to-end verification, `AUDITORIA_FINAL.md`, `VALIDACAO_CIENTIFICA.md`, and `REPRODUCIBILIDADE.md`.
+diff --git a/reports/baseline_v1/drift_report.json b/reports/baseline_v1/drift_report.json
+new file mode 100644
+index 0000000..eccdd7c
+--- /dev/null
++++ b/reports/baseline_v1/drift_report.json
+@@ -0,0 +1,113 @@
++{
++  "baseline_period": "<= 2023",
++  "current_period": ">= 2024",
++  "baseline_samples": 1478532,
++  "current_samples": 366344,
++  "summary": {
++    "total_monitored": 11,
++    "stable_count": 9,
++    "moderate_drift_count": 2,
++    "critical_drift_count": 0
++  },
++  "features": [
++    {
++      "feature": "T2M_MAX",
++      "PSI": 0.1503,
++      "KS_statistic": 0.1618,
++      "KS_pvalue": 0.0,
++      "status": "MODERATE_DRIFT",
++      "baseline_mean": 31.996,
++      "current_mean": 33.401
++    },
++    {
++      "feature": "T2M_MIN",
++      "PSI": 0.0836,
++      "KS_statistic": 0.1292,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 21.783,
++      "current_mean": 22.33
++    },
++    {
++      "feature": "RH2M",
++      "PSI": 0.0933,
++      "KS_statistic": 0.1108,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 69.337,
++      "current_mean": 63.569
++    },
++    {
++      "feature": "PRECTOTCORR",
++      "PSI": 0.0088,
++      "KS_statistic": 0.0357,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 3.647,
++      "current_mean": 3.112
++    },
++    {
++      "feature": "WS10M",
++      "PSI": 0.0075,
++      "KS_statistic": 0.0289,
++      "KS_pvalue": 3.9431975379094955e-214,
++      "status": "STABLE",
++      "baseline_mean": 1.597,
++      "current_mean": 1.622
++    },
++    {
++      "feature": "vpd",
++      "PSI": 0.1067,
++      "KS_statistic": 0.1238,
++      "KS_pvalue": 0.0,
++      "status": "MODERATE_DRIFT",
++      "baseline_mean": 1.173,
++      "current_mean": 1.457
++    },
++    {
++      "feature": "dtr",
++      "PSI": 0.0497,
++      "KS_statistic": 0.0943,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 10.212,
++      "current_mean": 11.071
++    },
++    {
++      "feature": "fwi_proxy",
++      "PSI": 0.0735,
++      "KS_statistic": 0.0944,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 0.822,
++      "current_mean": 1.003
++    },
++    {
++      "feature": "fire_count_30d",
++      "PSI": 0.007,
++      "KS_statistic": 0.0362,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 4.625,
++      "current_mean": 5.072
++    },
++    {
++      "feature": "neighbor_fire_7d",
++      "PSI": 0.0109,
++      "KS_statistic": 0.0431,
++      "KS_pvalue": 0.0,
++      "status": "STABLE",
++      "baseline_mean": 8.541,
++      "current_mean": 9.289
++    },
++    {
++      "feature": "dry_days",
++      "PSI": 0.0081,
++      "KS_statistic": 0.0287,
++      "KS_pvalue": 4.9467398616554296e-210,
++      "status": "STABLE",
++      "baseline_mean": 10.026,
++      "current_mean": 13.0
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/reports/baseline_v1/feature_importance.csv b/reports/baseline_v1/feature_importance.csv
+new file mode 100644
+index 0000000..9dde496
+--- /dev/null
++++ b/reports/baseline_v1/feature_importance.csv
+@@ -0,0 +1,40 @@
++feature,mean_abs_shap
++lat_center,0.9946916877130146
++fire_count_30d,0.8797836887414587
++neighbor_fire_7d,0.44384736024234306
++lon_center,0.35117985925399176
++fire_count_lastyear,0.2594126832337457
++fire_count_14d,0.1592627876066219
++fire_count_7d,0.11711002255050135
++PRECTOTCORR,0.07542379518545617
++WS10M_mean_14d,0.03716895133583284
++doy_cos,0.029076832826903085
++precip_sum_30d,0.0193965805526895
++month_cos,0.01658685994422355
++T2M_MIN_mean_14d,0.015990049100318884
++doy_sin,0.015336166715281124
++dtr,0.014962350689387503
++fwi_proxy,0.011431330801464537
++fwi_proxy_mean_7d,0.011041666359784331
++WS10M_mean_7d,0.009757105257973072
++fwi_proxy_mean_14d,0.009677882211579919
++vpd_mean_7d,0.0069819052795585135
++T2M_MIN_mean_7d,0.006826400199849102
++RH2M,0.0065761359379667905
++RH2M_mean_14d,0.006170098869174563
++PRECTOTCORR_mean_14d,0.006111957794699871
++dry_days,0.005569450601008042
++month_sin,0.005307952392672857
++dtr_mean_14d,0.00472708424652159
++T2M_MAX_mean_14d,0.004421430986752072
++precip_sum_14d,0.0037455880622172784
++RH2M_mean_7d,0.0029898326942542934
++vpd_mean_14d,0.0025042884392850874
++T2M_MAX_mean_7d,0.0023396765992182837
++T2M_MAX,0.0012885712158563277
++vpd,0.0012399968150844825
++PRECTOTCORR_mean_7d,0.0010560931809906568
++WS10M,0.0009596345498550537
++T2M_MIN,0.0007819137303554338
++dtr_mean_7d,0.0007632428173313698
++precip_sum_7d,0.00025361205889043323
+diff --git a/reports/baseline_v1/lstm_comparison.csv b/reports/baseline_v1/lstm_comparison.csv
+new file mode 100644
+index 0000000..f11e18b
+--- /dev/null
++++ b/reports/baseline_v1/lstm_comparison.csv
+@@ -0,0 +1,7 @@
++model,PR-AUC,ROC-AUC,Brier,Recall@P50
++Persistence (Empirical),0.4293,0.726,0.1074,0.5281
++Climatology,0.5169,0.8521,0.1079,0.4855
++LogisticRegression,0.5464,0.8276,0.1658,0.5935
++LightGBM (Raw),0.6274,0.8823,0.1501,0.6734
++LightGBM (Platt Calibrated),0.6274,0.8823,0.0931,0.6734
++LSTM (PyTorch Recurrent),0.5947,0.8655,0.163,0.6015
+diff --git a/reports/baseline_v1/model_comparison.csv b/reports/baseline_v1/model_comparison.csv
+new file mode 100644
+index 0000000..53a65d6
+--- /dev/null
++++ b/reports/baseline_v1/model_comparison.csv
+@@ -0,0 +1,6 @@
++model,PR-AUC,ROC-AUC,Brier,Recall@P50
++Persistence (Empirical),0.4293,0.726,0.1074,0.5281
++Climatology,0.5169,0.8521,0.1079,0.4855
++LogisticRegression,0.5464,0.8276,0.1658,0.5935
++LightGBM (Raw),0.6301,0.8833,0.1498,0.6753
++LightGBM (Platt Calibrated),0.6301,0.8833,0.0927,0.6753
+diff --git a/reports/baseline_v1/multi_horizon_comparison.csv b/reports/baseline_v1/multi_horizon_comparison.csv
+new file mode 100644
+index 0000000..b2a5b5e
+--- /dev/null
++++ b/reports/baseline_v1/multi_horizon_comparison.csv
+@@ -0,0 +1,4 @@
++horizon,horizon_desc,positive_rate,PR-AUC,ROC-AUC,Brier,Recall@P50
++7-day,D+1 to D+7,16.48%,0.6301,0.8833,0.0927,0.6753
++1-day,D+1,4.26%,0.368,0.896,0.0325,0.2958
++3-day,D+1 to D+3,9.67%,0.5341,0.8882,0.0624,0.5018
+diff --git a/reports/baseline_v1/training_metadata.json b/reports/baseline_v1/training_metadata.json
+new file mode 100644
+index 0000000..8aa41a8
+--- /dev/null
++++ b/reports/baseline_v1/training_metadata.json
+@@ -0,0 +1,185 @@
++{
++  "feature_cols": [
++    "PRECTOTCORR",
++    "PRECTOTCORR_mean_14d",
++    "PRECTOTCORR_mean_7d",
++    "RH2M",
++    "RH2M_mean_14d",
++    "RH2M_mean_7d",
++    "T2M_MAX",
++    "T2M_MAX_mean_14d",
++    "T2M_MAX_mean_7d",
++    "T2M_MIN",
++    "T2M_MIN_mean_14d",
++    "T2M_MIN_mean_7d",
++    "WS10M",
++    "WS10M_mean_14d",
++    "WS10M_mean_7d",
++    "doy_cos",
++    "doy_sin",
++    "dry_days",
++    "dtr",
++    "dtr_mean_14d",
++    "dtr_mean_7d",
++    "fire_count_14d",
++    "fire_count_30d",
++    "fire_count_7d",
++    "fire_count_lastyear",
++    "fwi_proxy",
++    "fwi_proxy_mean_14d",
++    "fwi_proxy_mean_7d",
++    "lat_center",
++    "lon_center",
++    "month_cos",
++    "month_sin",
++    "neighbor_fire_7d",
++    "precip_sum_14d",
++    "precip_sum_30d",
++    "precip_sum_7d",
++    "vpd",
++    "vpd_mean_14d",
++    "vpd_mean_7d"
++  ],
++  "train_period": "2016-01-01 to 2023-12-31",
++  "test_period": "2024-01-01 to 2025-12-24",
++  "train_size": 1478532,
++  "test_size": 366344,
++  "spatial_block_cv": "Contiguous (North / Central / South MT)",
++  "best_params": {
++    "n_estimators": 203,
++    "learning_rate": 0.02801895126690664,
++    "max_depth": 6,
++    "num_leaves": 57,
++    "min_child_samples": 175,
++    "subsample": 0.9041689133187472,
++    "colsample_bytree": 0.8600897137634251,
++    "reg_alpha": 3.1818822659182637,
++    "reg_lambda": 0.16511270409815212
++  },
++  "p_value_vs_climatology": 0.0,
++  "p_value_vs_persistence": 0.0,
++  "confidence_intervals": {
++    "Persistence": {
++      "PR-AUC_95CI": [
++        0.4181,
++        0.4406
++      ],
++      "ROC-AUC_95CI": [
++        0.7203,
++        0.7318
++      ],
++      "Brier_95CI": [
++        0.1054,
++        0.1093
++      ]
++    },
++    "Climatology": {
++      "PR-AUC_95CI": [
++        0.5051,
++        0.5281
++      ],
++      "ROC-AUC_95CI": [
++        0.8483,
++        0.8561
++      ],
++      "Brier_95CI": [
++        0.1061,
++        0.1094
++      ]
++    },
++    "LogisticRegression": {
++      "PR-AUC_95CI": [
++        0.5355,
++        0.559
++      ],
++      "ROC-AUC_95CI": [
++        0.8227,
++        0.8326
++      ],
++      "Brier_95CI": [
++        0.1642,
++        0.1673
++      ]
++    },
++    "LightGBM (Platt Calibrated)": {
++      "PR-AUC_95CI": [
++        0.6197,
++        0.6416
++      ],
++      "ROC-AUC_95CI": [
++        0.8802,
++        0.8871
++      ],
++      "Brier_95CI": [
++        0.0911,
++        0.0942
++      ]
++    }
++  },
++  "multi_horizon_results": [
++    {
++      "horizon": "7-day",
++      "horizon_desc": "D+1 to D+7",
++      "positive_rate": "16.48%",
++      "PR-AUC": 0.6301,
++      "ROC-AUC": 0.8833,
++      "Brier": 0.0927,
++      "Recall@P50": 0.6753
++    },
++    {
++      "horizon": "1-day",
++      "horizon_desc": "D+1",
++      "positive_rate": "4.26%",
++      "PR-AUC": 0.368,
++      "ROC-AUC": 0.896,
++      "Brier": 0.0325,
++      "Recall@P50": 0.2958
++    },
++    {
++      "horizon": "3-day",
++      "horizon_desc": "D+1 to D+3",
++      "positive_rate": "9.67%",
++      "PR-AUC": 0.5341,
++      "ROC-AUC": 0.8882,
++      "Brier": 0.0624,
++      "Recall@P50": 0.5018
++    }
++  ],
++  "results": [
++    {
++      "model": "Persistence (Empirical)",
++      "PR-AUC": 0.4293,
++      "ROC-AUC": 0.726,
++      "Brier": 0.1074,
++      "Recall@P50": 0.5281
++    },
++    {
++      "model": "Climatology",
++      "PR-AUC": 0.5169,
++      "ROC-AUC": 0.8521,
++      "Brier": 0.1079,
++      "Recall@P50": 0.4855
++    },
++    {
++      "model": "LogisticRegression",
++      "PR-AUC": 0.5464,
++      "ROC-AUC": 0.8276,
++      "Brier": 0.1658,
++      "Recall@P50": 0.5935
++    },
++    {
++      "model": "LightGBM (Raw)",
++      "PR-AUC": 0.6301,
++      "ROC-AUC": 0.8833,
++      "Brier": 0.1498,
++      "Recall@P50": 0.6753
++    },
++    {
++      "model": "LightGBM (Platt Calibrated)",
++      "PR-AUC": 0.6301,
++      "ROC-AUC": 0.8833,
++      "Brier": 0.0927,
++      "Recall@P50": 0.6753
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/reports/baseline_v1/walk_forward_metrics.csv b/reports/baseline_v1/walk_forward_metrics.csv
+new file mode 100644
+index 0000000..bb6571b
+--- /dev/null
++++ b/reports/baseline_v1/walk_forward_metrics.csv
+@@ -0,0 +1,6 @@
++test_year,train_period,train_size,test_size,positive_rate,PR-AUC,ROC-AUC,Brier
++2021,2016-2020,924462,184690,0.1799,0.6391,0.8879,0.1515
++2022,2016-2021,1109152,184690,0.1843,0.6476,0.8828,0.1479
++2023,2016-2022,1293842,184690,0.184,0.6392,0.8857,0.1469
++2024,2016-2023,1478532,185196,0.2138,0.6958,0.8848,0.1532
++2025,2016-2024,1663728,181148,0.1147,0.4998,0.873,0.1464

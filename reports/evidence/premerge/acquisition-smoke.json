@@ -1,0 +1,106 @@
+{
+  "INPE_2016": {
+    "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref/focos_br_ref_2016.zip",
+    "status": 200,
+    "headers": {
+      "Last-Modified": "Wed, 09 Aug 2023 15:28:25 GMT",
+      "ETag": "\"39b655-6027f217533d0\"",
+      "Content-Length": "3782229",
+      "Content-Type": "application/zip"
+    },
+    "body_downloaded": false
+  },
+  "INPE_2025": {
+    "url": "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref/focos_br_ref_2025.zip",
+    "status": 200,
+    "headers": {
+      "Last-Modified": "Wed, 11 Feb 2026 18:32:07 GMT",
+      "ETag": "\"5a1fdd-64a9096dbd7c0\"",
+      "Content-Length": "5906397",
+      "Content-Type": "application/zip"
+    },
+    "body_downloaded": false
+  },
+  "POWER_3_day_smoke": {
+    "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M_MAX%2CT2M_MIN%2CRH2M%2CPRECTOTCORR%2CWS10M&community=AG&longitude=-55.0&latitude=-12.5&start=20240101&end=20240103&format=JSON&time-standard=LST",
+    "status": 200,
+    "response_sha256": "b309cc7423dc4f9ea21b04d66481a4316516606c2a70df944f9648561d7ffc9f",
+    "headers": {
+      "Content-Type": "application/json",
+      "Date": "Mon, 26 Oct 2026 23:16:56 GMT"
+    },
+    "quality": {
+      "valid": true,
+      "rows": 3,
+      "expected_days": 3,
+      "date_min": "2024-01-01 00:00:00",
+      "date_max": "2024-01-03 00:00:00",
+      "issues": {
+        "invalid_dates": 0,
+        "duplicate_days": 0,
+        "missing_days": 0,
+        "unexpected_days": 0,
+        "wrong_grid": 0,
+        "inverted_temperature": 0
+      },
+      "missing": {
+        "T2M_MAX": 0,
+        "T2M_MIN": 0,
+        "RH2M": 0,
+        "PRECTOTCORR": 0,
+        "WS10M": 0
+      },
+      "invalid": {
+        "T2M_MAX": 0,
+        "T2M_MIN": 0,
+        "RH2M": 0,
+        "PRECTOTCORR": 0,
+        "WS10M": 0
+      }
+    },
+    "source_metadata": {
+      "header": {
+        "title": "NASA/POWER Source Native Resolution Daily Data",
+        "api": {
+          "version": "v2.10.1",
+          "name": "POWER Daily API"
+        },
+        "sources": [
+          "MERRA2",
+          "POWER"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "20240101",
+        "end": "20240103"
+      },
+      "messages": [],
+      "parameters": {
+        "T2M_MAX": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Maximum"
+        },
+        "T2M_MIN": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Minimum"
+        },
+        "RH2M": {
+          "units": "%",
+          "longname": "Relative Humidity at 2 Meters"
+        },
+        "PRECTOTCORR": {
+          "units": "mm/day",
+          "longname": "Precipitation Corrected"
+        },
+        "WS10M": {
+          "units": "m/s",
+          "longname": "Wind Speed at 10 Meters"
+        }
+      },
+      "times": {
+        "data": 0.428,
+        "process": 0.01
+      }
+    }
+  }
+}

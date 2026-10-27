@@ -20,6 +20,7 @@ import requests
 
 from src.config import get_project_root, load_config
 from src.data.build_grid import build_grid
+from src.data.quality import climate_quality
 
 
 def _fetch_one_cell(
@@ -55,6 +56,7 @@ def _fetch_one_cell(
         "start": start_date,
         "end": end_date,
         "format": "JSON",
+        "time-standard": "LST",  # Explicitly preserves the legacy POWER day definition.
     }
 
     for attempt in range(max_retries):
@@ -77,6 +79,9 @@ def _fetch_one_cell(
                     df[col] = pd.to_numeric(df[col], errors="coerce")
                     df.loc[df[col] < -900, col] = None
 
+            check = climate_quality(df, pd.Timestamp(start_date), pd.Timestamp(end_date), grid_id)
+            if not check["valid"]:
+                raise ValueError(f"Incomplete or invalid daily series: {check}")
             return df
 
         except Exception as e:
@@ -117,7 +122,13 @@ def download_climate_data(config: dict | None = None) -> Path:
     existing = set()
     for f in out_dir.glob("climate_*.csv"):
         gid = f.stem.replace("climate_", "")
-        existing.add(gid)
+        try:
+            check = climate_quality(pd.read_csv(f), f"{cfg['data']['start_year']}-01-01",
+                                    f"{cfg['data']['end_year']}-12-31", gid)
+            if check["valid"]:
+                existing.add(gid)
+        except (OSError, ValueError):
+            pass  # Invalid cache is downloaded again, not accepted as complete.
 
     to_download = grid_df[~grid_df["grid_id"].isin(existing)]
     print(f"  Already downloaded: {len(existing)}")
@@ -168,6 +179,8 @@ def download_climate_data(config: dict | None = None) -> Path:
                       f"(ok={completed}, fail={failed})")
 
     print(f"\n  Climate download complete: {completed} ok, {failed} failed")
+    if failed:
+        raise RuntimeError(f"Climate acquisition incomplete: {failed} cells failed")
     return out_dir
 
 

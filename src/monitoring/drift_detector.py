@@ -1,15 +1,10 @@
-"""Data and Concept Drift Detection for Brazil Wildfire Risk Forecast.
+"""Historical covariate distribution comparison, without continuous monitoring.
 
-Monitors distribution drift between baseline training periods (2016–2023)
-and operational/testing periods (2024–2025 or real-time incoming data).
-
-Key Metrics:
-- Population Stability Index (PSI):
-    * PSI < 0.10: No significant drift (Stable)
-    * 0.10 <= PSI < 0.25: Moderate drift (Warning, continue monitoring)
-    * PSI >= 0.25: Critical drift (Action required, trigger retraining)
-- Kolmogorov-Smirnov (KS) 2-sample test:
-    * Non-parametric test for continuous distribution shift (p-value and statistic).
+The 2016–2023 descriptive reference includes the calibration year and is not
+identical to the model's training partition. PSI categories use conventional
+0.10/0.25 cutoffs. KS reference p-values assume independent observations and
+are not valid inferential evidence for dependent cell-days. Neither statistic
+establishes concept drift, predictive degradation or a need to retrain.
 """
 
 import json
@@ -23,6 +18,7 @@ import pandas as pd
 from scipy.stats import ks_2samp
 
 from src.config import get_project_root
+from src.data.build_grid import build_grid
 
 
 def calculate_psi(baseline: np.ndarray, current: np.ndarray, num_bins: int = 10) -> float:
@@ -30,7 +26,7 @@ def calculate_psi(baseline: np.ndarray, current: np.ndarray, num_bins: int = 10)
 
     Args:
         baseline: Baseline / reference distribution array
-        current: Current / operational distribution array
+        current: Historical comparison distribution array
         num_bins: Number of quantile bins to segment
 
     Returns:
@@ -40,7 +36,7 @@ def calculate_psi(baseline: np.ndarray, current: np.ndarray, num_bins: int = 10)
     c = current[~np.isnan(current)]
 
     if len(b) == 0 or len(c) == 0:
-        return 0.0
+        raise ValueError("PSI requires observed values in both periods")
 
     # Quantile bins based on baseline
     quantiles = np.linspace(0, 100, num_bins + 1)
@@ -75,7 +71,7 @@ def run_drift_analysis(
 ) -> dict:
     """Run drift analysis across core meteorological and behavioral features.
 
-    Compares baseline period (<= baseline_end_year) with operational period (>= test_start_year).
+    Compares a declared historical reference with a later historical period.
     """
     root = get_project_root()
     feat_path = root / "data" / "processed" / "features.parquet"
@@ -86,6 +82,8 @@ def run_drift_analysis(
 
     df = pd.read_parquet(feat_path)
     df["date"] = pd.to_datetime(df["date"])
+    grid = build_grid()
+    df = df[df.grid_id.isin(grid.loc[grid.state_status != "outside", "grid_id"])]
 
     baseline_mask = df["date"].dt.year <= baseline_end_year
     current_mask = df["date"].dt.year >= test_start_year
@@ -93,11 +91,9 @@ def run_drift_analysis(
     baseline_df = df[baseline_mask]
     current_df = df[current_mask]
 
-    # If running on small sample without future years, split chronologically 70/30
-    if len(current_df) == 0:
-        split_idx = int(len(df) * 0.70)
-        baseline_df = df.iloc[:split_idx]
-        current_df = df.iloc[split_idx:]
+    # A demonstration sample cannot substitute for both historical periods.
+    if len(current_df) == 0 or len(baseline_df) == 0:
+        raise ValueError("Both declared historical periods are required; no alternate split is substituted")
 
     monitored_features = [
         "T2M_MAX",
@@ -142,12 +138,14 @@ def run_drift_analysis(
     report = {
         "report_type": "historical_drift_analysis",
         "description": (
-            "Retrospective distribution drift comparing historical training baseline (2016-2023) "
-            "against out-of-time test period (2024-2025). Operational streaming drift monitoring "
-            "operates on near-real-time telemetry sliding windows and is marked standby while "
-            "operational ingestion is disconnected."
+            "Retrospective covariate distribution comparison; the reference includes "
+            "training and calibration years. No continuous monitoring is implemented. "
+            "Covariate shift alone does not establish concept drift or predictive degradation."
         ),
         "monitoring_mode": "retrospective_evaluation",
+        "continuous_monitoring": False,
+        "performance_degradation_assessed": False,
+        "inference_limitations": "PSI is descriptive covariate shift. KS p-values assume independent samples and are not inferentially valid for these dependent cell-days. Neither establishes concept drift.",
         "baseline_period": f"<= {baseline_end_year}",
         "current_period": f">= {test_start_year}",
         "baseline_samples": len(baseline_df),
@@ -184,7 +182,7 @@ def run_drift_analysis(
     ax.axvline(0.10, color="#f39c12", linestyle="--", alpha=0.8, label="Moderate Drift Threshold (PSI=0.10)")
     ax.axvline(0.25, color="#e74c3c", linestyle="--", alpha=0.8, label="Critical Drift Threshold (PSI=0.25)")
     ax.set_xlabel("Population Stability Index (PSI)")
-    ax.set_title("Feature Drift Analysis (Baseline 2016-2023 vs Operational 2024-2025)")
+    ax.set_title(f"Historical Covariate Shift (reference ≤{baseline_end_year} vs ≥{test_start_year})")
     ax.legend(loc="lower right")
     ax.grid(True, alpha=0.3, axis="x")
 
