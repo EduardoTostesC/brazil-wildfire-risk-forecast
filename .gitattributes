@@ -5,4 +5,4 @@ models/*.pt -text
 models/training_metadata.json -text
 data/** -text
 reports/evidence/premerge/commit-*.txt -text
-reports/protocol/*.json -text
+reports/protocol/*.json -text whitespace=cr-at-eol

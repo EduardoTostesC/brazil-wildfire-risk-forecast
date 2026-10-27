@@ -44,6 +44,7 @@ jobs:
         python -m src.reporting.generate_readme_metrics --check
         python -m src.reporting.generate_research_tables --check
         python scripts/verify_frozen_protocol.py
+        python scripts/evaluate_frozen_2027.py --verify-only
 
     - name: Preserve validation evidence
       if: always()
