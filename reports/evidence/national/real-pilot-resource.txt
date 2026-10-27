@@ -1,0 +1,11 @@
+{
+  "command": ".venv/bin/python -m scripts.national_real_pilot",
+  "exit_code": 0,
+  "wall_seconds": 12.979,
+  "max_rss_kib": 523160,
+  "user_cpu_seconds": 12.157427,
+  "system_cpu_seconds": 1.185606,
+  "script_sha256": "4a291e6ba4f16096d673dd9dc27a696b599ab0f0a763a40328eb0b63ec90a892",
+  "scope": "bounded100row_geographic_sample_with278299rowannualscan_cached_acquisition",
+  "unit_note": "Linux ru_maxrss in KiB; current process child only; excludes previous acquisition downloads"
+}

@@ -1,0 +1,35 @@
+{
+  "sources": [
+    {
+      "url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+      "status_code": 200,
+      "raw_bytes": 36626,
+      "sha256": "e26540141248c204edf5a1381a211a6f52cddfdf6b8aaa26ce996695bcf05102",
+      "local_file": "data/raw/national/engineering-20261027-v1/source-docs/power.html"
+    },
+    {
+      "url": "https://power.larc.nasa.gov/docs/tutorials/service-data-request/api/",
+      "status_code": 200,
+      "raw_bytes": 56210,
+      "sha256": "992b289655037cf3d06b512cafa48c7be911d4228ac03714ff1f8d05d66158fd",
+      "local_file": "data/raw/national/engineering-20261027-v1/source-docs/tutorial.html"
+    },
+    {
+      "url": "https://data.inpe.br/queimadas/dados-abertos/",
+      "status_code": 200,
+      "raw_bytes": 17342,
+      "sha256": "8ef7fa3ff01be0842dc57b54cea2ec1cce24863980696ae17325379cd07f1c4b",
+      "local_file": "data/raw/national/engineering-20261027-v1/source-docs/inpe.html"
+    }
+  ],
+  "access_history": "Initial proxy CONNECT403; after environment domain settings changed all three GET200.",
+  "verified_requirements": [
+    "Daily defaults LST; explicit UTC or LST supported",
+    "Single-point daily API maximum20parameters",
+    "Tutorial states meteorology0.5x0.625degree and solar1x1degree",
+    "Tutorial says do not exceed five concurrent requests; probe used one",
+    "Tutorial warns duplicate same spatial information and revisions2-3months after real-time"
+  ],
+  "native_cell_mapping": "not_established_from_point_response_coordinates",
+  "source_day_completeness": "not_proven_by_rows_or_entire_annual_zip"
+}

@@ -21,6 +21,20 @@ STATUSES = {"complete", "missing", "incomplete", "sensor_invalid", "processing_f
 KEY = ["national_cell_id", "uf_code", "date"]
 
 
+def normalize_inpe_chunk(frame):
+    """Add canonical columns without dropping source fields (2024 uses data_pas)."""
+    result = frame.copy()
+    aliases = {"lat": "latitude", "lon": "longitude", "data_hora_gmt": "data_pas"}
+    for canonical, alias in aliases.items():
+        if canonical in result and alias in result and not result[canonical].eq(result[alias]).all():
+            raise ValueError(f"Ambiguous INPE source columns: {canonical}, {alias}")
+        if canonical not in result and alias in result:
+            result[canonical] = result[alias]
+    if not {"lat", "lon", "data_hora_gmt", "estado"} <= set(result):
+        raise ValueError("INPE required schema missing after audited normalization")
+    return result
+
+
 def normalize_state(value):
     return "".join(c for c in unicodedata.normalize("NFD", str(value).strip().upper())
                    if unicodedata.category(c) != "Mn")

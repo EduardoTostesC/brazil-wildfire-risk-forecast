@@ -19,6 +19,7 @@ from src.national.dataset import (
     attribute_fire_chunk,
     join_climate,
     local_features,
+    normalize_inpe_chunk,
     unit_calendar,
     write_partition,
 )
@@ -240,3 +241,29 @@ def test_unknown_climate_source_never_matches_null_key():
     climate = pd.DataFrame({"date": frame.date, "climate_source_id": [None], "T2M_MAX": [30]})
     with pytest.raises(ValueError, match="Null climate source"):
         join_climate(frame, climate)
+
+
+def test_actual_2024_inpe_schema_retains_source_timestamp():
+    source = pd.DataFrame({"id_bdq": [1], "foco_id": [2], "lat": [-15.75], "lon": [-47.75],
+                           "data_pas": ["2024-02-29 16:00:00"], "pais": ["Brasil"], "estado": ["DISTRITO FEDERAL"],
+                           "municipio": ["BRASÍLIA"], "bioma": ["Cerrado"]})
+    normalized = normalize_inpe_chunk(source)
+    pd.testing.assert_frame_equal(normalized[source.columns], source)
+    assert normalized.data_hora_gmt.equals(source.data_pas)
+    normalized["data_hora_gmt"] = "different"
+    with pytest.raises(ValueError, match="Ambiguous"):
+        normalize_inpe_chunk(normalized)
+
+
+def test_real_pilot_derived_outputs_verify_and_never_overwrite(tmp_path):
+    from scripts.national_real_pilot import write_immutable_parquet
+    frame = pd.DataFrame({'date': pd.to_datetime(['2024-02-29']), 'value': [3.]})
+    path = tmp_path / 'probe.parquet'
+    first_hash = write_immutable_parquet(frame, path)
+    initial = path.read_bytes()
+    assert write_immutable_parquet(frame, path) == first_hash
+    assert path.read_bytes() == initial
+    path.write_bytes(b'corrupt')
+    with pytest.raises(ValueError, match='immutable version'):
+        write_immutable_parquet(frame, path)
+    assert path.read_bytes() == b'corrupt'
