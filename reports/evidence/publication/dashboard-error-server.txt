@@ -4,4 +4,3 @@
   Local URL: http://localhost:8506
   Network URL: <redacted-local-address>
   External URL: <redacted-local-address>
-

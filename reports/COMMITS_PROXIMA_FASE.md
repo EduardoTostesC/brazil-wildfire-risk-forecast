@@ -1,6 +1,6 @@
 # Commits da próxima fase
 
-Base preservada: `5877c8ab1e84443a7d9671fb7f6af13ae0fc3792`. Checkout inventariado: `909f5699d5f29cd5eed97e3668ed923a9df86a53`.
+Base preservada: `5877c8ab1e84443a7d9671fb7f6af13ae0fc3792`. Checkout inventariado: `9c8043f16548b410bd803d0b39ddeb077c89fc18`.
 
 Inventário gerado do Git real. O relatório versionado lista os commits existentes antes de seu fechamento; o próprio commit que o grava aparece no inventário completo do artefato CI e em git log. Isso evita inventar o SHA de um commit que ainda não existia.
 
@@ -66,3 +66,12 @@ Objetivo: Documentação, metadados e release candidata.
 Verificação: Geradores/links e verificações finais documentados; sem publicação automática.
 Evidência: reports/FINALIZACAO_PUBLICACAO.md.
 Arquivos: `README.hf.md`, `README.md`, `README.pt-BR.md`, `deploy/github-metadata.json`, `docs/API.md`, `docs/PUBLICACAO.md`, `docs/PULL_REQUEST_PUBLICATION.md`, `docs/RELEASE_CANDIDATE_v2.1.0-rc.1.md`, `reports/BENCHMARKS_SERVING.md`, `reports/COMMITS_PROXIMA_FASE.md`, `reports/DASHBOARD_FINAL.md`, `reports/EXECUTOR_CONFIRMATORIO_STATUS.md`, `reports/FINALIZACAO_PUBLICACAO.md`, `reports/PARECER_POS_PUBLICACAO.md`, `reports/REPRODUCAO_PUBLICA_STATUS.md`.
+
+## 9c8043f16548b410bd803d0b39ddeb077c89fc18
+
+test(release): preserve clean-clone evidence and inventory the final CI checkout
+
+Objetivo: Preservar evidências e fechamento.
+Verificação: Logs locais/clone e checks do SHA no workflow; consultar conclusão remota.
+Evidência: reports/FINALIZACAO_PUBLICACAO.md.
+Arquivos: `.github/workflows/ci.yml`, `reports/COMMITS_PROXIMA_FASE.md`, `reports/evidence/publication/bundle-final.txt`, `reports/evidence/publication/ci-9e382-summary.json`, `reports/evidence/publication/clean-api-server.txt`, `reports/evidence/publication/clean-bundle.txt`, `reports/evidence/publication/clean-clone-checks.json`, `reports/evidence/publication/clean-clone-tests.json`, `reports/evidence/publication/clean-full-manifest-expected-unavailable.txt`, `reports/evidence/publication/clean-future-verification.txt`, `reports/evidence/publication/clean-http-examples.json`, `reports/evidence/publication/clean-protocol.txt`, `reports/evidence/publication/clean-py311.txt`, `reports/evidence/publication/clean-py311.xml`, `reports/evidence/publication/clean-py312.txt`, `reports/evidence/publication/clean-py312.xml`, `reports/evidence/publication/clean-readme-metrics.txt`, `reports/evidence/publication/clean-research-tables.txt`, `reports/evidence/publication/clean-ruff.txt`, `reports/evidence/publication/clean-source-import.txt`, `reports/evidence/publication/dashboard-browser.json`, `reports/evidence/publication/dashboard-error-server.txt`, `reports/evidence/publication/dashboard-server.txt`, `reports/evidence/publication/dvc-final.txt`, `reports/evidence/publication/executor-final.txt`, `reports/evidence/publication/final-checks.json`, `reports/evidence/publication/final-py311.txt`, `reports/evidence/publication/final-py311.xml`, `reports/evidence/publication/final-py312.txt`, `reports/evidence/publication/final-py312.xml`, `reports/evidence/publication/full-py311-pip.txt`, `reports/evidence/publication/full-py312-pip.txt`, `reports/evidence/publication/links-final.txt`, `reports/evidence/publication/metrics-final.txt`, `reports/evidence/publication/protocol-final.txt`, `reports/evidence/publication/ruff-final.txt`, `reports/evidence/publication/runtime-pip.txt`, `reports/evidence/publication/space-final-export-manifest.json`, `reports/evidence/publication/tables-final.txt`, `reports/figures/publication/en-desktop-home.png`, `reports/figures/publication/en-desktop-map_tab.png`, `reports/figures/publication/en-desktop-rank_tab.png`, `reports/figures/publication/en-mobile-map_tab.png`, `reports/figures/publication/pt-BR-desktop-home.png`, `reports/figures/publication/pt-BR-desktop-map_tab.png`, `reports/figures/publication/pt-BR-desktop-rank_tab.png`, `scripts/publication_history.py`, `scripts/smoke_dashboard.py`.
