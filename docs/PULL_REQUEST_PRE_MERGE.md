@@ -1,6 +1,6 @@
 # Audit: reproducible wildfire hotspot research and release candidate
 
-Origem: `audit/pre-merge-2026-10-26` → destino: `main`. Esta branch contém os 14 commits da auditoria anterior e as correções pré-merge. Não usar o comparador da branch antiga para revisar apenas parte da entrega.
+Origem: `audit/pre-merge-2026-10-26` → destino: `main`. Candidato preservado em `5877c8ab1e84443a7d9671fb7f6af13ae0fc3792`, com 19 commits de evolução à frente da main remota. Não usar o comparador da branch antiga para revisar apenas parte da entrega.
 
 ## Resumo e motivação
 
@@ -37,6 +37,8 @@ O CI usa Actions oficiais Node.js 24 fixadas por SHA, Python 3.11/3.12, instala�
 Também há reprodução DVC em checkout separado, verificação de equivalência dos dados/modelos/tabelas, testes de inferência sem dados privados e navegador local nas cinco abas. Esses resultados são distintos de um deploy público ou de replicação por terceiros.
 
 O candidato `372099b` passou no CI 40423524933 com 101 testes por Python 3.11/3.12, Docker, 12 HTTPs e entrada Streamlit. A reprodução DVC final preservou 13/13 binários e 16/16 tabelas científicas, excluindo colunas de tempo; atualizou proveniência por execução real. A captura mobile foi corrigida após inspeção visual. Os checks de commits posteriores continuam pertencendo a seus próprios SHAs.
+
+O fechamento `5877c8a` passou no [CI 40424728263](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40424728263), com os mesmos 101 testes por Python e Docker aprovado. A [PR #1](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1) já foi aberta pelo proprietário e aguarda sua decisão. A integração recusou a atualização do título/corpo com 403; este texto está pronto para aplicação manual. Melhorias posteriores seguem em branch separada, sem modificar essa candidata.
 
 ## Limitações e riscos do merge
 

@@ -1,0 +1,89 @@
+{
+  "checked_at_utc": "2026-10-27T01:53:20.004799+00:00",
+  "branches": [
+    {
+      "name": "audit/pre-merge-2026-10-26",
+      "commit": {
+        "sha": "5877c8ab1e84443a7d9671fb7f6af13ae0fc3792",
+        "url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/commits/5877c8ab1e84443a7d9671fb7f6af13ae0fc3792"
+      },
+      "protected": false
+    },
+    {
+      "name": "audit/reproducibility-2026-10-23",
+      "commit": {
+        "sha": "03adf8d667f97d5e83a5a44b47c33e9a26d15f99",
+        "url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/commits/03adf8d667f97d5e83a5a44b47c33e9a26d15f99"
+      },
+      "protected": false
+    },
+    {
+      "name": "main",
+      "commit": {
+        "sha": "0f05555922e485ae067d35e95c722d4ffce41af4",
+        "url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/commits/0f05555922e485ae067d35e95c722d4ffce41af4"
+      },
+      "protected": false
+    }
+  ],
+  "tags": [
+    {
+      "name": "v2.0.0",
+      "zipball_url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/zipball/refs/tags/v2.0.0",
+      "tarball_url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/tarball/refs/tags/v2.0.0",
+      "commit": {
+        "sha": "0f05555922e485ae067d35e95c722d4ffce41af4",
+        "url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/commits/0f05555922e485ae067d35e95c722d4ffce41af4"
+      },
+      "node_id": "REF_kwDOVQ_VU7ByZWZzL3RhZ3MvdjIuMC4w"
+    },
+    {
+      "name": "v1.0.0",
+      "zipball_url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/zipball/refs/tags/v1.0.0",
+      "tarball_url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/tarball/refs/tags/v1.0.0",
+      "commit": {
+        "sha": "1b47873d84894a052712bbdcc5d2616be927cc10",
+        "url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/commits/1b47873d84894a052712bbdcc5d2616be927cc10"
+      },
+      "node_id": "REF_kwDOVQ_VU7ByZWZzL3RhZ3MvdjEuMC4w"
+    }
+  ],
+  "releases": [],
+  "pull_requests": [
+    {
+      "number": 1,
+      "html_url": "https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1",
+      "title": "Audit/pre merge 2026 10 26",
+      "state": "open",
+      "draft": false,
+      "merged_at": null,
+      "body": null,
+      "head": "5877c8ab1e84443a7d9671fb7f6af13ae0fc3792",
+      "head_branch": "audit/pre-merge-2026-10-26",
+      "base_branch": "main"
+    }
+  ],
+  "ci": [
+    {
+      "id": 40434868113,
+      "head_sha": "5877c8ab1e84443a7d9671fb7f6af13ae0fc3792",
+      "status": "in_progress",
+      "conclusion": null,
+      "html_url": "https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40434868113"
+    },
+    {
+      "id": 40424728263,
+      "head_sha": "5877c8ab1e84443a7d9671fb7f6af13ae0fc3792",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40424728263"
+    },
+    {
+      "id": 40423524933,
+      "head_sha": "372099b80f75eff297b1dd135b9e93be3c033ae6",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40423524933"
+    }
+  ]
+}
