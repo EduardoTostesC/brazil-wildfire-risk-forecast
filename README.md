@@ -6,6 +6,10 @@
 
 [Pre-merge review, 26 October 2026](reports/REVISAO_PRE_MERGE.md): follow-up source-provenance checks, exploratory tie/calibration analyses and a frozen future evaluation protocol. Main and candidate CI badges refer to their named branches separately.
 
+[![Publication branch CI](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/workflows/ci.yml/badge.svg?branch=release%2Fretrospective-publication-2026-10-26)](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions?query=branch%3Arelease%2Fretrospective-publication-2026-10-26)
+
+Publication work is isolated on `release/retrospective-publication-2026-10-26`; the owner merged the earlier candidate through [PR #1](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1). These subsequent improvements await separate review; the integration returned 403 when creating their PR. The dashboard now supports Portuguese/English, with a [runtime-only deployment](docs/DEPLOY_RETROSPECTIVO.md), [measured serving benchmarks](reports/BENCHMARKS_SERVING.md) and [current readiness report](reports/FINALIZACAO_PUBLICACAO.md). The future evaluator is technically tested and gated pending protocol clarification; no 2027 outcomes were accessed. No public demo URL is claimed.
+
 Retrospective machine learning research on satellite hotspot detection in Mato Grosso, Brazil. LightGBM models estimate the probability of **at least one detectable reference-sensor hotspot in a 0.5° cell during D+1 through D+H**, for H = 1, 3 or 7 days. The API and Streamlit dashboard replay exact historical cell/date observations.
 
 Thermal detections are not counts of independent wildfires. This target does not measure ignition location, propagation, burned area or severity. Absence of a detection does not prove physical absence of fire.
@@ -92,11 +96,13 @@ python -m streamlit run app/streamlit_app.py
 
 API docs: `http://localhost:8000/docs`. The versioned sample is explicitly marked as a demonstration. Queries absent from it return 404; no nearby date is substituted. Missing model/calibrator or infrastructure returns 503, invalid domain input 422, controlled internal inference errors 500. `operational_forecast` returns 503.
 
+For **API/dashboard only**, use a separate environment and install `python -m pip install --require-hashes -r app/requirements.txt`. This runtime excludes training/notebook dependencies; use the full lock above for scientific tests or training. Choose the language in the sidebar or start with `?lang=en`. `Dockerfile.serving` starts the dashboard by default and exposes a separate `api` target.
+
 For complete source acquisition, training, DVC, research and deployment instructions see [REPRODUCIBILIDADE](reports/REPRODUCIBILIDADE.md). Full raw and processed datasets are local and are not distributed by this Git repository. A local manifest does not make those inputs publicly versioned.
 
 ## Demonstration and evidence
 
-[Dashboard screenshot](reports/figures/dashboard-desktop.png) · [Tests and CI](reports/TESTES_E_CI.md) · [Remaining work](reports/PENDENCIAS_REAIS.md) · [Readiness assessment](reports/PARECER_FINAL.md)
+[English desktop](reports/figures/publication/en-desktop-home.png) · [Mobile](reports/figures/publication/en-mobile-home.png) · [Dashboard validation](reports/DASHBOARD_FINAL.md) · [Tests and CI](reports/TESTES_E_CI.md) · [Current assessment](reports/PARECER_POS_PUBLICACAO.md)
 
 No public deployment or academic acceptance is claimed. This project does not replace official emergency warnings.
 

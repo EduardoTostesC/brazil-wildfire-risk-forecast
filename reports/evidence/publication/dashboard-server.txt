@@ -1,0 +1,140 @@
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8505
+  Network URL: <redacted-local-address>
+  External URL: <redacted-local-address>
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names

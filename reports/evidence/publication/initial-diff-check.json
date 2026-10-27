@@ -1,0 +1,20 @@
+{
+  "command": "git diff --check origin/main...audit/pre-merge-2026-10-26",
+  "exit_code": 2,
+  "output_lines": 122747,
+  "first_lines": [
+    "data/data_manifest.json:1: trailing whitespace.",
+    "+{",
+    "data/data_manifest.json:2: trailing whitespace.",
+    "+  \"schema_version\": 2,",
+    "data/data_manifest.json:3: trailing whitespace.",
+    "+  \"project\": \"brazil-wildfire-risk-forecast\",",
+    "data/data_manifest.json:4: trailing whitespace.",
+    "+  \"scope\": \"local_files_not_a_public_data_archive\",",
+    "data/data_manifest.json:5: trailing whitespace.",
+    "+  \"sources\": {",
+    "data/data_manifest.json:6: trailing whitespace.",
+    "+    \"INPE\": \"https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref\","
+  ],
+  "interpretation": "CRLF in byte-preserved evidence/protocol/data is reported by Git as trailing whitespace. Do not rewrite fingerprinted historical files."
+}

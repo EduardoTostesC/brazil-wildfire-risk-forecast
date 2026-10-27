@@ -1,18 +1,13 @@
-"""Streamlit dashboard — retrospective satellite hotspot risk in Mato Grosso.
+"""Bilingual retrospective replay; no live forecast or emergency decision support."""
 
-Multi-tab interactive dashboard featuring:
-- Tab 1: Interactive Folium risk map with horizon selector and date picker.
-- Tab 2: Top-N risk cell ranking table with per-cell trend sparklines.
-- Tab 3: Local SHAP explanation for any cell or map click.
-- Tab 4: Drift & Model Health monitoring panel.
-- Tab 5: About — data sources, methodology, and model performance.
-"""
-
+import hashlib
+import json
 import os
+import pickle
 import sys
+from datetime import timedelta
 from pathlib import Path
 
-# Add project root to path
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_PROJECT_ROOT))
 
@@ -25,736 +20,303 @@ import plotly.graph_objects as go
 import streamlit as st
 from streamlit_folium import st_folium
 
-# ── Page config ───────────────────────────────────────────────────────────────
-
-st.set_page_config(
-    page_title="🔥 Brazil Wildfire Risk Forecast",
-    page_icon="🔥",
-    layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        "Get Help": "https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast",
-        "Report a bug": "https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/issues",
-        "About": "Brazil Wildfire Risk Forecast — ML pipeline by Eduardo Tostes",
-    },
-)
-
+from app.i18n import LANGUAGES, horizon_label, translate
 from src.data.build_grid import _load_ibge_polygon, build_grid
 from src.models.inference import calibrated_probabilities, feature_matrix
 from src.models.risk_tiers import DEFAULT_RISK_CONFIG
 
-# ── Theme constants ───────────────────────────────────────────────────────────
-
-RISK_COLORS = {
-    "Low": DEFAULT_RISK_CONFIG.color_low,
-    "Medium": DEFAULT_RISK_CONFIG.color_medium,
-    "High": DEFAULT_RISK_CONFIG.color_high,
-}
-RISK_THRESHOLDS = {
-    "Low": DEFAULT_RISK_CONFIG.low_cutoff,
-    "Medium": DEFAULT_RISK_CONFIG.high_cutoff,
-}
-
-# ── Cached loaders ────────────────────────────────────────────────────────────
+st.set_page_config(page_title="Brazil Wildfire Risk Forecast", page_icon="🔥",
+                   layout="wide", initial_sidebar_state="auto")
+COLORS = {"Low": DEFAULT_RISK_CONFIG.color_low, "Medium": DEFAULT_RISK_CONFIG.color_medium,
+          "High": DEFAULT_RISK_CONFIG.color_high}
 
 
-@st.cache_resource(show_spinner="Loading model artifacts…")
+def tr(key, **values):
+    return translate(key, st.session_state.get("language", "pt-BR"), **values)
+
+
+def level_label(level):
+    return tr(level.lower())
+
+
+@st.cache_resource(show_spinner=False)
 def _load_models():
-    """Load LightGBM models, Platt calibrators, and feature list once."""
-    models, calibrators = {}, {}
-    for h in [1, 3, 7]:
-        m_file = f"lightgbm_{h}d.joblib" if h != 7 else "lightgbm_model.joblib"
-        c_file = f"platt_calibrator_{h}d.joblib" if h != 7 else "platt_calibrator.joblib"
-        mp = _PROJECT_ROOT / "models" / m_file
-        cp = _PROJECT_ROOT / "models" / c_file
-        if mp.exists():
-            models[h] = joblib.load(mp)
-        if cp.exists():
-            calibrators[h] = joblib.load(cp)
-    fc_path = _PROJECT_ROOT / "models" / "feature_cols.joblib"
-    feature_cols = joblib.load(fc_path) if fc_path.exists() else []
-    return models, calibrators, feature_cols
+    models, calibrators, versions = {}, {}, {}
+    columns = joblib.load(_PROJECT_ROOT / "models/feature_cols.joblib")
+    if not isinstance(columns, list) or not columns or len(set(columns)) != len(columns):
+        raise ValueError("Invalid feature schema")
+    for h in (1, 3, 7):
+        model_path = _PROJECT_ROOT / "models" / (f"lightgbm_{h}d.joblib" if h != 7 else "lightgbm_model.joblib")
+        cal_path = _PROJECT_ROOT / "models" / (f"platt_calibrator_{h}d.joblib" if h != 7 else "platt_calibrator.joblib")
+        models[h], calibrators[h] = joblib.load(model_path), joblib.load(cal_path)
+        if not getattr(calibrators[h], "is_fitted_", False) or models[h].n_features_in_ != len(columns):
+            raise ValueError("Invalid model/calibrator pair")
+        versions[h] = "sha256:" + hashlib.sha256(model_path.read_bytes() + cal_path.read_bytes()).hexdigest()
+    return models, calibrators, columns, versions
 
 
-@st.cache_data(show_spinner="Loading dataset…")
+@st.cache_data(show_spinner=False)
 def _load_dataframe():
-    """Load the feature dataset (full or sample fallback)."""
-    full = _PROJECT_ROOT / "data" / "processed" / "features.parquet"
-    sample = _PROJECT_ROOT / "data" / "sample" / "features_sample.parquet"
+    full = _PROJECT_ROOT / "data/processed/features.parquet"
+    sample = _PROJECT_ROOT / "data/sample/features_sample.parquet"
     is_sample = os.environ.get("WILDFIRE_USE_SAMPLE") == "1" or not full.exists()
-    path = sample if is_sample else full
-    if not path.exists():
-        return None, is_sample
-    df = pd.read_parquet(path)
-    df["date"] = pd.to_datetime(df["date"])
+    frame = pd.read_parquet(sample if is_sample else full)
+    frame["date"] = pd.to_datetime(frame["date"], errors="raise")
+    if frame.duplicated(["grid_id", "date"]).any():
+        raise ValueError("Duplicate historical keys")
     grid = build_grid()
     valid = grid.loc[grid.state_status != "outside", "grid_id"]
-    df = df[df.grid_id.isin(valid)]
-    df = df[df.date >= "2024-01-01"]
-    return df, is_sample
+    frame = frame[frame.grid_id.isin(valid) & (frame.date >= "2024-01-01")].copy()
+    return frame, is_sample
 
 
-def _add_predictions(df: pd.DataFrame, models, calibrators, feature_cols, horizon: int) -> pd.DataFrame:
-    """Add probability and risk_level columns for a given forecast horizon."""
-    model = models.get(horizon)
-    calibrator = calibrators.get(horizon)
-    prob = calibrated_probabilities(model, calibrator, feature_matrix(df, feature_cols))
-
-    df = df.copy()
-    df["probability"] = prob
-    df["risk_level"] = np.where(
-        prob >= DEFAULT_RISK_CONFIG.high_cutoff, "High",
-        np.where(prob >= DEFAULT_RISK_CONFIG.low_cutoff, "Medium", "Low"),
-    )
-    return df
+@st.cache_data(show_spinner=False, max_entries=12)
+def _probabilities(frame, horizon, version, _models, _calibrators, columns):
+    # Immutable artifact digest participates in the cache key; resources do not.
+    return calibrated_probabilities(_models[horizon], _calibrators[horizon], feature_matrix(frame, columns))
 
 
-@st.cache_data(show_spinner=False)
-def _load_drift_report():
-    """Load drift_report.json if available."""
-    import json
-    path = _PROJECT_ROOT / "reports" / "drift_report.json"
-    if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))
-    return None
+def _add_predictions(frame, models, calibrators, columns, horizon, version):
+    result = frame.copy()
+    result["probability"] = _probabilities(frame, horizon, version, models, calibrators, columns)
+    result["risk_level"] = np.where(result.probability >= DEFAULT_RISK_CONFIG.high_cutoff, "High",
+                                    np.where(result.probability >= DEFAULT_RISK_CONFIG.low_cutoff, "Medium", "Low"))
+    return result
+
+
+def chart(figure):
+    figure.update_layout(height=figure.layout.height or 420,
+                         separators=",." if st.session_state.language == "pt-BR" else ".,",
+                         font=dict(family="sans-serif", size=13), margin=dict(l=12, r=12, t=65, b=35))
+    st.plotly_chart(figure, use_container_width=True, config={"displayModeBar": False, "responsive": True})
 
 
 @st.cache_data(show_spinner=False)
-def _load_comparison_csv(name: str) -> pd.DataFrame | None:
+def _load_csv(name):
     path = _PROJECT_ROOT / "reports" / name
-    if path.exists():
-        return pd.read_csv(path)
-    return None
+    return pd.read_csv(path) if path.is_file() else None
 
 
-# ── Map builder ───────────────────────────────────────────────────────────────
-
-
-def _build_risk_map(df_day: pd.DataFrame, selected_grid: str | None = None) -> folium.Map:
-    """Build a Folium choropleth-style circle marker map."""
-    if df_day.empty:
-        return folium.Map(location=[-12.5, -56.0], zoom_start=6)
-
-    clat = df_day["lat_center"].mean()
-    clon = df_day["lon_center"].mean()
-    m = folium.Map(location=[clat, clon], zoom_start=6, tiles="OpenStreetMap")
-
-    folium.GeoJson(_load_ibge_polygon(_PROJECT_ROOT).__geo_interface__, name="Archived IBGE state boundary",
-                   style_function=lambda feature: {"color": "#34495e", "weight": 2, "fillOpacity": 0}).add_to(m)
-    folium.LayerControl(collapsed=True).add_to(m)
-
-    for _, row in df_day.iterrows():
-        prob = float(row.get("probability", 0))
-        level = str(row.get("risk_level", "Low"))
-        color = RISK_COLORS.get(level, "#95a5a6")
-        is_selected = (selected_grid is not None and row["grid_id"] == selected_grid)
-        radius = 9 if is_selected else 6
-        weight = 3 if is_selected else 1
-
-        folium.CircleMarker(
-            location=[row["lat_center"], row["lon_center"]],
-            radius=radius,
-            color="#2c3e50" if is_selected else color,
-            fill=True,
-            fill_color=color,
-            fill_opacity=0.75,
-            weight=weight,
-            tooltip=(
-                f"<b>Cell {row['grid_id']}</b><br>"
-                f"Risk: <b style='color:{color}'>{level}</b><br>"
-                f"Probability: <b>{prob:.1%}</b><br>"
-                f"Click to inspect ↗"
-            ),
-            popup=folium.Popup(
-                f"<b>Grid:</b> {row['grid_id']}<br>"
-                f"<b>Lat/Lon:</b> {row['lat_center']:.2f}°, {row['lon_center']:.2f}°<br>"
-                f"<b>Risk Level:</b> {level}<br>"
-                f"<b>Probability:</b> {prob:.1%}",
-                max_width=220,
-            ),
-        ).add_to(m)
-
-    legend_html = f"""
-    <div style="position:fixed;bottom:30px;left:30px;z-index:1000;
-                background:white;padding:12px 16px;border-radius:8px;
-                border:1px solid #ccc;font-size:13px;line-height:1.6;">
-        <b>🔥 Fire Risk</b><br>
-        <span style="color:#27ae60">●</span> Low (&lt;{DEFAULT_RISK_CONFIG.low_cutoff:.0%})<br>
-        <span style="color:#f39c12">●</span> Medium ({DEFAULT_RISK_CONFIG.low_cutoff:.0%}–{DEFAULT_RISK_CONFIG.high_cutoff:.0%})<br>
-        <span style="color:#e74c3c">●</span> High (≥{DEFAULT_RISK_CONFIG.high_cutoff:.0%})
-    </div>
-    """
-    m.get_root().html.add_child(folium.Element(legend_html))
+def _build_risk_map(frame):
+    m = folium.Map(location=[frame.lat_center.mean(), frame.lon_center.mean()], zoom_start=6,
+                   tiles="OpenStreetMap", control_scale=True)
+    folium.GeoJson(_load_ibge_polygon(_PROJECT_ROOT).__geo_interface__, name=tr("boundary"),
+                   style_function=lambda _: {"color": "#34495e", "weight": 2, "fillOpacity": 0}).add_to(m)
+    for row in frame.itertuples():
+        color = COLORS[row.risk_level]
+        tooltip = (f"<b>{tr('cell')} {row.grid_id}</b><br>{tr('probability')}: {row.probability:.1%}"
+                   f"<br>{tr('risk')}: {level_label(row.risk_level)}<br>{row.lat_center:.2f}°, {row.lon_center:.2f}°")
+        folium.CircleMarker(location=[row.lat_center, row.lon_center], radius=6, color=color,
+                            fill=True, fill_opacity=.8, tooltip=tooltip, popup=tooltip).add_to(m)
+    legend = f'<div style="position:fixed;bottom:25px;left:12px;z-index:1000;background:white;padding:9px;border:1px solid #aaa;font-size:12px"><b>{tr("legend")}</b><br>'
+    low, high = DEFAULT_RISK_CONFIG.low_cutoff, DEFAULT_RISK_CONFIG.high_cutoff
+    for level, limits in [("Low", f"&lt;{low:.0%}"), ("Medium", f"{low:.0%}–{high:.0%}"), ("High", f"≥{high:.0%}")]:
+        legend += f'<span style="color:{COLORS[level]}">●</span> {level_label(level)} ({limits})<br>'
+    m.get_root().html.add_child(folium.Element(legend + "</div>"))
     return m
 
 
-# ── Tab 1: Risk Map ───────────────────────────────────────────────────────────
-
-
-def tab_risk_map(df: pd.DataFrame, is_sample: bool, models, calibrators, feature_cols):
-    st.markdown("### 🗺️ Wildfire Risk Map — Mato Grosso")
-    if is_sample:
-        st.info(
-            "💡 **Demo mode** — running on sample data (`data/sample/`). "
-            "For the full 10-year dataset, run `make all` in the project root."
-        )
-
-    # Sidebar controls
-    horizon = st.sidebar.radio(
-        "⏱ Forecast Horizon",
-        options=[7, 3, 1],
-        format_func=lambda h: {7: "7-day (Weekly)", 3: "3-day (72h)", 1: "1-day (24h)"}[h],
-        index=0,
-    )
-
-    available_dates = sorted(df["date"].dt.date.unique())
-    default_idx = min(len(available_dates) * 3 // 4, len(available_dates) - 1)
-    selected_date = st.sidebar.date_input(
-        "📅 Date",
-        value=available_dates[default_idx],
-        min_value=available_dates[0],
-        max_value=available_dates[-1],
-    )
-
-    risk_filter = st.sidebar.multiselect(
-        "🎯 Risk Levels",
-        ["Low", "Medium", "High"],
-        default=["Low", "Medium", "High"],
-    )
-
-    df_day = _add_predictions(df[df["date"].dt.date == selected_date], models, calibrators, feature_cols, horizon)
-    if risk_filter and "risk_level" in df_day.columns:
-        df_day = df_day[df_day["risk_level"].isin(risk_filter)]
-
-    # KPI row
-    total = len(df_day)
-    n_high = int((df_day["risk_level"] == "High").sum()) if "risk_level" in df_day.columns else 0
-    n_med = int((df_day["risk_level"] == "Medium").sum()) if "risk_level" in df_day.columns else 0
-    avg_prob = float(df_day["probability"].mean()) if "probability" in df_day.columns else 0.0
-    max_prob = float(df_day["probability"].max()) if "probability" in df_day.columns else 0.0
-
-    c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("📍 Cells Shown", f"{total:,}")
-    c2.metric("🔴 High Risk", f"{n_high:,}", delta=None)
-    c3.metric("🟠 Medium Risk", f"{n_med:,}")
-    c4.metric("📊 Avg Probability", f"{avg_prob:.1%}")
-    c5.metric("⚠️ Max Probability", f"{max_prob:.1%}")
-
-    # Map
-    st.markdown(f"**Horizon:** `{horizon}-day` | **Date:** `{selected_date}`")
-    if not df_day.empty:
-        risk_map = _build_risk_map(df_day)
-        map_data = st_folium(risk_map, width="100%", height=500, key=f"map_{horizon}_{selected_date}")
-        # Show clicked cell info
-        if map_data and map_data.get("last_object_clicked_tooltip"):
-            with st.expander("📌 Last clicked cell info", expanded=True):
-                st.markdown(map_data["last_object_clicked_tooltip"], unsafe_allow_html=True)
-    else:
-        st.warning("No data for the selected date and risk filters.")
-
-    # Probability distribution histogram
-    if "probability" in df_day.columns and not df_day.empty:
-        with st.expander("📊 Probability Distribution", expanded=False):
-            fig = px.histogram(
-                df_day, x="probability", nbins=40,
-                color="risk_level",
-                color_discrete_map=RISK_COLORS,
-                category_orders={"risk_level": ["Low", "Medium", "High"]},
-                labels={"probability": "Fire Probability", "risk_level": "Risk Level"},
-                title=f"Cell Probability Distribution — {selected_date}",
-                opacity=0.85,
-            )
-            fig.update_layout(bargap=0.05, legend_title_text="Risk Level")
-            st.plotly_chart(fig, use_container_width=True)
-
-
-# ── Tab 2: Risk Ranking ───────────────────────────────────────────────────────
-
-
-def tab_ranking(df: pd.DataFrame, models, calibrators, feature_cols):
-    st.markdown("### 🏆 Highest-Risk Cell Ranking")
-    st.markdown(
-        "Top cells by mean predicted probability over the available historical interval. "
-        "In demonstration mode this interval is a selected week, not the full evaluation period."
-    )
-
-    horizon = st.selectbox(
-        "Forecast Horizon", [7, 3, 1],
-        format_func=lambda h: {7: "7-day", 3: "3-day", 1: "1-day"}[h],
-        key="ranking_horizon",
-    )
-    top_n = st.slider("Top N cells", 10, 50, 20, 5, key="ranking_n")
-
-    df_pred = _add_predictions(df, models, calibrators, feature_cols, horizon)
-
-    # Aggregate: mean prob and % high-risk days per cell
-    agg = (
-        df_pred.groupby("grid_id")
-        .agg(
-            lat=("lat_center", "first"),
-            lon=("lon_center", "first"),
-            mean_prob=("probability", "mean"),
-            max_prob=("probability", "max"),
-            pct_high=("risk_level", lambda x: (x == "High").mean() * 100),
-            pct_medium=("risk_level", lambda x: (x == "Medium").mean() * 100),
-            n_obs=("probability", "count"),
-        )
-        .sort_values("mean_prob", ascending=False)
-        .reset_index()
-        .head(top_n)
-    )
-    agg["rank"] = range(1, len(agg) + 1)
-
-    c1, c2 = st.columns([2, 1])
-
-    with c1:
-        st.markdown("#### 📋 Ranking Table")
-        display = agg[["rank", "grid_id", "lat", "lon", "mean_prob", "max_prob", "pct_high", "pct_medium"]].copy()
-        display.columns = ["Rank", "Cell ID", "Lat", "Lon", "Mean Prob", "Max Prob", "% High-Risk Days", "% Medium-Risk Days"]
-        display["Mean Prob"] = display["Mean Prob"].map("{:.1%}".format)
-        display["Max Prob"] = display["Max Prob"].map("{:.1%}".format)
-        display["% High-Risk Days"] = display["% High-Risk Days"].map("{:.1f}%".format)
-        display["% Medium-Risk Days"] = display["% Medium-Risk Days"].map("{:.1f}%".format)
-        display["Lat"] = display["Lat"].map("{:.2f}°".format)
-        display["Lon"] = display["Lon"].map("{:.2f}°".format)
-        st.dataframe(display, use_container_width=True, height=min(450, top_n * 38))
-
-    with c2:
-        st.markdown("#### 📍 Top Cells on Map")
-        m = folium.Map(
-            location=[agg["lat"].mean(), agg["lon"].mean()],
-            zoom_start=6, tiles="OpenStreetMap",
-        )
-        for i, row in agg.iterrows():
-            prob = float(row["mean_prob"])
-            level = "High" if prob >= RISK_THRESHOLDS["Medium"] else "Medium" if prob >= RISK_THRESHOLDS["Low"] else "Low"
-            folium.CircleMarker(
-                location=[row["lat"], row["lon"]],
-                radius=8,
-                color=RISK_COLORS[level],
-                fill=True,
-                fill_color=RISK_COLORS[level],
-                fill_opacity=0.8,
-                tooltip=f"<b>#{row['rank']} {row['grid_id']}</b><br>Mean: {prob:.1%}",
-            ).add_to(m)
-        st_folium(m, width="100%", height=380, key="ranking_map")
-
-    # Bar chart
-    st.markdown("#### 📊 Mean Probability by Rank")
-    agg_plot = agg.copy()
-    agg_plot["color"] = agg_plot["mean_prob"].apply(
-        lambda p: "High" if p >= RISK_THRESHOLDS["Medium"] else "Medium" if p >= RISK_THRESHOLDS["Low"] else "Low"
-    )
-    fig = px.bar(
-        agg_plot, x="grid_id", y="mean_prob",
-        color="color",
-        color_discrete_map=RISK_COLORS,
-        category_orders={"color": ["High", "Medium", "Low"]},
-        labels={"grid_id": "Cell ID", "mean_prob": "Mean Fire Probability", "color": "Risk"},
-        title=f"Top {top_n} Cells by Mean Fire Probability ({horizon}-Day Horizon)",
-    )
-    fig.update_layout(xaxis_tickangle=-45, showlegend=True)
-    fig.update_yaxes(tickformat=".0%")
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Monthly trend for top cell
-    top_cell = agg.iloc[0]["grid_id"]
-    st.markdown(f"#### 📈 Monthly Risk Trend — Top Cell `{top_cell}`")
-    df_cell = df_pred[df_pred["grid_id"] == top_cell].copy()
-    if not df_cell.empty:
-        monthly = (
-            df_cell.set_index("date")
-            .resample("ME")["probability"]
-            .mean()
-            .reset_index()
-        )
-        monthly.columns = ["Month", "Avg Probability"]
-        fig2 = px.line(
-            monthly, x="Month", y="Avg Probability",
-            markers=True,
-            title=f"Monthly Average Risk — Cell {top_cell}",
-            color_discrete_sequence=["#e74c3c"],
-        )
-        fig2.update_yaxes(tickformat=".0%")
-        fig2.add_hrect(y0=RISK_THRESHOLDS["Medium"], y1=1.0, fillcolor="#e74c3c", opacity=0.07, line_width=0)
-        fig2.add_hrect(y0=RISK_THRESHOLDS["Low"], y1=RISK_THRESHOLDS["Medium"], fillcolor="#f39c12", opacity=0.07, line_width=0)
-        st.plotly_chart(fig2, use_container_width=True)
-
-
-# ── Tab 3: Local SHAP Explanation ────────────────────────────────────────────
-
-
-def tab_shap(df: pd.DataFrame, models, calibrators, feature_cols):
-    import shap
-
-    st.markdown("### 🔍 Local SHAP Explanation — Why this cell is at risk?")
-    st.markdown(
-        "Inspect feature contributions to the **raw model log-odds** for an exact cell/date. "
-        "This tab uses the dedicated **7-day model**; the map and ranking have their own horizon selectors. "
-        "Contributions are not a decomposition of calibrated probability or a causal effect."
-    )
-
-    model = models.get(7)
-    if model is None:
-        st.error("7-day model not found. Run `make train` first.")
+def tab_map(frame, models, calibrators, columns, versions):
+    st.subheader(tr("map_title"))
+    language = st.session_state.language
+    h = st.sidebar.radio(tr("horizon"), [7, 3, 1], format_func=lambda value: horizon_label(value, language), key="map_horizon")
+    dates = sorted(frame.date.dt.date.unique())
+    date = st.sidebar.date_input(tr("date"), value=dates[len(dates) * 3 // 4], min_value=dates[0], max_value=dates[-1], key="map_date")
+    bands = st.sidebar.multiselect(tr("levels"), list(COLORS), default=list(COLORS), format_func=lambda level: translate(level.lower(), language), key="map_bands")
+    day = frame[frame.date.dt.date == date]
+    st.caption(tr("window", date=date, start=date + timedelta(days=1), end=date + timedelta(days=h), h=h))
+    st.caption(tr("model_version", version=versions[h][:23] + "…"))
+    if day.empty or not bands:
+        st.warning(tr("no_rows"))
         return
-
-    # Controls
-    col1, col2 = st.columns(2)
-    with col1:
-        available_cells = sorted(df["grid_id"].unique())
-        sel_cell = st.selectbox("📍 Grid Cell", available_cells, index=0, key="shap_cell")
-    with col2:
-        available_dates = sorted(df["date"].dt.date.unique())
-        default_idx = min(len(available_dates) * 3 // 4, len(available_dates) - 1)
-        sel_date = st.date_input(
-            "📅 Date", value=available_dates[default_idx],
-            min_value=available_dates[0], max_value=available_dates[-1],
-            key="shap_date",
-        )
-
-    mask = (df["grid_id"] == sel_cell) & (df["date"].dt.date == sel_date)
-    row_df = df[mask]
-
-    if row_df.empty:
-        st.warning(f"No exact historical record for {sel_cell} on {sel_date}.")
+    day = _add_predictions(day, models, calibrators, columns, h, versions[h])
+    day = day[day.risk_level.isin(bands)]
+    if day.empty:
+        st.warning(tr("no_rows"))
         return
-
-    # Feature vector for this row
-    X_row = feature_matrix(row_df, feature_cols)
-
-    with st.spinner("Computing SHAP values…"):
-        explainer = shap.TreeExplainer(model)
-        shap_vals = explainer.shap_values(X_row)
-        if isinstance(shap_vals, list):
-            shap_vals = shap_vals[1]  # positive class for LightGBM
-        sv = shap_vals[0]  # shape (n_features,)
-
-    calibrator = calibrators.get(7)
-    prob = float(calibrated_probabilities(model, calibrator, X_row)[0])
-    st.caption("SHAP explains raw model log-odds before Platt calibration. It does not decompose the calibrated probability or establish causality.")
-    level = "High" if prob >= RISK_THRESHOLDS["Medium"] else "Medium" if prob >= RISK_THRESHOLDS["Low"] else "Low"
-
-    # Summary metrics
-    c1, c2, c3 = st.columns(3)
-    c1.metric("🔥 Fire Probability", f"{prob:.1%}")
-    c2.metric("📊 Risk Level", level, delta=None)
-    c3.metric("📍 Cell", sel_cell)
-
-    # SHAP waterfall chart (plotly — no matplotlib dependency in Streamlit)
-    shap_df = pd.DataFrame({"feature": feature_cols, "shap_value": sv, "feature_value": X_row[0]})
-    shap_df["abs_shap"] = shap_df["shap_value"].abs()
-    shap_df = shap_df.sort_values("abs_shap", ascending=False).head(15)
-    shap_df["direction"] = shap_df["shap_value"].apply(lambda v: "↑ Increases Risk" if v > 0 else "↓ Reduces Risk")
-    shap_df["color"] = shap_df["shap_value"].apply(lambda v: "#e74c3c" if v > 0 else "#2980b9")
-    shap_df["label"] = shap_df.apply(
-        lambda r: f"{r['feature']}<br><small>val={r['feature_value']:.2f}</small>", axis=1
-    )
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        y=shap_df["label"].tolist()[::-1],
-        x=shap_df["shap_value"].tolist()[::-1],
-        orientation="h",
-        marker_color=shap_df["color"].tolist()[::-1],
-        text=[f"{v:+.3f}" for v in shap_df["shap_value"].tolist()[::-1]],
-        textposition="outside",
-        hovertemplate="<b>%{y}</b><br>SHAP: %{x:+.4f}<extra></extra>",
-    ))
-    fig.add_vline(x=0, line_dash="dash", line_color="#7f8c8d", line_width=1)
-    fig.update_layout(
-        title=f"Top 15 SHAP Feature Contributions<br><sup>Cell {sel_cell} — Probability: {prob:.1%} ({level})</sup>",
-        xaxis_title="SHAP Value (impact on log-odds)",
-        yaxis_title="",
-        height=500,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        font_size=12,
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Feature value table for context
-    with st.expander("📋 Full Feature Values for This Cell/Date", expanded=False):
-        feat_table = pd.DataFrame({
-            "Feature": feature_cols,
-            "Value": X_row[0],
-            "SHAP": sv,
-        }).sort_values("SHAP", key=abs, ascending=False)
-        feat_table["SHAP"] = feat_table["SHAP"].map("{:+.4f}".format)
-        feat_table["Value"] = feat_table["Value"].map("{:.4f}".format)
-        st.dataframe(feat_table, use_container_width=True)
-
-    # SHAP interpretation guide
-    with st.expander("ℹ️ How to read SHAP values"):
-        st.markdown("""
-**SHAP (SHapley Additive exPlanations)** fairly allocates each feature's contribution to the model output.
-
-| SHAP value | Meaning |
-|---|---|
-| **Positive** 🔴 | Positive contribution to the raw model log-odds for this cell/date |
-| **Negative** 🔵 | Negative contribution to the raw model log-odds for this cell/date |
-| **Magnitude** | Larger absolute value = stronger influence |
-
-**Example:** SHAP = +0.15 contributes +0.15 to the raw log-odds relative to the model
-baseline. It is not a +0.15 change in calibrated probability or evidence of causality.
-        """)
+    metrics = [("shown", str(len(day))), ("mean", f"{day.probability.mean():.1%}"),
+               ("maximum", f"{day.probability.max():.1%}"), ("high_count", str((day.risk_level == "High").sum()))]
+    for column, (label, value) in zip(st.columns(4), metrics):
+        column.metric(tr(label), value)
+    # No component return values are used: suppress click/resize-triggered reruns.
+    st_folium(_build_risk_map(day), use_container_width=True, height=480,
+              returned_objects=[], key=f"risk_map_{h}_{date}_{st.session_state.language}")
+    with st.expander(tr("histogram")):
+        plot = day.assign(band=day.risk_level.map(level_label))
+        figure = px.histogram(plot, x="probability", color="band", nbins=30,
+                           color_discrete_map={level_label(k): v for k, v in COLORS.items()},
+                           labels={"probability": tr("probability"), "band": tr("risk")})
+        figure.update_yaxes(title=tr("count"))
+        figure.update_xaxes(range=[0, 1], tickformat=".0%")
+        chart(figure)
 
 
-# ── Tab 4: Drift & Health ─────────────────────────────────────────────────────
+def tab_ranking(frame, models, calibrators, columns, versions):
+    st.subheader(tr("rank_title"))
+    st.write(tr("rank_desc"))
+    language = st.session_state.language
+    h = st.selectbox(tr("horizon"), [7, 3, 1], format_func=lambda value: horizon_label(value, language), key="ranking_horizon")
+    n = st.slider(tr("top_n"), 10, 50, 20, 5)
+    prediction = _add_predictions(frame, models, calibrators, columns, h, versions[h])
+    ranking = prediction.groupby("grid_id").agg(lat=("lat_center", "first"), lon=("lon_center", "first"),
+        mean_prob=("probability", "mean"), max_prob=("probability", "max"),
+        pct_high=("risk_level", lambda x: (x == "High").mean() * 100),
+        pct_medium=("risk_level", lambda x: (x == "Medium").mean() * 100)).sort_values("mean_prob", ascending=False).head(n).reset_index()
+    display = ranking.rename(columns={"grid_id": tr("cell"), **{key: tr(key) for key in ["lat", "lon", "mean_prob", "max_prob", "pct_high", "pct_medium"]}})
+    st.dataframe(display, hide_index=True, use_container_width=True)
+    with st.expander(tr("ranking_map")):
+        map_frame = ranking.rename(columns={"lat": "lat_center", "lon": "lon_center", "mean_prob": "probability"}).copy()
+        map_frame["risk_level"] = np.where(map_frame.probability >= DEFAULT_RISK_CONFIG.high_cutoff, "High",
+            np.where(map_frame.probability >= DEFAULT_RISK_CONFIG.low_cutoff, "Medium", "Low"))
+        st_folium(_build_risk_map(map_frame), use_container_width=True, height=380,
+                  returned_objects=[], key=f"ranking_map_{h}_{language}")
+    figure = px.bar(ranking, x="grid_id", y="mean_prob", title=tr("ranking_chart", h=h),
+                   labels={"grid_id": tr("cell"), "mean_prob": tr("probability")}, color_discrete_sequence=["#b73e28"])
+    figure.update_yaxes(range=[0, 1], tickformat=".0%")
+    chart(figure)
+    top = ranking.iloc[0].grid_id
+    monthly = prediction[prediction.grid_id == top].set_index("date").probability.resample("ME").mean().reset_index()
+    figure = px.line(monthly, x="date", y="probability", markers=True, title=tr("trend", cell=top),
+                     labels={"date": tr("month"), "probability": tr("probability")})
+    figure.update_yaxes(range=[0, 1], tickformat=".0%")
+    chart(figure)
+
+
+def tab_shap(frame, models, calibrators, columns):
+    st.subheader(tr("shap_title"))
+    st.write(tr("shap_desc"))
+    c1, c2 = st.columns(2)
+    cell = c1.selectbox(tr("cell"), sorted(frame.grid_id.unique()), key="shap_cell")
+    dates = sorted(frame.date.dt.date.unique())
+    date = c2.date_input(tr("date"), value=dates[len(dates) * 3 // 4], min_value=dates[0], max_value=dates[-1], key="shap_date")
+    row = frame[(frame.grid_id == cell) & (frame.date.dt.date == date)]
+    if len(row) != 1:
+        st.warning(tr("no_rows"))
+        return
+    values = feature_matrix(row, columns)
+    contributions = np.asarray(models[7].predict(values, pred_contrib=True))[0]
+    raw = float(models[7].predict(values, raw_score=True)[0])
+    if not np.isclose(contributions.sum(), raw, atol=1e-6):
+        st.error(tr("shap_error"))
+        return
+    probability = calibrated_probabilities(models[7], calibrators[7], values)[0]
+    st.metric(tr("probability"), f"{probability:.1%}")
+    table = pd.DataFrame({tr("feature"): columns, tr("value"): values[0], "SHAP": contributions[:-1]})
+    table = table.sort_values("SHAP", key=abs, ascending=False)
+    top = table.head(15).iloc[::-1]
+    fig = go.Figure(go.Bar(y=top[tr("feature")], x=top.SHAP, orientation="h",
+                           marker_color=np.where(top.SHAP > 0, "#b73e28", "#2166ac")))
+    fig.update_layout(title=tr("shap_chart"), xaxis_title=tr("shap_axis"), height=550)
+    chart(fig)
+    st.caption(tr("shap_caption"))
+    with st.expander(tr("shap_all")):
+        st.dataframe(table, hide_index=True, use_container_width=True)
 
 
 def tab_drift():
-    st.markdown("### 🩺 Model & Data Health Dashboard")
-    st.markdown(
-        "Compares historical input distributions in **2024–2025** with a "
-        "**2016–2023 reference that includes training and calibration**. "
-        "This is a stored retrospective report, without continuous monitoring. "
-        "Covariate shift alone does not establish concept drift or worse predictions."
-    )
-
-    drift = _load_drift_report()
-
-    if drift is None:
-        st.warning("Drift report not found. Run `python -m src.monitoring.drift_detector` to generate it.")
+    st.subheader(tr("drift_title"))
+    st.write(tr("drift_desc"))
+    try:
+        report = json.loads((_PROJECT_ROOT / "reports/drift_report.json").read_text(encoding="utf-8"))
+        if report.get("report_type") != "historical_drift_analysis" or report.get("continuous_monitoring") is not False:
+            raise ValueError("Unexpected report scope")
+        features = pd.DataFrame(report["features"])
+        if features.empty or not {"feature", "PSI", "status", "baseline_mean", "current_mean", "KS_pvalue"}.issubset(features.columns):
+            raise ValueError("Invalid drift schema")
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+        st.warning(tr("drift_missing"))
         return
+    for column, (key, count) in zip(st.columns(4), [("features_compared", len(features)),
+        ("stable", (features.PSI < .10).sum()), ("moderate", features.PSI.between(.10, .25, inclusive="left").sum()),
+        ("critical", (features.PSI >= .25).sum())]):
+        column.metric(tr(key), str(count))
+    categories = {"STABLE": tr("stable"), "MODERATE_DRIFT": tr("moderate"), "CRITICAL_DRIFT": tr("critical")}
+    features["category"] = features.status.map(categories)
+    chart(px.bar(features.sort_values("PSI", ascending=False), x="feature", y="PSI", color="category",
+                 title=tr("psi_chart"), labels={"feature": tr("feature"), "category": tr("status")},
+                 color_discrete_map={tr("stable"): "#278250", tr("moderate"): "#b67b00", tr("critical"): "#b73e28"}))
+    st.caption(tr("psi_caption"))
+    st.dataframe(features[["feature", "baseline_mean", "current_mean", "PSI", "KS_pvalue"]].rename(
+        columns={"feature": tr("feature"), "baseline_mean": tr("baseline_mean"), "current_mean": tr("comparison_mean"), "KS_pvalue": tr("ks_reference")}),
+        hide_index=True, use_container_width=True)
+    walk = _load_csv("walk_forward_metrics.csv")
+    if walk is not None:
+        st.subheader(tr("walk_title"))
+        st.write(tr("walk_desc"))
+        chart(px.line(walk, x="test_year", y=["PR-AUC", "ROC-AUC"], markers=True,
+                      labels={"test_year": tr("year"), "value": tr("metric"), "variable": tr("metric")}))
 
-    summary = drift.get("summary", {})
-    features = drift.get("features", [])
 
-    # Health KPIs
-    total = summary.get("total_monitored", 0)
-    stable = summary.get("stable_count", 0)
-    moderate = summary.get("moderate_drift_count", 0)
-    critical = summary.get("critical_drift_count", 0)
-
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("🔵 Features Monitored", total)
-    c2.metric("✅ Stable", stable, delta=None)
-    c3.metric("⚠️ Moderate Drift", moderate)
-    c4.metric("🚨 Critical Drift", critical, delta=None)
-
-    if critical > 0:
-        st.info(f"{critical} feature(s) exceed the conventional PSI 0.25 cutoff. This does not establish performance degradation.")
-    elif moderate > 0:
-        st.info(f"{moderate} feature(s) fall in the conventional PSI 0.10–0.25 interval.")
+def tab_about(versions):
+    st.subheader(tr("about_title"))
+    st.write(tr("method"))
+    comparison = _load_csv("model_comparison.csv")
+    st.markdown("#### " + tr("benchmark"))
+    if comparison is not None:
+        display = comparison[["model", "AP", "ROC-AUC", "Brier", "ECE"]].rename(columns={"model": tr("model")})
+        names = {"Persistence (Empirical)": "persistence", "Climatology": "climatology",
+                 "LogisticRegression": "logistic", "LogisticRegression (Platt Calibrated)": "logistic_platt",
+                 "LightGBM (Raw)": "lgb_raw", "LightGBM (Platt Calibrated)": "lgb_platt",
+                 "LightGBM (Isotonic Calibrated)": "lgb_isotonic"}
+        display[tr("model")] = display[tr("model")].map(lambda name: tr(names[name]) if name in names else name)
+        st.dataframe(display, hide_index=True, use_container_width=True)
+        st.download_button(tr("download"), comparison.to_csv(index=False), file_name="model_comparison.csv", mime="text/csv")
     else:
-        st.info("All compared features have PSI below 0.10; predictive stability is not established by this result.")
-
-    st.caption("PSI categories are descriptive conventions. KS reference p-values assume independent observations; dependent cell-days violate that assumption.")
-
-    # Comparison metadata
-    st.markdown(
-        f"**Baseline:** `{drift.get('baseline_period', '2016–2023')}` "
-        f"— {drift.get('baseline_samples', 0):,} samples  \n"
-        f"**Historical comparison:** `{drift.get('current_period', '2024–2025')}` "
-        f"— {drift.get('current_samples', 0):,} samples"
-    )
-
-    # PSI bar chart
-    feat_df = pd.DataFrame(features)
-    if not feat_df.empty:
-        feat_df["color"] = feat_df["status"].map({
-            "STABLE": "#27ae60",
-            "MODERATE_DRIFT": "#f39c12",
-            "CRITICAL_DRIFT": "#e74c3c",
-        }).fillna("#95a5a6")
-
-        fig = px.bar(
-            feat_df.sort_values("PSI", ascending=False),
-            x="feature", y="PSI",
-            color="status",
-            color_discrete_map={
-                "STABLE": "#27ae60",
-                "MODERATE_DRIFT": "#f39c12",
-                "CRITICAL_DRIFT": "#e74c3c",
-            },
-            text="PSI",
-            labels={"feature": "Feature", "PSI": "Population Stability Index (PSI)", "status": "Status"},
-            title="Feature Distribution Drift — Population Stability Index (PSI)",
-        )
-        fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
-        fig.add_hline(y=0.10, line_dash="dot", line_color="#f39c12", annotation_text="Moderate drift (0.10)")
-        fig.add_hline(y=0.25, line_dash="dash", line_color="#e74c3c", annotation_text="Critical drift (0.25)")
-        fig.update_layout(xaxis_tickangle=-30)
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Mean comparison table
-        st.markdown("#### 📊 Historical Feature Mean Comparison")
-        shift_df = feat_df[["feature", "baseline_mean", "current_mean", "PSI", "KS_statistic", "KS_pvalue", "status"]].copy()
-        shift_df["mean_delta"] = shift_df["current_mean"] - shift_df["baseline_mean"]
-        shift_df["mean_delta_pct"] = (shift_df["mean_delta"] / shift_df["baseline_mean"].abs().replace(0, 1)) * 100
-        shift_df.columns = ["Feature", "Baseline Mean", "Comparison Mean", "PSI", "KS Stat", "KS reference p-value", "Status", "Δ Mean", "Δ %"]
-        st.dataframe(
-            shift_df.style.format({
-                "Baseline Mean": "{:.3f}", "Comparison Mean": "{:.3f}",
-                "PSI": "{:.4f}", "KS Stat": "{:.4f}", "KS reference p-value": "{:.2e}",
-                "Δ Mean": "{:+.3f}", "Δ %": "{:+.1f}%",
-            }),
-            use_container_width=True,
-        )
-
-    # Walk-forward validation stability
-    wf = _load_comparison_csv("walk_forward_metrics.csv")
-    if wf is not None:
-        st.markdown("#### 📈 Model Stability — Walk-Forward Expanding Window")
-        st.markdown(
-            "Each year is evaluated after training on prior years with target-window purging. "
-            "AP depends on yearly prevalence; these historical comparisons do not establish stability in future years."
-        )
-        fig2 = go.Figure()
-        fig2.add_trace(go.Scatter(
-            x=wf["test_year"], y=wf["PR-AUC"],
-            mode="lines+markers", name="PR-AUC",
-            line=dict(color="#e74c3c", width=2),
-            marker=dict(size=8),
-        ))
-        fig2.add_trace(go.Scatter(
-            x=wf["test_year"], y=wf["ROC-AUC"],
-            mode="lines+markers", name="ROC-AUC",
-            line=dict(color="#3498db", width=2),
-            marker=dict(size=8),
-        ))
-        fig2.update_layout(
-            title="Walk-Forward Temporal Validation (Expanding Window)",
-            xaxis_title="Test Year",
-            yaxis_title="Metric",
-            yaxis_range=[0.4, 1.0],
-            legend_title="Metric",
-        )
-        st.plotly_chart(fig2, use_container_width=True)
-
-    # Drift figure
-    drift_fig_path = _PROJECT_ROOT / "reports" / "figures" / "drift_summary.png"
-    if drift_fig_path.exists():
-        with st.expander("🖼️ Drift Summary Chart", expanded=False):
-            st.image(str(drift_fig_path), caption="Feature Distribution Drift (PSI + KS Test)", use_container_width=True)
-
-
-# ── Tab 5: About ──────────────────────────────────────────────────────────────
-
-
-def tab_about():
-    st.markdown("### ℹ️ About This Project")
-
-    # Model performance
-    comp = _load_comparison_csv("model_comparison.csv")
-    horizon_comp = _load_comparison_csv("multi_horizon_comparison.csv")
-
-    st.markdown("#### Model benchmark — retrospective evaluation; consult run metadata for dates and sample counts")
-    if comp is not None:
-        comp_display = comp.copy()
-        for col in ["PR-AUC", "ROC-AUC", "Brier", "Recall@P50"]:
-            if col in comp_display.columns:
-                comp_display[col] = comp_display[col].map("{:.4f}".format)
-        st.dataframe(comp_display, use_container_width=True, hide_index=True)
-    else:
-        st.info("Run `make train` to generate the model comparison report.")
-
-    if horizon_comp is not None:
-        st.markdown("#### ⏱️ Multi-Horizon Performance")
-        st.dataframe(horizon_comp, use_container_width=True, hide_index=True)
-
-    # Figures
-    st.markdown("#### 📈 Evaluation Charts")
-    fig_cols = st.columns(2)
-    figs = [
-        ("calibration_curve.png", "Probability Calibration (Reliability Diagram)"),
-        ("error_analysis_breakdown.png", "Retrospective evaluation by month, year and region"),
-        ("shap_bar.png", "SHAP Global Feature Importance"),
-        ("shap_summary.png", "SHAP Beeswarm Summary"),
-    ]
-    for i, (fname, caption) in enumerate(figs):
-        path = _PROJECT_ROOT / "reports" / "figures" / fname
-        if path.exists():
-            with fig_cols[i % 2]:
-                st.image(str(path), caption=caption, use_container_width=True)
-
-    # Data sources
-    st.markdown("#### 📂 Data Sources")
-    st.markdown("""
-| Source | Variable | Period | License |
-|--------|----------|--------|---------|
-| **INPE Queimadas** (reference-product archive) | Fire hotspots | 2016–2025 | Public access; verify redistribution terms before republishing |
-| **NASA POWER** (MERRA-2 reanalysis) | T2M_MAX, T2M_MIN, RH2M, PRECTOTCORR, WS10M | 2016–2025 | NASA Open Data Policy |
-    """)
-
-    st.markdown("#### ⚠️ Limitations")
-    st.markdown("""
-1. **Cloud cover**: MODIS cannot detect fires under dense clouds.
-2. **Sensor coverage**: The reference product does not establish complete daily observation of every cell.
-3. **Spatial granularity**: A 0.5° cell (~56 km) indicates aggregate area risk, not a precise ignition point.
-4. **Pilot scope**: Evaluation is limited to Mato Grosso; transfer to other states or biomes requires separate validation.
-    """)
-
-    st.markdown("#### 🤝 Responsible Use")
-    st.warning(
-        "This is a retrospective research prototype. Visual bands are conventions. "
-        "**Do not use this prototype to guide emergency response or resource mobilization.**"
-    )
-
-    st.markdown("---")
-    st.markdown(
-        "**Author:** [Eduardo Tostes](https://github.com/EduardoTostesC) · "
-        "Information Systems undergraduate · "
-        "[Repository](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast) · "
-        "Distributed under [MIT License](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/blob/main/LICENSE)"
-    )
-
-
-# ── Main entry point ──────────────────────────────────────────────────────────
+        st.info(tr("metrics_missing"))
+    horizons = _load_csv("multi_horizon_comparison.csv")
+    if horizons is not None:
+        st.markdown("#### " + tr("horizons"))
+        plot = horizons.assign(H=[int(str(value).split("-")[0]) for value in horizons.horizon])
+        chart(px.bar(plot, x="H", y="PR-AUC", labels={"H": tr("horizon"), "PR-AUC": "AP"}))
+    with st.expander(tr("model_identity")):
+        for h, version in versions.items():
+            st.caption(tr("horizon_value", h=h))
+            st.code(version, language=None)
+    st.markdown("#### " + tr("source_title"))
+    st.write(tr("sources"))
+    st.markdown("#### " + tr("limitations"))
+    st.write(tr("limits"))
+    st.markdown(f"[{tr('author')}](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast)")
 
 
 def main():
-    # Custom CSS
-    st.markdown("""
-    <style>
-    .main .block-container { padding-top: 1.5rem; }
-    div[data-testid="metric-container"] > div { border-left: 3px solid #e74c3c; padding-left: 8px; }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.title("🔥 Brazil Wildfire Risk Forecast")
-    st.caption(
-        "LightGBM + Platt Calibration · INPE fire data (2016–2025) · NASA POWER climate reanalysis · "
-        "Mato Grosso · Historical replay / Análise retrospectiva"
-    )
-
-    # Load shared resources
-    models, calibrators, feature_cols = _load_models()
-    df, is_sample = _load_dataframe()
-    st.info("Historical replay / Replay histórico: observed daily data; historical publication times are unknown. Operational forecasts are unavailable. Visual risk tiers are conventions, not validated action thresholds.")
-    if set(models) != {1, 3, 7} or set(calibrators) != {1, 3, 7} or not feature_cols:
-        st.error("Required model/calibrator pairs are unavailable.")
+    if "language" not in st.session_state:
+        requested = st.query_params.get("lang", "pt-BR")
+        st.session_state.language = requested if requested in LANGUAGES else "pt-BR"
+    st.sidebar.selectbox(translate("language"), list(LANGUAGES), format_func=LANGUAGES.get, key="language")
+    st.title("🔥 " + tr("title"))
+    st.caption(tr("subtitle"))
+    st.warning(tr("warning"))
+    with st.expander(tr("meaning")):
+        st.write(tr("science"))
+        st.write(tr("bands"))
+        st.caption(tr("units"))
+    try:
+        with st.spinner(tr("loading")):
+            models, calibrators, columns, versions = _load_models()
+            frame, sample = _load_dataframe()
+            feature_matrix(frame, columns)
+        if frame.empty:
+            st.error(tr("empty"))
+            return
+    except (OSError, ValueError, TypeError, ImportError, AttributeError, KeyError, EOFError, pickle.UnpicklingError):
+        st.error(tr("unavailable"))
         return
-
-    if df is None:
-        st.error("❌ No data found. Please run: `make all` to download and process the full dataset.")
-        st.code("make all  # or: make data && make features && make train")
-        return
-
-    # Tab layout
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "🗺️ Risk Map",
-        "🏆 Cell Ranking",
-        "🔍 SHAP Explanation",
-        "🩺 Model Health",
-        "ℹ️ About",
-    ])
-
-    with tab1:
-        tab_risk_map(df, is_sample, models, calibrators, feature_cols)
-
-    with tab2:
-        tab_ranking(df, models, calibrators, feature_cols)
-
-    with tab3:
-        tab_shap(df, models, calibrators, feature_cols)
-
-    with tab4:
-        tab_drift()
-
-    with tab5:
-        tab_about()
+    st.info(tr("sample", days=frame.date.nunique(), cells=frame.grid_id.nunique()) if sample else tr("full", days=frame.date.nunique()))
+    tabs = st.tabs([tr(key) for key in ["map_tab", "rank_tab", "shap_tab", "drift_tab", "about_tab"]])
+    try:
+        with tabs[0]:
+            tab_map(frame, models, calibrators, columns, versions)
+        with tabs[1]:
+            tab_ranking(frame, models, calibrators, columns, versions)
+        with tabs[2]:
+            tab_shap(frame, models, calibrators, columns)
+        with tabs[3]:
+            tab_drift()
+        with tabs[4]:
+            tab_about(versions)
+    except (ValueError, TypeError, KeyError):
+        st.error(tr("data_error"))
 
 
 if __name__ == "__main__":

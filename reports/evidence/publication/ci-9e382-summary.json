@@ -1,0 +1,39 @@
+{
+  "head": "9e382945df041435f74c2dfbd79e20e096c09359",
+  "run_id": 40457916591,
+  "url": "https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40457916591",
+  "conclusion": "success",
+  "logs": {
+    "test312": {
+      "job_id": 122035461131,
+      "excerpts": [
+        "2026-10-27T05:55:36.2945363Z All checks passed!",
+        "2026-10-27T05:56:01.1239664Z ============================= 142 passed in 23.49s =============================",
+        "2026-10-27T05:56:02.4016387Z Documentation metrics verified",
+        "2026-10-27T05:56:02.8793598Z Research documentation verified",
+        "2026-10-27T05:56:03.9843550Z Original protocol/models/schema/geometry/algorithm/baseline hashes verified; implementation clarification remains a proposal. No future inputs read."
+      ]
+    },
+    "test311": {
+      "job_id": 122035460838,
+      "excerpts": [
+        "2026-10-27T05:55:34.4662849Z All checks passed!",
+        "2026-10-27T05:55:53.6991652Z ============================= 142 passed in 18.12s =============================",
+        "2026-10-27T05:55:55.0534506Z Documentation metrics verified",
+        "2026-10-27T05:55:55.4109411Z Research documentation verified",
+        "2026-10-27T05:55:56.2994424Z Original protocol/models/schema/geometry/algorithm/baseline hashes verified; implementation clarification remains a proposal. No future inputs read."
+      ]
+    },
+    "docker": {
+      "job_id": 122036149078,
+      "excerpts": [
+        "2026-10-27T05:59:54.9093069Z   \"size_bytes\": 848501434,",
+        "2026-10-27T06:00:03.3331546Z {\"status\":\"ok\",\"model_loaded\":true,\"available_horizons\":[1,3,7],\"supported_inference_modes\":{\"historical_replay\":\"Exact cell/date lookup; publication time unknown\",\"operational_forecast\":\"Unavailable; not implemented\"}}Model bundle verified",
+        "2026-10-27T06:00:03.9877208Z Verified 12 actual HTTP responses",
+        "2026-10-27T06:01:28.5255388Z   \"size_bytes\": 285210866,",
+        "2026-10-27T06:01:33.9690841Z Verified 54 response pairs and 6 errors; maximum numeric difference 0.0",
+        "2026-10-27T06:01:34.8721573Z Model bundle verified"
+      ]
+    }
+  }
+}

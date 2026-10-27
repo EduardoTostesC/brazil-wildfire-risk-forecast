@@ -1,0 +1,18 @@
+{
+  "command": [
+    "docker",
+    "build",
+    "--file",
+    "Dockerfile",
+    "--tag",
+    "wildfire-audit:ci",
+    "."
+  ],
+  "elapsed_build_seconds": 177.198719655,
+  "size_bytes": 848328266,
+  "image_id": "sha256:ac347c7a6b2588bc63a694ff6b4f4c8da2827535d18d4922500df1eecb69385b",
+  "os": "linux",
+  "architecture": "amd64",
+  "dockerfile_sha256": "a967d72cd6c03e341716ec5ade8c9046638a9bb07e67b052120e7b956a4b06a5",
+  "cache_policy": "Normal Docker layer cache; base layers may already be available. Not a guaranteed cold build."
+}

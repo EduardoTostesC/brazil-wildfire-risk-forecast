@@ -1,0 +1,41 @@
+INFO:     Started server process [19036]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8005 (Press CTRL+C to quit)
+INFO:     127.0.0.1:50664 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50665 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50666 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50667 - "GET /drift HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:50668 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:50669 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:50670 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:50671 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:50672 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:50673 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50674 - "POST /predict HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50675 - "POST /predict HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:50676 - "POST /predict HTTP/1.1" 503 Service Unavailable

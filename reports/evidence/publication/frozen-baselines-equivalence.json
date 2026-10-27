@@ -1,0 +1,17 @@
+{
+  "evidence_kind": "original-training lookup reconstruction and historical-sample technical inference, not future evaluation",
+  "training_rows": 897600,
+  "sample_rows": 2464,
+  "reference_features_sha256": "5e99b15c4b7a5bef47be0dd0c91136a0135888060ec1a582cd7c01f847fc92c8",
+  "comparators": {
+    "Climatology": {
+      "max_absolute_prediction_difference": 0.0,
+      "exact_array_equality": true
+    },
+    "Persistence": {
+      "max_absolute_prediction_difference": 0.0,
+      "exact_array_equality": true
+    }
+  },
+  "original_protocol_sha256": "106f80f46afba90c67e785994cde20e2effc7b920bfc95460f5e779eae2a58d1"
+}

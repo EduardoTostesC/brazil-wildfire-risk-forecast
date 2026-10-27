@@ -4,6 +4,7 @@ import datetime as dt
 import hashlib
 import json
 import logging
+import os
 import pickle
 from functools import lru_cache
 from pathlib import Path
@@ -127,7 +128,7 @@ def _resolve_grid_cell(lat: float, lon: float) -> tuple[str, dict]:
 
 def _archive_path() -> Path:
     full = _DATA_DIR / "processed/features.parquet"
-    return full if full.exists() else _DATA_DIR / "sample/features_sample.parquet"
+    return full if full.exists() and os.environ.get("WILDFIRE_USE_SAMPLE") != "1" else _DATA_DIR / "sample/features_sample.parquet"
 
 
 @lru_cache(maxsize=2048)
@@ -187,7 +188,8 @@ def _prepare(request):
 
 @app.get("/health", response_model=HealthResponse)
 def health_check():
-    ready = sorted(h for h in _models if _model_loaded and h in _calibrators and _feature_cols)
+    ready = sorted(h for h in _models if _model_loaded and h in _calibrators and _feature_cols
+                   and getattr(_calibrators[h], "is_fitted_", False))
     return HealthResponse(status="ok" if len(ready) == 3 and _polygon is not None and _grid_cells and _archive_path().exists() else "degraded",
                           model_loaded=bool(ready), available_horizons=ready,
                           supported_inference_modes={"historical_replay": "Exact cell/date lookup; publication time unknown",

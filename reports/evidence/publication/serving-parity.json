@@ -1,0 +1,930 @@
+{
+  "git_head": "e825f0a5ce69833686cbe7498abc3edf309b0ff1",
+  "api_source_sha256": "d9b1a784a2b0012770f859ed9809d85ce3408bbd5307326da2e893d56bbadc96",
+  "absolute_tolerance": 1e-12,
+  "relative_tolerance": 0,
+  "ignored_dynamic_field": "processed_at",
+  "success_response_pairs": 54,
+  "error_responses_checked": 6,
+  "maximum_absolute_numeric_difference": 0.0,
+  "cases": [
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.05517334126969597,
+      "candidate_probability": 0.05517334126969597,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.05517334126969597,
+      "candidate_probability": 0.05517334126969597,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.15490360315773127,
+      "candidate_probability": 0.15490360315773127,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.15490360315773127,
+      "candidate_probability": 0.15490360315773127,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.3360228925096026,
+      "candidate_probability": 0.3360228925096026,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.3360228925096026,
+      "candidate_probability": 0.3360228925096026,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.04021664325428109,
+      "candidate_probability": 0.04021664325428109,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.04021664325428109,
+      "candidate_probability": 0.04021664325428109,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.12411198923812165,
+      "candidate_probability": 0.12411198923812165,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.12411198923812165,
+      "candidate_probability": 0.12411198923812165,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.28987614836358194,
+      "candidate_probability": 0.28987614836358194,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.28987614836358194,
+      "candidate_probability": 0.28987614836358194,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.05183282187964302,
+      "candidate_probability": 0.05183282187964302,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.05183282187964302,
+      "candidate_probability": 0.05183282187964302,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.14777004457623535,
+      "candidate_probability": 0.14777004457623535,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.14777004457623535,
+      "candidate_probability": 0.14777004457623535,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.32544375035372536,
+      "candidate_probability": 0.32544375035372536,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -11.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.32544375035372536,
+      "candidate_probability": 0.32544375035372536,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.024723240706932326,
+      "candidate_probability": 0.024723240706932326,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.024723240706932326,
+      "candidate_probability": 0.024723240706932326,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.07318994269816062,
+      "candidate_probability": 0.07318994269816062,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.07318994269816062,
+      "candidate_probability": 0.07318994269816062,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.1728325577317736,
+      "candidate_probability": 0.1728325577317736,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.1728325577317736,
+      "candidate_probability": 0.1728325577317736,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.06147677370903422,
+      "candidate_probability": 0.06147677370903422,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.06147677370903422,
+      "candidate_probability": 0.06147677370903422,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.16576281806852294,
+      "candidate_probability": 0.16576281806852294,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.16576281806852294,
+      "candidate_probability": 0.16576281806852294,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.33802109596549995,
+      "candidate_probability": 0.33802109596549995,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.33802109596549995,
+      "candidate_probability": 0.33802109596549995,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.07308149365632596,
+      "candidate_probability": 0.07308149365632596,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.07308149365632596,
+      "candidate_probability": 0.07308149365632596,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.1703314710835585,
+      "candidate_probability": 0.1703314710835585,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.1703314710835585,
+      "candidate_probability": 0.1703314710835585,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.34919022287793505,
+      "candidate_probability": 0.34919022287793505,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -12.5,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.34919022287793505,
+      "candidate_probability": 0.34919022287793505,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.041986185514320984,
+      "candidate_probability": 0.041986185514320984,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.041986185514320984,
+      "candidate_probability": 0.041986185514320984,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.12109282420477739,
+      "candidate_probability": 0.12109282420477739,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.12109282420477739,
+      "candidate_probability": 0.12109282420477739,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.27982129644256004,
+      "candidate_probability": 0.27982129644256004,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-12",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.27982129644256004,
+      "candidate_probability": 0.27982129644256004,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.05340470323540042,
+      "candidate_probability": 0.05340470323540042,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.05340470323540042,
+      "candidate_probability": 0.05340470323540042,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.16206596378519122,
+      "candidate_probability": 0.16206596378519122,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.16206596378519122,
+      "candidate_probability": 0.16206596378519122,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.3379387159717104,
+      "candidate_probability": 0.3379387159717104,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-15",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.3379387159717104,
+      "candidate_probability": 0.3379387159717104,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.055565683833264407,
+      "candidate_probability": 0.055565683833264407,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 1
+      },
+      "reference_probability": 0.055565683833264407,
+      "candidate_probability": 0.055565683833264407,
+      "model_version": "sha256:2f59ca47d9e8e5f1a4a2874c5e1ec2017a671ec96a6ec4aedce8ab642976d793",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.1633124427428251,
+      "candidate_probability": 0.1633124427428251,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 3
+      },
+      "reference_probability": 0.1633124427428251,
+      "candidate_probability": 0.1633124427428251,
+      "model_version": "sha256:149d85e5c891993b9dfb987426a924964d44d500eba4ac160139e4c0914ef469",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/predict",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.3500520047391465,
+      "candidate_probability": 0.3500520047391465,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "endpoint": "/explain",
+      "request": {
+        "latitude": -13.0,
+        "longitude": -55.0,
+        "date": "2024-08-18",
+        "horizon_days": 7
+      },
+      "reference_probability": 0.3500520047391465,
+      "candidate_probability": 0.3500520047391465,
+      "model_version": "sha256:bee3895b0aa2400ad7b342889d65fdc93126faa3e93bea9eb25d1a9cd2a4b006",
+      "max_absolute_numeric_difference": 0.0,
+      "statuses": [
+        200,
+        200
+      ]
+    }
+  ]
+}

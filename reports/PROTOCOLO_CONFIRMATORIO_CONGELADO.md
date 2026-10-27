@@ -51,3 +51,7 @@ Blocos de 7/21/30 dias são sensibilidades secundárias. A inferência condicion
 `python scripts/verify_frozen_protocol.py` confere a identidade do JSON e os hashes/modelo/schema, **sem acessar dados futuros nem executar a avaliação**. O executor somente de leitura para 2027 ainda precisa ser implementado e revisado antes do acesso aos desfechos. Essa pendência não bloqueia o PR de engenharia retrospectiva.
 
 Antes de acessar os resultados, qualquer alteração exige nova versão do protocolo, justificativa e novo registro de SHA. Depois da primeira consulta a rótulos/métricas, mudanças são exploratórias e não substituem o resultado primário. Não treinar ou calibrar usando o holdout antes da primeira avaliação. Se 2027 for inviável por fontes/sensor, registrar a inviabilidade e definir outro período ainda não observado em novo protocolo.
+
+## Implementação posterior — 27/10/2026
+
+O JSON original e seu hash acima permanecem congelados. O [executor técnico](EXECUTOR_CONFIRMATORIO_STATUS.md) foi implementado/testado sem desfechos de 2027; sua entrada real permanece bloqueada por admissibilidade e por [esclarecimentos metodológicos ainda propostos](protocol/FUTURE_2027_CLARIFICATIONS_PROPOSAL.md). A seção de execução original descreve o estado de 26/10; esta nota não converte o estudo em avaliação executada ou protocolo institucionalmente pré-registrado.

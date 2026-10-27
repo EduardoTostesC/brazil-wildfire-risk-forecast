@@ -1,0 +1,6 @@
+{
+  "description": "Retrospective satellite hotspot risk research in Mato Grosso, Brazil, with calibrated LightGBM, spatial validation and historical replay.",
+  "topics": ["machine-learning", "wildfire", "remote-sensing", "earth-observation", "lightgbm", "geospatial", "spatiotemporal", "reproducible-research", "fastapi", "streamlit"],
+  "homepage": null,
+  "status": "prepared_for_owner_application; homepage requires a real accessible validated deploy URL"
+}

@@ -1,0 +1,19 @@
+{
+  "checkout_head": "9e382945df041435f74c2dfbd79e20e096c09359",
+  "clone_type": "network git clone from public release branch",
+  "raw_exists": false,
+  "processed_exists": false,
+  "dependency_environments": "reused audited isolated interpreters; fresh runtime-only installation recorded separately",
+  "tests": [
+    {
+      "environment": "py311",
+      "exit_code": 0,
+      "tail": "_standard] PASSED [ 99%]\ntests/test_versioned_acquisition.py::test_reference_zip_filters_state_sensor_and_duplicate_packets PASSED [100%]\n\n- generated xml file: <workspace>\\reports\\evidence\\publication\\clean-py311.xml -\n============================ 142 passed in 21.24s =============================\n"
+    },
+    {
+      "environment": "py312",
+      "exit_code": 0,
+      "tail": "_standard] PASSED [ 99%]\ntests/test_versioned_acquisition.py::test_reference_zip_filters_state_sensor_and_duplicate_packets PASSED [100%]\n\n- generated xml file: <workspace>\\reports\\evidence\\publication\\clean-py312.xml -\n============================ 142 passed in 21.62s =============================\n"
+    }
+  ]
+}

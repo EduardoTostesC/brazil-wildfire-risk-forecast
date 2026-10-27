@@ -50,4 +50,8 @@ mlruns/
 
 # Docker
 *.log
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
 

@@ -1,0 +1,37 @@
+{
+  "checked_at_utc": "2026-10-27T07:55:04.479716+00:00",
+  "pr1": {
+    "number": 1,
+    "html_url": "https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/pull/1",
+    "state": "closed",
+    "merged": true,
+    "merged_at": "2026-10-27T01:53:51Z",
+    "merge_commit_sha": "b87381a78588ae4cfeaf93746aaf03d005412442"
+  },
+  "merged_by": "EduardoTostesC",
+  "branches": [
+    {
+      "name": "audit/pre-merge-2026-10-26",
+      "sha": "5877c8ab1e84443a7d9671fb7f6af13ae0fc3792"
+    },
+    {
+      "name": "audit/reproducibility-2026-10-23",
+      "sha": "03adf8d667f97d5e83a5a44b47c33e9a26d15f99"
+    },
+    {
+      "name": "main",
+      "sha": "b87381a78588ae4cfeaf93746aaf03d005412442"
+    },
+    {
+      "name": "release/retrospective-publication-2026-10-26",
+      "sha": "88b635897315c2a7b50892db088a048041bb823e"
+    }
+  ],
+  "open_prs": [],
+  "tags": [
+    "v2.0.0",
+    "v1.0.0"
+  ],
+  "releases": [],
+  "actions_by_agent": "Read-only snapshot; no merge or change of main, tags or releases"
+}
