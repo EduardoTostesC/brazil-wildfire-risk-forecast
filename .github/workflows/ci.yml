@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, 'audit/**', 'release/**' ]
+    branches: [ main, 'audit/**', 'release/**', 'feat/brazil-national-coverage-*' ]
   pull_request:
     branches: [ main ]
 
@@ -47,6 +47,7 @@ jobs:
         python -m src.reporting.generate_research_tables --check
         python scripts/verify_frozen_protocol.py
         python scripts/evaluate_frozen_2027.py --verify-only
+        python scripts/verify_pilot_preservation.py
         python scripts/publication_history.py --output publication-history.md --json publication-history.json
 
     - name: Preserve validation evidence
