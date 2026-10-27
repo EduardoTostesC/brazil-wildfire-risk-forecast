@@ -1,0 +1,19 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-8.3.4, pluggy-1.7.0 -- <workspace>\.venv\py312\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: <workspace>
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hydra-core-1.3.7, platformdirs-4.13.5
+collecting ... collected 8 items
+
+tests/test_versioned_acquisition.py::test_valid_receipt_has_raw_processed_hashes_and_never_overwrites PASSED [ 12%]
+tests/test_versioned_acquisition.py::test_hash_divergence_is_rejected_and_recorded[expected_raw_sha256] PASSED [ 25%]
+tests/test_versioned_acquisition.py::test_hash_divergence_is_rejected_and_recorded[expected_processed_sha256] PASSED [ 37%]
+tests/test_versioned_acquisition.py::test_incomplete_calendar_and_future_dates_are_rejected PASSED [ 50%]
+tests/test_versioned_acquisition.py::test_reference_data_tree_is_protected PASSED [ 62%]
+tests/test_versioned_acquisition.py::test_incompatible_units_or_time_standard_are_not_accepted[units] PASSED [ 75%]
+tests/test_versioned_acquisition.py::test_incompatible_units_or_time_standard_are_not_accepted[time_standard] PASSED [ 87%]
+tests/test_versioned_acquisition.py::test_reference_zip_filters_state_sensor_and_duplicate_packets PASSED [100%]
+
+- generated xml file: <workspace>\reports\evidence\publication\acquisition-tests.xml -
+============================== 8 passed in 1.60s ==============================

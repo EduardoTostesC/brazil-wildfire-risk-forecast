@@ -1,0 +1,125 @@
+{
+  "provider": "power",
+  "requested_url": "https://power.larc.nasa.gov/api/temporal/daily/point",
+  "parameters": {
+    "parameters": "T2M_MAX,T2M_MIN,RH2M,PRECTOTCORR,WS10M",
+    "community": "AG",
+    "latitude": -12.35,
+    "longitude": -54.95,
+    "start": "20240101",
+    "end": "20240103",
+    "format": "JSON",
+    "time-standard": "LST"
+  },
+  "final_url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M_MAX%2CT2M_MIN%2CRH2M%2CPRECTOTCORR%2CWS10M&community=AG&latitude=-12.35&longitude=-54.95&start=20240101&end=20240103&format=JSON&time-standard=LST",
+  "acquired_at_utc": "2026-10-27T03:00:35.829738+00:00",
+  "observation_time_standard": "LST",
+  "historical_publication_timestamp": null,
+  "status_code": 200,
+  "response_headers": {
+    "Content-Type": "application/json",
+    "Content-Length": "1047",
+    "Date": "Tue, 27 Oct 2026 03:00:35 GMT"
+  },
+  "raw_sha256": "dbdad10315e2fcd8c73848c0daff80ec4014a46674ed1794500fdd1d84ea7cd7",
+  "expected_raw_sha256": null,
+  "expected_processed_sha256": null,
+  "accepted": true,
+  "response_metadata": {
+    "header": {
+      "title": "NASA/POWER Source Native Resolution Daily Data",
+      "api": {
+        "version": "v2.10.1",
+        "name": "POWER Daily API"
+      },
+      "sources": [
+        "MERRA2",
+        "POWER"
+      ],
+      "fill_value": -999.0,
+      "time_standard": "LST",
+      "start": "20240101",
+      "end": "20240103"
+    },
+    "parameters": {
+      "T2M_MAX": {
+        "units": "C",
+        "longname": "Temperature at 2 Meters Maximum"
+      },
+      "T2M_MIN": {
+        "units": "C",
+        "longname": "Temperature at 2 Meters Minimum"
+      },
+      "RH2M": {
+        "units": "%",
+        "longname": "Relative Humidity at 2 Meters"
+      },
+      "PRECTOTCORR": {
+        "units": "mm/day",
+        "longname": "Precipitation Corrected"
+      },
+      "WS10M": {
+        "units": "m/s",
+        "longname": "Wind Speed at 10 Meters"
+      }
+    },
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        -54.95,
+        -12.35,
+        373.44
+      ]
+    },
+    "messages": []
+  },
+  "quality": {
+    "valid": true,
+    "rows": 3,
+    "expected_days": 3,
+    "date_min": "2024-01-01 00:00:00",
+    "date_max": "2024-01-03 00:00:00",
+    "issues": {
+      "invalid_dates": 0,
+      "duplicate_days": 0,
+      "missing_days": 0,
+      "unexpected_days": 0,
+      "wrong_grid": 0,
+      "inverted_temperature": 0
+    },
+    "missing": {
+      "T2M_MAX": 0,
+      "T2M_MIN": 0,
+      "RH2M": 0,
+      "PRECTOTCORR": 0,
+      "WS10M": 0
+    },
+    "invalid": {
+      "T2M_MAX": 0,
+      "T2M_MIN": 0,
+      "RH2M": 0,
+      "PRECTOTCORR": 0,
+      "WS10M": 0
+    }
+  },
+  "processed_sha256": "45a4082722608640da1e2c61afaa07ff7a18bbde48df17545e4918925bd27d6d",
+  "rows": 3,
+  "schema": {
+    "date": "datetime64[ns]",
+    "T2M_MAX": "float64",
+    "T2M_MIN": "float64",
+    "RH2M": "float64",
+    "PRECTOTCORR": "float64",
+    "WS10M": "float64",
+    "grid_id": "object"
+  },
+  "missing": {
+    "date": 0,
+    "T2M_MAX": 0,
+    "T2M_MIN": 0,
+    "RH2M": 0,
+    "PRECTOTCORR": 0,
+    "WS10M": 0,
+    "grid_id": 0
+  }
+}

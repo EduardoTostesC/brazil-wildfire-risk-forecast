@@ -7,7 +7,7 @@ Preparado em 26/10/2026. Distingue inferência pública, reconstrução com aqui
 | Fonte | Origem e identidade | O que verificar antes de distribuir |
 |---|---|---|
 | INPE | `https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref/focos_br_ref_{ANO}.zip`, anos 2016–2025; produto de referência filtrado por MATO GROSSO | A [FAQ oficial](https://data.inpe.br/queimadas/faq/) informa acesso gratuito e orienta citação. Não foi identificada licença específica de redistribuição nos CSVs locais; acesso livre não deve ser transformado em uma licença MIT atribuída a terceiros |
-| NASA POWER | `https://power.larc.nasa.gov/api/temporal/daily/point`; community AG; cinco parâmetros configurados; time-standard LST explícito; todos os centroides da grade | Consultar [documentação da API](https://power.larc.nasa.gov/docs/services/api/temporal/daily/) e [orientações POWER no fórum oficial Earthdata](https://forum.earthdata.nasa.gov/viewtopic.php?t=504); registrar fonte, versão, unidades e reconhecimento aplicável ao produto |
+| NASA POWER | `https://power.larc.nasa.gov/api/temporal/daily/point`; community AG; cinco parâmetros configurados; time-standard LST explícito; todos os centroides da grade | Consultar [documentação da API](https://power.larc.nasa.gov/docs/services/api/temporal/daily/) e [FAQ de dados/unidades/fontes](https://power.larc.nasa.gov/docs/faqs/data/); registrar versão, unidades, atribuição e termos específicos da coleção antes de redistribuir |
 | IBGE | [API de malhas, UF 51](https://servicodados.ibge.gov.br/api/docs/malhas?versao=3); arquivo versionado data/geo/mato_grosso_ibge.geojson | Conservar o hash arquivado; metadados da API são relativos à malha original, enquanto o endpoint entrega versão simplificada. Recuperar o vintage correspondente; não substituir a máscara sem uma nova versão do estudo |
 | Código | Licença MIT do repositório | A licença do código não redefine direitos das fontes |
 
@@ -82,3 +82,9 @@ Uma pessoa/ambiente externo deverá executar a trilha completa, salvar seu commi
 Para a réplica interna da mesma plataforma, a regra é igualdade de chaves/rótulos, valores das tabelas científicas publicadas e identificação explícita de qualquer divergência de bytes. Para plataformas diferentes, definir antecipadamente tolerâncias numéricas de inferência e critérios de equivalência; não transformar arredondamento de tabelas em prova de modelos idênticos.
 
 Aceite externo exige relatório das divergências e suas causas. Não depende de criar uma API operacional nem de concluir o futuro estudo confirmatório; esses são escopos distintos. Não há DVC remoto configurado e nenhum arquivo de dados completo foi publicado automaticamente por esta revisão.
+
+## Ferramenta posterior de aquisição com recibos
+
+A rodada de publicação acrescenta scripts/acquire_versioned_sources.py e src/data/versioned_acquisition.py, opt-in, sem alterar os downloaders históricos nem o arquivo de referência. Cada resposta fica em diretório novo com bytes brutos, CSV derivado, URL/parâmetros, coleta UTC, headers, metadados, schema, cobertura, ausências e hashes. Divergência de hash ou unidade/padrão temporal invalida o recibo; não atualiza a referência. [Estado e comandos](REPRODUCAO_PUBLICA_STATUS.md).
+
+Na revisão da fonte web, o antigo link do fórum t=504 foi identificado como discussão sobre disponibilidade do SSE, sem sustentar a alegação de orientação de uso. Foi substituído pela FAQ pertinente, sem convertê-la em licença de redistribuição dos arquivos locais. As limitações de publicação/vintage permanecem.
