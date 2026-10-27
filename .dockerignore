@@ -16,3 +16,6 @@ data/processed
 reports/evidence
 docs/audits
 notebooks
+models/*.pkl
+models/*.txt
+models/lightgbm_calibrated.joblib

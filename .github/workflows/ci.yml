@@ -54,6 +54,25 @@ jobs:
           test-results.xml
           environment.txt
 
+  serving:
+    name: Runtime-only Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install only serving and verify real inference
+      run: |
+        python -m pip install --require-hashes -r app/requirements.txt
+        python -m pip check
+        python -m src.models.artifacts --verify
+        python scripts/smoke_api.py
+
   docker:
     name: Docker build and HTTP smoke
     needs: test
@@ -63,7 +82,7 @@ jobs:
     - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6; Node.js 24
 
     - name: Build CPU image
-      run: docker build --tag wildfire-audit:ci .
+      run: python scripts/measure_docker_build.py --file Dockerfile --tag wildfire-audit:ci --output reports/evidence/docker-research-build.json
 
     - name: Validate container API, artifacts and published port
       run: |
@@ -95,13 +114,33 @@ jobs:
         done
         test "$(docker inspect --format '{{.State.Health.Status}}' wildfire-dashboard)" = healthy
 
+    - name: Build runtime-only image and compare HTTP responses
+      run: |
+        python scripts/measure_docker_build.py --file Dockerfile.serving --target api --tag wildfire-serving:ci --output reports/evidence/docker-serving-build.json
+        docker run --detach --name wildfire-serving --publish 127.0.0.1:8001:8000 wildfire-serving:ci
+        python scripts/verify_serving_parity.py --reference-url http://127.0.0.1:8000 --candidate-url http://127.0.0.1:8001 --output reports/evidence/docker-serving-parity.json
+        docker exec wildfire-serving python -m src.models.artifacts --verify
+        test "$(docker exec wildfire-serving id -u)" = 1000
+        docker build --file Dockerfile.serving --target dashboard --tag wildfire-serving-dashboard:ci .
+        docker run --detach --name wildfire-serving-dashboard --publish 127.0.0.1:8502:8501 wildfire-serving-dashboard:ci
+        curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8502/_stcore/health
+        for container in wildfire-serving wildfire-serving-dashboard; do
+          for attempt in $(seq 1 30); do
+            if test "$(docker inspect --format '{{.State.Health.Status}}' "$container")" = healthy; then break; fi
+            sleep 2
+          done
+          test "$(docker inspect --format '{{.State.Health.Status}}' "$container")" = healthy
+        done
+
     - name: Collect container evidence
       if: always()
       run: |
         mkdir -p reports/evidence
         docker logs wildfire-api > reports/evidence/docker-api.log 2>&1 || true
         docker logs wildfire-dashboard > reports/evidence/docker-dashboard.log 2>&1 || true
-        docker inspect wildfire-api wildfire-dashboard > reports/evidence/docker-containers.json || true
+        docker logs wildfire-serving > reports/evidence/docker-serving.log 2>&1 || true
+        docker logs wildfire-serving-dashboard > reports/evidence/docker-serving-dashboard.log 2>&1 || true
+        docker inspect wildfire-api wildfire-dashboard wildfire-serving wildfire-serving-dashboard > reports/evidence/docker-containers.json || true
 
     - name: Preserve Docker evidence
       if: always()
@@ -113,5 +152,5 @@ jobs:
     - name: Stop temporary containers
       if: always()
       run: |
-        docker rm --force wildfire-api wildfire-dashboard || true
+        docker rm --force wildfire-api wildfire-dashboard wildfire-serving wildfire-serving-dashboard || true
 
