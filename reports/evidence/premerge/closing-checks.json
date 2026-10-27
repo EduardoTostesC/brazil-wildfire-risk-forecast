@@ -1,0 +1,89 @@
+{
+  "verified_at_utc": "2026-10-27T00:10:21.245554+00:00",
+  "source_candidate_ci": {
+    "commit": "372099b80f75eff297b1dd135b9e93be3c033ae6",
+    "run_id": 40423524933,
+    "python311_job": 121923496932,
+    "python312_job": 121923496497,
+    "docker_job": 121924311856,
+    "all_jobs_conclusion": "success",
+    "tests_per_python": 101
+  },
+  "checks": {
+    "ruff": {
+      "command": [
+        "C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\.venv\\py312\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "."
+      ],
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    "local_links": {
+      "command": [
+        "C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\.venv\\py312\\Scripts\\python.exe",
+        "scripts/check_doc_links.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Local links verified in 31 current Markdown documents\n",
+      "stderr": ""
+    },
+    "bundle": {
+      "command": [
+        "C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\.venv\\py312\\Scripts\\python.exe",
+        "-m",
+        "src.models.artifacts",
+        "--verify"
+      ],
+      "exit_code": 0,
+      "stdout": "Model bundle verified\n",
+      "stderr": ""
+    },
+    "frozen_protocol": {
+      "command": [
+        "C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\.venv\\py312\\Scripts\\python.exe",
+        "scripts/verify_frozen_protocol.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Frozen protocol and model/schema hashes verified; no future observations accessed\n",
+      "stderr": ""
+    },
+    "dvc_status": {
+      "command": [
+        "C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\.venv\\py312\\Scripts\\python.exe",
+        "-m",
+        "dvc",
+        "status",
+        "--json"
+      ],
+      "exit_code": 0,
+      "stdout": "{}\n",
+      "stderr": ""
+    }
+  },
+  "browser": {
+    "url": "http://localhost:8505",
+    "mode": "real versioned historical demonstration sample",
+    "browser_errors": [],
+    "tabs_checked": 5,
+    "viewports": [
+      [
+        1440,
+        1100
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "screenshots": [
+      "reports/figures/dashboard-desktop.png",
+      "reports/figures/dashboard-mobile.png"
+    ]
+  },
+  "pull_request_result": "403 Resource not accessible by integration; no PR created",
+  "merge_or_release_executed": false
+}

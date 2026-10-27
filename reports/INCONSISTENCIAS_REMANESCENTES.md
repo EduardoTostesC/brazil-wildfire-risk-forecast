@@ -20,6 +20,7 @@ Revisão de 26/10/2026. As correções executadas e seus testes estão em [MATRI
 | Calendário das features | Lag anual usa deslocamento fixo em dias; sazonalidade usa denominador 365 | Em ano bissexto isso não equivale exatamente à mesma data civil. É a representação histórica congelada; alterar exige nova versão e reavaliação, sem alegar que hoje se usa calendário corrigido |
 | Reprodutibilidade externa | Dados brutos completos não estão no Git; há hashes e aquisição documentada | DVC sem remoto não distribui entradas. Confirmar condições de redistribuição e testar aquisição independente; não republicar automaticamente CSVs de terceiros |
 | Publicação e desempenho | Docker/API e navegador foram exercitados; não há demo pública validada | Deploy, latência sob carga e pico de memória de processo continuam em fase posterior |
+| Versão do modelo no replay | A API aplica o modelo final fixo às linhas disponíveis; o arquivo completo contém anos de treino/calibração | Não recria o modelo que existiria em cada data. Replay de 2016–2023 não deve ser apresentado como avaliação fora da amostra; as métricas externas publicadas usam 2024–2025 |
 | Revisão independente | Revisão interna pelo mesmo agente; código e evidências acessíveis | Buscar avaliação humana/externa antes de alegar independência científica ou prontidão de artigo |
 
 Essas limitações não exigem um sistema operacional nem dados futuros para abrir o PR de engenharia retrospectiva, desde que o candidato passe seus checks e preserve explicitamente esse escopo. A decisão de merge cabe ao proprietário.

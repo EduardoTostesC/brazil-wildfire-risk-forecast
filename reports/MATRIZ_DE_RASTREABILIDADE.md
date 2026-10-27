@@ -23,6 +23,8 @@
 | PM17 | [train.py:568](../src/models/train.py#L568), [walk-forward:272](../src/models/train.py#L272) | P2 | Peso de classe usa prevalência de todo o treino na CV interna; walk-forward usa parâmetros fixos, sem nova seleção por fold | Limitação declarada sem mudar os modelos/experimentos publicados. Não envolve rótulos de 2023/2024–2025 no tuning principal | Verificação direta do fluxo; em próximo estudo testar que perturbar rótulos do fold retido não altera pesos do fold de ajuste | Limitação metodológica justificada; não é prova de CV espacial independente |
 | PM18 | [api/main.py:174](../api/main.py#L174), [drift](../api/main.py#L222) | P1 | Calibrador presente mas não ajustado gerava 500; JSON válido com estrutura errada era servido em /drift | Exige estado ajustado antes da inferência e valida a estrutura/escopo do relatório histórico; retorna 503 sem escrever arquivos | test_unfitted_calibrator_returns_service_unavailable; test_invalid_drift_schema_returns_503_without_rewriting | Corrigido/testado; não altera pesos ou fórmulas científicas |
 
+| PM19 | [smoke_dashboard.py:16](../scripts/smoke_dashboard.py#L16) | P2 | Captura após espera fixa podia mostrar recarga; resize do desktop mantinha barra lateral sobre o conteúdo mobile | Aguarda conteúdo/status, usa sessão mobile própria e recolhe barra com controle real; inspeção visual das imagens | [log](evidence/premerge/dashboard-smoke-final.txt), [desktop](figures/dashboard-desktop.png), [mobile](figures/dashboard-mobile.png) | Corrigido/verificado localmente; não substitui teste na plataforma de destino |
+
 ## Cobertura das fases do prompt
 
 | Fase | Fonte verificável | Resultado / limite |

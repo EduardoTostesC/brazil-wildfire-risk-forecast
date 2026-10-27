@@ -24,6 +24,14 @@ C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py3
 
 X does not have valid feature names, but LGBMClassifier was fitted with feature names
 
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\shap\explainers\_tree.py:448: UserWarning:
+
+LightGBM binary classifier with TreeExplainer shap values output has changed to a list of ndarray
+
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
 C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
 
 X does not have valid feature names, but LGBMClassifier was fitted with feature names
@@ -43,4 +51,12 @@ X does not have valid feature names, but LGBMClassifier was fitted with feature 
 C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
 
 X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning:
+
+X does not have valid feature names, but LGBMClassifier was fitted with feature names
+
+C:\Users\Eduardo Tostes\Desktop\wildfire\brazil-wildfire-risk-forecast\.venv\py312\Lib\site-packages\shap\explainers\_tree.py:448: UserWarning:
+
+LightGBM binary classifier with TreeExplainer shap values output has changed to a list of ndarray
 

@@ -44,3 +44,5 @@ Atualização pré-merge em 26/10/2026. A revisão individual dos 25 commits, co
 | `03adf8d` | Bundle DVC, executores completos e base por digest | Onze estágios e CI final 40023682295 verde |
 
 Os novos commits da revisão de 26/10 partem desse histórico, em `audit/pre-merge-2026-10-26`. `cf47abc` registra a base; `eaef23b` corrige configuração, qualidade de entrada, semântica visual/drift e captura de fontes. Não houve reescrita de commits nem modificação direta de `main`.
+
+`3478d94` acrescenta a revisão dos 25 commits e o protocolo futuro congelado. A execução DVC nesse código foi de fato realizada; `372099b` preserva sua nova proveniência, resultados equivalentes e os guards finais da API, aprovados com 101 testes por versão e Docker no CI 40423524933. O fechamento registra a revisão visual e a tentativa de PR que retornou 403, sem fingir que houve merge ou que o treino ocorreu no commit de documentação posterior.

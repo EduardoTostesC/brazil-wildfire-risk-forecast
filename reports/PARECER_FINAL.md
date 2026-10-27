@@ -26,3 +26,7 @@ A avaliação anterior permanece histórica. A rodada atual examinou os 25 commi
 | Operação real | Continua não implementada/não validada; não mobilizar recursos com base no protótipo |
 
 A revisão é interna, pelo mesmo agente, sem independência institucional. As mensagens de faixas/SHAP/drift foram ajustadas para que a interface não extrapole esse parecer. Merge e release não são executados sem aprovação explícita.
+
+Fechamento: o candidato `372099b` passou no CI Linux em Python 3.11/3.12 com 101 testes por versão, Docker e HTTPs reais. As verificações locais também passaram com 101 testes por versão. A reprodução final manteve 13/13 binários e 16/16 tabelas científicas; fontes/dados e metadados têm evidências próprias em [REVISAO_PRE_MERGE](REVISAO_PRE_MERGE.md). A captura mobile foi corrigida e inspecionada visualmente. Recomenda-se submeter esse trabalho à revisão de engenharia como pesquisa retrospectiva.
+
+A criação da PR foi tentada após o CI verde e recusada com 403 pela integração. A branch e o texto estão publicados para abertura manual pelo proprietário. Não houve merge, release ou deploy público. O novo Norte pareado inclui zero no IC; a calibração anual e os empates Top-K permanecem análises exploratórias. O estudo futuro segue apenas especificado, sem executor final ou desfechos avaliados.

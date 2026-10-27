@@ -8,9 +8,17 @@ import time
 from pathlib import Path
 
 import requests
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def wait_for_dashboard(page):
+    """Wait through Streamlit reruns, not merely an old DOM or a fixed delay."""
+    page.get_by_text("Cells Shown", exact=False).first.wait_for(state="visible", timeout=120000)
+    page.locator('[data-testid="stStatusWidget"]').wait_for(state="hidden", timeout=120000)
+    if page.locator('[data-testid="stException"]').count():
+        raise RuntimeError(page.locator('[data-testid="stException"]').inner_text())
 
 
 def main():
@@ -37,21 +45,25 @@ def main():
             page = browser.new_page(viewport={"width": 1440, "height": 1100})
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.goto("http://localhost:8505", wait_until="domcontentloaded")
-            page.get_by_text("Cells Shown", exact=False).first.wait_for(timeout=120000)
-            page.wait_for_timeout(4000)
-            if page.locator('[data-testid="stException"]').count():
-                raise RuntimeError(page.locator('[data-testid="stException"]').inner_text())
+            wait_for_dashboard(page)
             page.screenshot(path=str(ROOT / "reports/figures/dashboard-desktop.png"), full_page=True)
             for label in ["Cell Ranking", "SHAP Explanation", "Model Health", "About"]:
                 page.get_by_role("tab", name=label, exact=False).click()
                 page.wait_for_timeout(400)
                 if page.locator('[data-testid="stException"]').count():
                     raise RuntimeError("Dashboard tab failed: " + label)
-            page.get_by_role("tab", name="Risk Map", exact=False).click()
-            page.set_viewport_size({"width": 390, "height": 844})
-            page.wait_for_timeout(1000)
-            page.locator('iframe').first.scroll_into_view_if_needed()
-            page.screenshot(path=str(ROOT / "reports/figures/dashboard-mobile.png"), full_page=True)
+            page.close()
+            # Load a real mobile session instead of photographing a desktop resize.
+            page = browser.new_page(viewport={"width": 390, "height": 844})
+            page.on("pageerror", lambda error: errors.append(str(error)))
+            page.goto("http://localhost:8505", wait_until="domcontentloaded")
+            wait_for_dashboard(page)
+            sidebar = page.locator('[data-testid="stSidebar"]')
+            if sidebar.get_attribute("aria-expanded") == "true":
+                page.locator('[data-testid="stSidebarCollapseButton"] button').click()
+            expect(sidebar).to_have_attribute("aria-expanded", "false")
+            wait_for_dashboard(page)
+            page.screenshot(path=str(ROOT / "reports/figures/dashboard-mobile.png"), full_page=True, animations="disabled")
             browser.close()
         result = {"url": "http://localhost:8505", "mode": "real versioned historical demonstration sample",
                   "browser_errors": errors, "tabs_checked": 5, "viewports": [[1440, 1100], [390, 844]],

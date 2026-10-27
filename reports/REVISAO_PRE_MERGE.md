@@ -12,7 +12,7 @@ Validação inicial desta rodada: 87 testes aprovados em Python 3.11 e 87 em Pyt
 
 ## Estado desta revisão
 
-As correções e análises estão implementadas, com reprodução concluída e verificações finais em fechamento. O aceite do SHA final e a situação do PR serão registrados abaixo. Não há autorização para merge ou publicação automática de release.
+As correções, análises e verificações previstas nesta revisão foram concluídas. O código científico foi reproduzido e o candidato de serving `372099b` passou no CI Linux/Docker. O fechamento posterior corrige a captura do navegador e registra as evidências; seu próprio status pode ser conferido nos checks da branch. A criação da PR foi tentada e recusada pela integração com HTTP 403, como registrado abaixo. Não houve merge ou publicação de release.
 
 ## Escopo e entregas
 
@@ -20,7 +20,7 @@ Revisão individual dos 25 commits: [REVISAO_25_COMMITS](REVISAO_25_COMMITS.md).
 
 Foram conferidos módulos de dados, features, modelos, monitoramento, reporting, API/app, testes/scripts, configuração, dependências, DVC/CI/Docker e notebooks. A parte científica mantém os modelos/horizontes, população e fórmulas históricas; mudanças de validação rejeitam fontes inválidas em vez de alterar observações válidas. A classificação visual mantém 0,25/0,55, com linguagem neutra e rejeição de NaN/infinito/fora do domínio.
 
-As rotas /predict, /explain, /health e /drift mantêm replay histórico exato. O modo operacional continua retornando 503. SHAP é atribuição na margem bruta e a aba local declara seu modelo de sete dias. Drift é comparação de covariáveis de períodos históricos, sem conclusão automática sobre relação preditiva, desempenho ou necessidade de retreino.
+As rotas /predict, /explain, /health e /drift mantêm replay histórico exato. O replay aplica um modelo final fixo, sem recriar versões disponíveis em cada data passada; as métricas externas publicadas pertencem a 2024–2025. O modo operacional continua retornando 503. SHAP é atribuição na margem bruta e a aba local declara seu modelo de sete dias. Drift é comparação de covariáveis de períodos históricos, sem conclusão automática sobre relação preditiva, desempenho ou necessidade de retreino.
 
 ## Resultados científicos conferidos
 
@@ -60,7 +60,13 @@ As verificações finais da API foram feitas depois da execução científica: e
 | DVC no candidato científico | Exit 0 e status {} | [execução](evidence/premerge/final-dvc-reproduction.json) |
 | Links locais | 31 documentos atuais conferidos | [log](evidence/premerge/final-links.txt) |
 
-O [CI 40420262000](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40420262000), de 3478d94, passou em Python 3.11/3.12 com 99 testes por versão e Docker, incluindo verificação do protocolo congelado. Logs preservados: [3.11](evidence/premerge/ci-3478-py311.txt), [3.12](evidence/premerge/ci-3478-py312.txt), [Docker](evidence/premerge/ci-3478-docker.txt). Os dois guards de API foram adicionados depois; seus 101 testes locais não são apresentados como se já pertencessem a esse CI. O snapshot publicado com esses guards precisa de seu próprio CI antes de criar a PR.
+O [CI 40420262000](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40420262000), de 3478d94, passou em Python 3.11/3.12 com 99 testes por versão e Docker, incluindo verificação do protocolo congelado. Logs preservados: [3.11](evidence/premerge/ci-3478-py311.txt), [3.12](evidence/premerge/ci-3478-py312.txt), [Docker](evidence/premerge/ci-3478-docker.txt).
+
+O candidato `372099b`, já com os dois guards da API, passou no [CI 40423524933](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40423524933): **101 testes em Python 3.11 e 101 em Python 3.12**, Ruff, geradores, bundle/protocolo e Docker. O container passou pelos 12 HTTPs e healthchecks API/Streamlit. Trechos literais dos logs: [3.11](evidence/premerge/ci-3720-py311.txt), [3.12](evidence/premerge/ci-3720-py312.txt), [Docker](evidence/premerge/ci-3720-docker.txt). A rodada de fechamento não é apresentada como um novo treinamento.
+
+A inspeção visual encontrou uma captura mobile vazia durante recarga e depois a barra lateral sobrepondo o conteúdo. O script passou a aguardar o conteúdo/status do Streamlit, abrir uma sessão mobile própria e recolher a barra lateral com o controle real da interface. A execução final retornou zero erros de navegador; as imagens foram abertas e conferidas. O viewport mobile mostra título, escopo retrospectivo, amostra e início das métricas; não é uma captura da página inteira com todas as abas/mapa simultaneamente. [Log final](evidence/premerge/dashboard-smoke-final.txt).
+
+No fechamento, Ruff global, 31 documentos com links locais, bundle, protocolo congelado e DVC status {} foram novamente conferidos. [Registro dos comandos e saídas](evidence/premerge/closing-checks.json).
 
 As etapas de nova aquisição integral, avaliação de 2027, réplica externa, deploy público e benchmark sob carga permanecem fora do que foi executado. O Docker Linux é validado pelo CI; não existe Docker no host Windows. Não há teste de treino em macOS ou prova de determinismo bit a bit entre sistemas diferentes.
 
@@ -69,3 +75,11 @@ As etapas de nova aquisição integral, avaliação de 2027, réplica externa, d
 [Protocolo confirmatório congelado](PROTOCOLO_CONFIRMATORIO_CONGELADO.md), com JSON/hashes verificáveis, define avaliação retrospectiva futura de 2027 sujeita a completude/compatibilidade das fontes. Não foram acessados rótulos desse período e seu executor somente de leitura ainda deve ser implementado antes de acessar desfechos. Não é uma confirmação já executada nem pré-registro institucional.
 
 [Reprodução externa](PLANO_REPRODUCAO_EXTERNA.md) documenta aquisição, versões, direitos, comandos e comparação de diferenças. O smoke atual verificou HEAD de dois ZIPs e uma série POWER de três dias de 2024; não equivale à reaquisição completa. [Plano de publicação](PLANO_PUBLICACAO.md) separa integração/portfólio, réplica externa e próximo estudo. O [texto do PR](../docs/PULL_REQUEST_PRE_MERGE.md) está preparado para a branch nova, sem merge ou release automáticos.
+
+## PR e recomendação final
+
+Após o CI verde de `372099b`, a criação de PR draft foi tentada para `audit/pre-merge-2026-10-26` → `main`. O GitHub retornou **403 / Resource not accessible by integration**; não foi criado um número de PR. [Resposta preservada](evidence/premerge/pr-attempt.json). Push funciona, mas não implica permissão de criação de PR pela integração; o CLI gh também não está instalado neste host.
+
+Título pronto: **Audit: reproducible wildfire hotspot research and release candidate**. Corpo: [PULL_REQUEST_PRE_MERGE.md](../docs/PULL_REQUEST_PRE_MERGE.md). [Comparador correto para abrir manualmente](https://github.com/EduardoTostesC/brazil-wildfire-risk-forecast/compare/main...audit/pre-merge-2026-10-26?expand=1). O comparador da branch antiga não contém todas as correções.
+
+Parecer: apto a revisão de engenharia para integração como pesquisa retrospectiva, com os limites científicos declarados e os checks do SHA a integrar conferidos. Não equivale a aceite acadêmico, replicação externa ou prontidão operacional. As três frentes seguintes estão planejadas, sem executar merge, release, deploy público, aquisição futura ou novos modelos.

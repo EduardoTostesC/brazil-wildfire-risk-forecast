@@ -36,6 +36,8 @@ O CI usa Actions oficiais Node.js 24 fixadas por SHA, Python 3.11/3.12, instala�
 
 Também há reprodução DVC em checkout separado, verificação de equivalência dos dados/modelos/tabelas, testes de inferência sem dados privados e navegador local nas cinco abas. Esses resultados são distintos de um deploy público ou de replicação por terceiros.
 
+O candidato `372099b` passou no CI 40423524933 com 101 testes por Python 3.11/3.12, Docker, 12 HTTPs e entrada Streamlit. A reprodução DVC final preservou 13/13 binários e 16/16 tabelas científicas, excluindo colunas de tempo; atualizou proveniência por execução real. A captura mobile foi corrigida após inspeção visual. Os checks de commits posteriores continuam pertencendo a seus próprios SHAs.
+
 ## Limitações e riscos do merge
 
 Entradas históricas completas não estão distribuídas no Git/DVC remoto. Horários de publicação e metadados originais das fontes continuam incompletos. A máscara preserva um polígono arquivado, sem vintage plenamente recuperado. Bootstrap temporal não estima transferência para uma população de novos estados. Calibração e seleção de limiar compartilham 2023; CV interna preserva vizinhança e usa peso de classe calculado no conjunto de treino agregado. Nenhum desses fatos deve ser ocultado como “zero leakage” ou superioridade universal.
