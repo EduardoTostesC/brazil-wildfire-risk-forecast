@@ -1,0 +1,17 @@
+Running stage 'national/dvc.yaml:geography_inventory':
+> python scripts/build_national_geography.py benchmark --source data/geo/national/ibge-2024 --output data/raw/national/dvc-engineering/grid-inventory.json
+0.5deg: 3673 units, 9.46s
+0.25deg: 13088 units, 16.33s
+Generating lock file 'national/dvc.lock'
+Updating lock file 'national/dvc.lock'
+
+To track the changes with git, run:
+
+	git add national/dvc.lock
+
+To enable auto staging, run:
+
+	dvc config core.autostage true
+Use `dvc push` to send your updates to remote storage.
+
+Outcome: exit 0; subsequent dvc status national/dvc.yaml --json returned {}. Historical DVC files unchanged.

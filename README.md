@@ -100,7 +100,16 @@ For **API/dashboard only**, use a separate environment and install `python -m pi
 
 For complete source acquisition, training, DVC, research and deployment instructions see [REPRODUCIBILIDADE](reports/REPRODUCIBILIDADE.md). Full raw and processed datasets are local and are not distributed by this Git repository. A local manifest does not make those inputs publicly versioned.
 
-## Demonstration and evidence
+## National Research Expansion — in development
+
+The **Mato Grosso Pilot** above remains the validated historical study. The separate
+**National Research Expansion** (`brazil_national_v1`) is under development; it has
+no trained national model or national performance results. See the
+[national architecture](docs/NATIONAL_ARCHITECTURE.md) and
+[execution status and acceptance gates](reports/NATIONAL_EXECUTION_STATUS.md).
+The national registry must not be interpreted as predictive coverage of 27 UFs.
+
+### Mato Grosso demonstration and evidence
 
 [English desktop](reports/figures/publication/en-desktop-home.png) · [Mobile](reports/figures/publication/en-mobile-home.png) · [Dashboard validation](reports/DASHBOARD_FINAL.md) · [Tests and CI](reports/TESTES_E_CI.md) · [Current assessment](reports/PARECER_POS_PUBLICACAO.md)
 
