@@ -1,0 +1,40 @@
+schema: '2.0'
+stages:
+  geography_inventory:
+    cmd: python scripts/build_national_geography.py benchmark --source
+      data/geo/national/ibge-2024 --output
+      data/raw/national/dvc-engineering/grid-inventory.json
+    deps:
+    - path: data/geo/national/ibge-2024/BR_UF_2024.geojson.gz
+      hash: md5
+      md5: 0f4312c7d59c870490859af1ea2251d5
+      size: 9308856
+    - path: data/geo/national/ibge-2024/receipt.json
+      hash: md5
+      md5: 004a43a388ed1655ebbee1c609296fb4
+      size: 1385
+    - path: requirements-cpu.lock
+      hash: md5
+      md5: cf44fbfcecf2f62b426325a9bd78416d
+      size: 304847
+    - path: scripts/build_national_geography.py
+      hash: md5
+      md5: 67190f0e868a548510a1d12f3d02b6e6
+      size: 7152
+    - path: src/geo/boundaries.py
+      hash: md5
+      md5: e3fcc356156578c59bbb041217713be7
+      size: 3835
+    - path: src/geo/national_grid.py
+      hash: md5
+      md5: 45cd562417059d5074c6576e30e19e52
+      size: 5885
+    - path: src/geo/uf_registry.py
+      hash: md5
+      md5: 5ee1292fc18a1923c0f1385c35d303f4
+      size: 1684
+    outs:
+    - path: data/raw/national/dvc-engineering/grid-inventory.json
+      hash: md5
+      md5: 758b73102a160f0f5f29cbafb8986405
+      size: 13703

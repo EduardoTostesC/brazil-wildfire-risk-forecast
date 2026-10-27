@@ -1,0 +1,26 @@
+{
+  "stage": "real_archived_geography",
+  "pilot_http_cases_passed": 12,
+  "national_ufs_with_verified_geometry_and_grid": 27,
+  "df_locate": {
+    "scope": "brazil_national_v1",
+    "national_cell_id": "global-grs80-0.5deg-v1:r0148:c0264",
+    "spatial_unit_id": "global-grs80-0.5deg-v1:r0148:c0264:uf53",
+    "uf_code": "53",
+    "boundary": false,
+    "candidate_uf_codes": [
+      "53"
+    ],
+    "uf_name": "Distrito Federal",
+    "region_code": "5",
+    "geometry_version": "ibge-2024",
+    "grid_version": "global-grs80-0.5deg-v1",
+    "territory_verified": true,
+    "national_inference_available": false
+  },
+  "national_prediction_http_status": 503,
+  "ocean_locate_http_status": 422,
+  "dashboard_health_http": 200,
+  "dashboard_root_http": 200,
+  "processes_stopped_after_validation": true
+}

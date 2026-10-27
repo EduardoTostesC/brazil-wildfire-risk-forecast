@@ -1,0 +1,30 @@
+{
+  "base_commit": "c1bead578bb0417538df56fd7f232477fba1c519",
+  "python": "3.12.14",
+  "network_checks": [
+    {
+      "url": "https://api.github.com/repos/EduardoTostesC/brazil-wildfire-risk-forecast/actions/runs/40471215197",
+      "error": "ProxyError: CONNECT tunnel rejected (403 Forbidden)"
+    },
+    {
+      "url": "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=UF&periodo=2024",
+      "error": "ProxyError: CONNECT tunnel rejected (403 Forbidden)"
+    },
+    {
+      "url": "https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR/BR_UF_2024.zip",
+      "error": "ProxyError: CONNECT tunnel rejected (403 Forbidden)"
+    },
+    {
+      "url": "https://data.inpe.br/queimadas/dados-abertos/",
+      "error": "ProxyError: CONNECT tunnel rejected (403 Forbidden)"
+    },
+    {
+      "url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+      "error": "ProxyError: CONNECT tunnel rejected (403 Forbidden)"
+    }
+  ],
+  "data_acquired": false,
+  "national_training_executed": false,
+  "stage": "initial_network_probe_before_recovery",
+  "subsequent_access": "Recovered; actual sources acquired. See source-documents.json, real-acquisition-pilot.json and national/real-grid-evidence.json."
+}

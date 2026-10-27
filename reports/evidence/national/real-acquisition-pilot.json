@@ -1,0 +1,483 @@
+{
+  "data_version": "engineering-20261027-v1",
+  "kind": "bounded_engineering_probe_not_national_model",
+  "period": [
+    "2024-02-28",
+    "2024-03-03"
+  ],
+  "power": [
+    {
+      "requested_uf_code": "51",
+      "coordinate": [
+        -55.25,
+        -12.25
+      ],
+      "request_key": "0fd2a941d41d020fc46f6551b4b9433b3dc4fd293b531fd00404487283703086",
+      "raw_sha256": "e2910d382c5ba4ebd6d1034b5663a438567b91f6e08e67b351c2d97c1f09b556",
+      "raw_bytes": 1215,
+      "acquired_at_utc": "2026-10-27T17:22:37.178994+00:00",
+      "response_headers": {
+        "content-type": "application/json",
+        "date": "Tue, 27 Oct 2026 17:22:37 GMT"
+      },
+      "derived_sha256": "503b726a374c8b882f9f14d68c120a171caa06197d27fcd14b3dceaf2da91c3b",
+      "rows": 5,
+      "header": {
+        "title": "NASA/POWER Source Native Resolution Daily Data",
+        "api": {
+          "version": "v2.10.1",
+          "name": "POWER Daily API"
+        },
+        "sources": [
+          "MERRA2",
+          "POWER"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "20240228",
+        "end": "20240303"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.25,
+          -12.25,
+          354.49
+        ]
+      },
+      "parameters": {
+        "T2M_MAX": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Maximum"
+        },
+        "T2M_MIN": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Minimum"
+        },
+        "RH2M": {
+          "units": "%",
+          "longname": "Relative Humidity at 2 Meters"
+        },
+        "PRECTOTCORR": {
+          "units": "mm/day",
+          "longname": "Precipitation Corrected"
+        },
+        "WS10M": {
+          "units": "m/s",
+          "longname": "Wind Speed at 10 Meters"
+        }
+      },
+      "messages": [],
+      "status": "validated_daily_series",
+      "geographic_assignment": {
+        "national_cell_id": "global-grs80-0.5deg-v1:r0155:c0249",
+        "spatial_unit_id": "global-grs80-0.5deg-v1:r0155:c0249:uf51",
+        "uf_code": "51",
+        "boundary": false,
+        "candidate_uf_codes": [
+          "51"
+        ]
+      },
+      "uf_geometry_verified": true
+    },
+    {
+      "requested_uf_code": "13",
+      "coordinate": [
+        -60.25,
+        -3.25
+      ],
+      "request_key": "661b0e49a2298f39d3f99e330a2953f23a9fd94a9427e5271d6df513a1166d90",
+      "raw_sha256": "c7f0317ca4d7e37ac8d0842c80fc2a2e99833dbd5e47a830f6b831d2af5849f6",
+      "raw_bytes": 1211,
+      "acquired_at_utc": "2026-10-27T17:22:38.928826+00:00",
+      "response_headers": {
+        "content-type": "application/json",
+        "date": "Tue, 27 Oct 2026 17:22:38 GMT"
+      },
+      "derived_sha256": "6d09e928dc4ed6851b5f8b897918e21e34044070e58bd7df21f122693f723149",
+      "rows": 5,
+      "header": {
+        "title": "NASA/POWER Source Native Resolution Daily Data",
+        "api": {
+          "version": "v2.10.1",
+          "name": "POWER Daily API"
+        },
+        "sources": [
+          "MERRA2",
+          "POWER"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "20240228",
+        "end": "20240303"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -60.25,
+          -3.25,
+          51.37
+        ]
+      },
+      "parameters": {
+        "T2M_MAX": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Maximum"
+        },
+        "T2M_MIN": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Minimum"
+        },
+        "RH2M": {
+          "units": "%",
+          "longname": "Relative Humidity at 2 Meters"
+        },
+        "PRECTOTCORR": {
+          "units": "mm/day",
+          "longname": "Precipitation Corrected"
+        },
+        "WS10M": {
+          "units": "m/s",
+          "longname": "Wind Speed at 10 Meters"
+        }
+      },
+      "messages": [],
+      "status": "validated_daily_series",
+      "geographic_assignment": {
+        "national_cell_id": "global-grs80-0.5deg-v1:r0173:c0239",
+        "spatial_unit_id": "global-grs80-0.5deg-v1:r0173:c0239:uf13",
+        "uf_code": "13",
+        "boundary": false,
+        "candidate_uf_codes": [
+          "13"
+        ]
+      },
+      "uf_geometry_verified": true
+    },
+    {
+      "requested_uf_code": "29",
+      "coordinate": [
+        -38.25,
+        -12.75
+      ],
+      "request_key": "d8a586f039d3ae0830bd78586cf83be20d2a2d75594d83dd2ac59da03061c8f5",
+      "raw_sha256": "773bbf90c68ac63c069bc211e301720b59bd9cd17dddac1a040ef31d98cec1f2",
+      "raw_bytes": 1210,
+      "acquired_at_utc": "2026-10-27T17:22:40.126747+00:00",
+      "response_headers": {
+        "content-type": "application/json",
+        "date": "Tue, 27 Oct 2026 17:22:40 GMT"
+      },
+      "derived_sha256": "47b1b20af8e32d8167275424daebdeeb48b3732a20a2ced7ef80f057830ce32e",
+      "rows": 5,
+      "header": {
+        "title": "NASA/POWER Source Native Resolution Daily Data",
+        "api": {
+          "version": "v2.10.1",
+          "name": "POWER Daily API"
+        },
+        "sources": [
+          "MERRA2",
+          "POWER"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "20240228",
+        "end": "20240303"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.25,
+          -12.75,
+          53.34
+        ]
+      },
+      "parameters": {
+        "T2M_MAX": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Maximum"
+        },
+        "T2M_MIN": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Minimum"
+        },
+        "RH2M": {
+          "units": "%",
+          "longname": "Relative Humidity at 2 Meters"
+        },
+        "PRECTOTCORR": {
+          "units": "mm/day",
+          "longname": "Precipitation Corrected"
+        },
+        "WS10M": {
+          "units": "m/s",
+          "longname": "Wind Speed at 10 Meters"
+        }
+      },
+      "messages": [],
+      "status": "validated_daily_series",
+      "geographic_assignment": {
+        "national_cell_id": "global-grs80-0.5deg-v1:r0154:c0283",
+        "spatial_unit_id": "global-grs80-0.5deg-v1:r0154:c0283:uf29",
+        "uf_code": "29",
+        "boundary": false,
+        "candidate_uf_codes": [
+          "29"
+        ]
+      },
+      "uf_geometry_verified": true
+    },
+    {
+      "requested_uf_code": "35",
+      "coordinate": [
+        -46.75,
+        -23.75
+      ],
+      "request_key": "794a9ac847111dd7b8d2f0078c743fd993298a8b009802900efcd67fccb97886",
+      "raw_sha256": "da42f95ab71041cc5f30b8837b87ce7059d1779291fe94a6a73c505ee0b2927c",
+      "raw_bytes": 1212,
+      "acquired_at_utc": "2026-10-27T17:22:41.567849+00:00",
+      "response_headers": {
+        "content-type": "application/json",
+        "date": "Tue, 27 Oct 2026 17:22:41 GMT"
+      },
+      "derived_sha256": "6bce55eb9855aad45b19bff72979d206ebec17e647d06333d52304922762b519",
+      "rows": 5,
+      "header": {
+        "title": "NASA/POWER Source Native Resolution Daily Data",
+        "api": {
+          "version": "v2.10.1",
+          "name": "POWER Daily API"
+        },
+        "sources": [
+          "MERRA2",
+          "POWER"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "20240228",
+        "end": "20240303"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.75,
+          -23.75,
+          790.19
+        ]
+      },
+      "parameters": {
+        "T2M_MAX": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Maximum"
+        },
+        "T2M_MIN": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Minimum"
+        },
+        "RH2M": {
+          "units": "%",
+          "longname": "Relative Humidity at 2 Meters"
+        },
+        "PRECTOTCORR": {
+          "units": "mm/day",
+          "longname": "Precipitation Corrected"
+        },
+        "WS10M": {
+          "units": "m/s",
+          "longname": "Wind Speed at 10 Meters"
+        }
+      },
+      "messages": [],
+      "status": "validated_daily_series",
+      "geographic_assignment": {
+        "national_cell_id": "global-grs80-0.5deg-v1:r0132:c0266",
+        "spatial_unit_id": "global-grs80-0.5deg-v1:r0132:c0266:uf35",
+        "uf_code": "35",
+        "boundary": false,
+        "candidate_uf_codes": [
+          "35"
+        ]
+      },
+      "uf_geometry_verified": true
+    },
+    {
+      "requested_uf_code": "53",
+      "coordinate": [
+        -47.75,
+        -15.75
+      ],
+      "request_key": "2f0da5c679c4808ccc92bf8c39a8eefdb4586204c54d2af2b458c6be3c2d155f",
+      "raw_sha256": "184ef96de234e29432de8e0648e9afd6d96b87e0ac4186828272c5c10db50a58",
+      "raw_bytes": 1211,
+      "acquired_at_utc": "2026-10-27T17:22:43.092520+00:00",
+      "response_headers": {
+        "content-type": "application/json",
+        "date": "Tue, 27 Oct 2026 17:22:43 GMT"
+      },
+      "derived_sha256": "9cee3df80e79f461130cf4993e675b1b70103c07776a705109463ad182eed658",
+      "rows": 5,
+      "header": {
+        "title": "NASA/POWER Source Native Resolution Daily Data",
+        "api": {
+          "version": "v2.10.1",
+          "name": "POWER Daily API"
+        },
+        "sources": [
+          "MERRA2",
+          "POWER"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "20240228",
+        "end": "20240303"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.75,
+          -15.75,
+          947.71
+        ]
+      },
+      "parameters": {
+        "T2M_MAX": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Maximum"
+        },
+        "T2M_MIN": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters Minimum"
+        },
+        "RH2M": {
+          "units": "%",
+          "longname": "Relative Humidity at 2 Meters"
+        },
+        "PRECTOTCORR": {
+          "units": "mm/day",
+          "longname": "Precipitation Corrected"
+        },
+        "WS10M": {
+          "units": "m/s",
+          "longname": "Wind Speed at 10 Meters"
+        }
+      },
+      "messages": [],
+      "status": "validated_daily_series",
+      "geographic_assignment": {
+        "national_cell_id": "global-grs80-0.5deg-v1:r0148:c0264",
+        "spatial_unit_id": "global-grs80-0.5deg-v1:r0148:c0264:uf53",
+        "uf_code": "53",
+        "boundary": false,
+        "candidate_uf_codes": [
+          "53"
+        ]
+      },
+      "uf_geometry_verified": true
+    }
+  ],
+  "inpe": {
+    "year": 2024,
+    "raw_sha256": "a2cec2f67483a4a95956a471d5cbdb7b3cbd93b21c9b87c845a649ef89abf4e1",
+    "raw_bytes": 10727110,
+    "acquired_at_utc": "2026-10-27T17:22:46.396269+00:00",
+    "response_headers": {
+      "date": "Tue, 27 Oct 2026 17:22:44 GMT",
+      "last-modified": "Fri, 06 Jun 2025 13:13:55 GMT",
+      "etag": "\"a3aec6-636e7008f4ac0\"",
+      "content-type": "application/zip"
+    },
+    "request_key": "19477747fbcdb5e404dd4669caa73edf8ea82958450eade5e1e0482b9931ad64",
+    "members": [
+      "focos_br_ref_2024.csv"
+    ],
+    "zip_crc_valid": true,
+    "sensor_verification": "reference_product_URL_only_no_per_row_satellite_column",
+    "rows": 278299,
+    "origin_state_counts": {
+      "BAHIA": 9160,
+      "CEARÁ": 7160,
+      "MARANHÃO": 22879,
+      "PARANÁ": 2704,
+      "SÃO PAULO": 8712,
+      "MATO GROSSO DO SUL": 13041,
+      "DISTRITO FEDERAL": 349,
+      "GOIÁS": 6362,
+      "AMAPÁ": 2014,
+      "TOCANTINS": 17251,
+      "PARÁ": 56070,
+      "MATO GROSSO": 50551,
+      "AMAZONAS": 25499,
+      "PERNAMBUCO": 2057,
+      "PIAUÍ": 10587,
+      "PARAÍBA": 1074,
+      "SERGIPE": 190,
+      "ESPÍRITO SANTO": 662,
+      "MINAS GERAIS": 11787,
+      "RORAIMA": 5358,
+      "RIO GRANDE DO SUL": 1572,
+      "SANTA CATARINA": 1801,
+      "RIO GRANDE DO NORTE": 624,
+      "RONDÔNIA": 10692,
+      "ALAGOAS": 285,
+      "RIO DE JANEIRO": 1200,
+      "ACRE": 8658
+    },
+    "date_min": "2024-01-01 16:24:00+00:00",
+    "date_max": "2024-12-31 17:53:00+00:00",
+    "csv_encoding": "UTF-8 strict",
+    "issues": {
+      "invalid_dates": 0,
+      "wrong_year": 0,
+      "invalid_coordinates": 0
+    },
+    "source_completeness": "not_established_by_detection_rows",
+    "cross_chunk_deduplication": "disk_backed_sqlite_exact_timestamp_lat_lon",
+    "status": "annual_schema_and_timestamp_scan_not_full_geographic_validation"
+  },
+  "geographic_pilot": {
+    "scope": "first_20_unique_source_events_per_requested_UF_not_full_annual_attribution",
+    "source_uf_sample_counts": {
+      "29": 20,
+      "35": 20,
+      "53": 20,
+      "51": 20,
+      "13": 20
+    },
+    "selected_rows": 100,
+    "assigned_rows": 100,
+    "assigned_uf_counts": {
+      "29": 20,
+      "35": 20,
+      "53": 20,
+      "51": 20,
+      "13": 20
+    },
+    "quarantine_rows": 0,
+    "audit": {
+      "accepted": 100,
+      "invalid_date": 0,
+      "invalid_coordinate": 0,
+      "wrong_year": 0,
+      "outside": 0,
+      "duplicates": 0,
+      "boundary": 0,
+      "state_mismatch": 0,
+      "state_unknown": 0,
+      "wrong_sensor": 0,
+      "sensor_verification": "unverified_reference_product_policy_required"
+    },
+    "full_annual_timestamp_coordinate_duplicate_scan": {
+      "scanned": 278299,
+      "duplicates": 0,
+      "deduplication": "disk_backed_sqlite_exact_timestamp_lat_lon"
+    },
+    "geometry_sha256": "675611345ce68e1ab3e204ff9fd686e62e29de973260a776aae30133315e7a2c",
+    "geometry_version": "ibge-2024",
+    "elapsed_seconds": 12.286,
+    "source_day_completeness": "not_established",
+    "model_training": "not_executed",
+    "accepted_sha256": "017984e7e72d5fb12aafd050a814ba59f56e3ab6ba3fb7a5b4a02e1b9843d765"
+  }
+}

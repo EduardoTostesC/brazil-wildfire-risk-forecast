@@ -100,7 +100,16 @@ Para **somente API/dashboard**, use outro ambiente e instale `python -m pip inst
 
 O guia [REPRODUCIBILIDADE](reports/REPRODUCIBILIDADE.md) contém aquisição, treinamento, DVC, pesquisa e publicação. Dados brutos e processados completos são locais e não são distribuídos pelo Git. Um manifesto local não equivale a uma versão pública desses dados.
 
-## Demonstração e evidências
+## National Research Expansion — em desenvolvimento
+
+O **Mato Grosso Pilot** acima continua sendo o estudo histórico validado. A linha
+separada **National Research Expansion** (`brazil_national_v1`) está em desenvolvimento;
+ainda não há modelo treinado ou resultados de desempenho nacionais. Consulte a
+[arquitetura nacional](docs/NATIONAL_ARCHITECTURE.md) e o
+[estado da execução e gates de aceitação](reports/NATIONAL_EXECUTION_STATUS.md).
+O cadastro nacional não comprova cobertura preditiva das 27 UFs.
+
+### Demonstração e evidências de Mato Grosso
 
 [Desktop PT-BR](reports/figures/publication/pt-BR-desktop-home.png) · [Mobile](reports/figures/publication/pt-BR-mobile-home.png) · [Validação do dashboard](reports/DASHBOARD_FINAL.md) · [Testes e CI](reports/TESTES_E_CI.md) · [Parecer atual](reports/PARECER_POS_PUBLICACAO.md)
 

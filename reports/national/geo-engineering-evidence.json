@@ -1,0 +1,23 @@
+{
+  "kind": "synthetic_engineering_only",
+  "fixture": "two adjacent rectangles and tiny isolated DF-code rectangle; not real UF geometry",
+  "results": [
+    {
+      "resolution_deg": 0.5,
+      "units": 3,
+      "cells": 2,
+      "df_units": 1,
+      "wall_seconds": 0.004229370002576616,
+      "python_tracemalloc_peak_bytes": 6686
+    },
+    {
+      "resolution_deg": 0.25,
+      "units": 5,
+      "cells": 5,
+      "df_units": 1,
+      "wall_seconds": 0.005350117004127242,
+      "python_tracemalloc_peak_bytes": 9529
+    }
+  ],
+  "limitations": "No national geometry, area, sensor data, positives, prevalence or predictive performance measured; tracemalloc does not include all native GEOS/PROJ allocations."
+}
