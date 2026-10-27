@@ -1,6 +1,6 @@
 {
-  "registration_commit": "dbbc21b34a667fe60a14a811aa1169b54435fde1",
-  "training_metadata_commit": "dbbc21b34a667fe60a14a811aa1169b54435fde1",
+  "registration_commit": "3478d9495738bc91e65ba5ea856fb32cf61a90c4",
+  "training_metadata_commit": "3478d9495738bc91e65ba5ea856fb32cf61a90c4",
   "seed": 42,
   "python": "3.12.10",
   "registration_note": "Registration snapshot; consult execution logs and metadata for training provenance.",
@@ -29,7 +29,7 @@
   },
   "data_features_sha256": "5e99b15c4b7a5bef47be0dd0c91136a0135888060ec1a582cd7c01f847fc92c8",
   "environment_lock_sha256": "e519b3df0c3fff0b7ef47105f0c2f86322e4c543095f0a3b25f3972c0859e35c",
-  "run_id": "cba87c85a9e4419682ea83ccbf14789f",
+  "run_id": "00232d5ee32f4a1183976a735c64c74f",
   "tracking_uri": "sqlite:///C:\\Users\\Eduardo Tostes\\Desktop\\wildfire\\brazil-wildfire-risk-forecast\\mlflow-audit.db",
   "verified_status": "FINISHED",
   "verified_metrics": 28

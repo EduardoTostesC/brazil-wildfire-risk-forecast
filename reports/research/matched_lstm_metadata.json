@@ -1,4 +1,225 @@
 {
+  "execution_snapshot": {
+    "commit_at_start": "3478d9495738bc91e65ba5ea856fb32cf61a90c4",
+    "working_tree_dirty_at_start": true,
+    "sources_match_commit": true,
+    "source_files": {
+      "api/main.py": {
+        "sha256": "77e1cbe66fea74abd790e41d1e044e4b809e33b68130061cd4a69aaaf1cb26c4",
+        "sha256_lf": "77e1cbe66fea74abd790e41d1e044e4b809e33b68130061cd4a69aaaf1cb26c4",
+        "matches_commit_after_eol_normalization": true
+      },
+      "app/streamlit_app.py": {
+        "sha256": "114094aa70ebf47a6348a0f62846c06ce3c75d00870378ad4fa1c77a0a8f232d",
+        "sha256_lf": "114094aa70ebf47a6348a0f62846c06ce3c75d00870378ad4fa1c77a0a8f232d",
+        "matches_commit_after_eol_normalization": true
+      },
+      "config.yaml": {
+        "sha256": "7c05ae206dc09def122c90159828a46ec470e76d93e9562ea5ae7a52be46f7af",
+        "sha256_lf": "7c05ae206dc09def122c90159828a46ec470e76d93e9562ea5ae7a52be46f7af",
+        "matches_commit_after_eol_normalization": true
+      },
+      "pyproject.toml": {
+        "sha256": "2d1214ae407f688bfaf5888f8be0a7feee4ae8e661fb948d96ad71009ba569a9",
+        "sha256_lf": "2d1214ae407f688bfaf5888f8be0a7feee4ae8e661fb948d96ad71009ba569a9",
+        "matches_commit_after_eol_normalization": true
+      },
+      "requirements-cpu.lock": {
+        "sha256": "7bc5957b4f92b21af544592b8dc05b399c1118fad8505431716000479d12714c",
+        "sha256_lf": "7a3ee9aa39d5b73f9c5f65ababc7677386aa263b20a110ce3a0a2840e72e0259",
+        "matches_commit_after_eol_normalization": true
+      },
+      "requirements.lock": {
+        "sha256": "e519b3df0c3fff0b7ef47105f0c2f86322e4c543095f0a3b25f3972c0859e35c",
+        "sha256_lf": "e519b3df0c3fff0b7ef47105f0c2f86322e4c543095f0a3b25f3972c0859e35c",
+        "matches_commit_after_eol_normalization": true
+      },
+      "requirements.txt": {
+        "sha256": "40b88dab3e98325909e7dcf136aa9f85f964d79f1f7619a4d6bf5b6d59a17187",
+        "sha256_lf": "40b88dab3e98325909e7dcf136aa9f85f964d79f1f7619a4d6bf5b6d59a17187",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/__init__.py": {
+        "sha256": "00fdf57a0e3b898103bc2d7df34b112d7b7ff16722da97c6cdff7f8536d5a6e8",
+        "sha256_lf": "00fdf57a0e3b898103bc2d7df34b112d7b7ff16722da97c6cdff7f8536d5a6e8",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/config.py": {
+        "sha256": "c30153de3f5ef7c0255fb2e3491fd367d56921755b9bddda6f3e0aed8efdc31b",
+        "sha256_lf": "c30153de3f5ef7c0255fb2e3491fd367d56921755b9bddda6f3e0aed8efdc31b",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/data/__init__.py": {
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "sha256_lf": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/data/build_grid.py": {
+        "sha256": "90f98d38ac988ad25d15f7f218860157218e9b577fd81593b2c92d43d20bde6c",
+        "sha256_lf": "90f98d38ac988ad25d15f7f218860157218e9b577fd81593b2c92d43d20bde6c",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/data/build_sample.py": {
+        "sha256": "39c94db8258e917f2e3eacb0fe0c0c554419525c9fb90c310c060113e65eecd9",
+        "sha256_lf": "39c94db8258e917f2e3eacb0fe0c0c554419525c9fb90c310c060113e65eecd9",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/data/download_climate.py": {
+        "sha256": "8bf188ae1e74f1538a3ef4c5986f85e22ef3a9dcb8f176f9543e80d9a7245fc1",
+        "sha256_lf": "8bf188ae1e74f1538a3ef4c5986f85e22ef3a9dcb8f176f9543e80d9a7245fc1",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/data/download_fire.py": {
+        "sha256": "9ec14396853ea0cafb061373c2b0c05d38de833cacebd8b1caca4ccad1542cbb",
+        "sha256_lf": "9ec14396853ea0cafb061373c2b0c05d38de833cacebd8b1caca4ccad1542cbb",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/data/manifest.py": {
+        "sha256": "36029eb2aca9db7b2e6b0ba697b7a956513d069b09fc373e6339053c8a7e9103",
+        "sha256_lf": "36029eb2aca9db7b2e6b0ba697b7a956513d069b09fc373e6339053c8a7e9103",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/data/process_data.py": {
+        "sha256": "9b08d3284a8099c3d22e1cf3f2ef27a09f75fcd1f3b9072c14760433bd88ad08",
+        "sha256_lf": "9b08d3284a8099c3d22e1cf3f2ef27a09f75fcd1f3b9072c14760433bd88ad08",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/data/quality.py": {
+        "sha256": "a7a89d61a5569ec1d813bb84513b3b2f94206583bc879c9057b613b579200a4e",
+        "sha256_lf": "a7a89d61a5569ec1d813bb84513b3b2f94206583bc879c9057b613b579200a4e",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/features/__init__.py": {
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "sha256_lf": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/features/build_features.py": {
+        "sha256": "fc848d394539a2df3d2acee6021efbd70ac626d19509b1ac67d1acc3c8b323fb",
+        "sha256_lf": "fc848d394539a2df3d2acee6021efbd70ac626d19509b1ac67d1acc3c8b323fb",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/__init__.py": {
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "sha256_lf": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/artifacts.py": {
+        "sha256": "3081f45476c68884475119614d15c4bd3ddc110aad2da25cd15ba9816fe0bd90",
+        "sha256_lf": "3081f45476c68884475119614d15c4bd3ddc110aad2da25cd15ba9816fe0bd90",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/calibration.py": {
+        "sha256": "93d16a2ebdd5a176a3f70a32f2251cb0d5d8a697ca71cc1df9c3aa51758e19f2",
+        "sha256_lf": "93d16a2ebdd5a176a3f70a32f2251cb0d5d8a697ca71cc1df9c3aa51758e19f2",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/evaluation.py": {
+        "sha256": "a24aa11e421a20f96f1534ea707c1dfe4a8f39603c555c05a0e253efcde6e849",
+        "sha256_lf": "a24aa11e421a20f96f1534ea707c1dfe4a8f39603c555c05a0e253efcde6e849",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/explain.py": {
+        "sha256": "fc84fe6c1984343d41dc6fe198d398933b473492cda03d2c0ff88931667e34dd",
+        "sha256_lf": "fc84fe6c1984343d41dc6fe198d398933b473492cda03d2c0ff88931667e34dd",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/inference.py": {
+        "sha256": "da970e9f5f1f5c5fe1b965a3d076c90880c1cd55d5923f56fa3817e9e3f832cd",
+        "sha256_lf": "da970e9f5f1f5c5fe1b965a3d076c90880c1cd55d5923f56fa3817e9e3f832cd",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/provenance.py": {
+        "sha256": "5f85eb147397fffb1923c13acb67c4fb46943ac4e6ed74dd38cd9d327f6a3831",
+        "sha256_lf": "5f85eb147397fffb1923c13acb67c4fb46943ac4e6ed74dd38cd9d327f6a3831",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/research.py": {
+        "sha256": "c1ecc113652098d6ee30ccb1872d11a22bfe60bc89862b8266d39556b3878376",
+        "sha256_lf": "c1ecc113652098d6ee30ccb1872d11a22bfe60bc89862b8266d39556b3878376",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/risk_tiers.py": {
+        "sha256": "018575ce526651897a41b1be2c462265bff87c935005c65bea493ae3cf07db30",
+        "sha256_lf": "018575ce526651897a41b1be2c462265bff87c935005c65bea493ae3cf07db30",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/tracking.py": {
+        "sha256": "c4e37c3e43a1ac43ae0e478bed41c03bb84937aa89b006207ff6a943be23931a",
+        "sha256_lf": "c4e37c3e43a1ac43ae0e478bed41c03bb84937aa89b006207ff6a943be23931a",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/train.py": {
+        "sha256": "e06aa6fec0ee7643f74ab9e5e036c48344238c99a36204f981d5dd4953f334ef",
+        "sha256_lf": "384ff2bc51191eaab8df727e63e0f25232052114ca2faf883e92118ef7657f28",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/models/train_lstm.py": {
+        "sha256": "90aa59634f0735529b5a0d54f2d4fb7df6d55db85789c08df757ba11807c09cd",
+        "sha256_lf": "90aa59634f0735529b5a0d54f2d4fb7df6d55db85789c08df757ba11807c09cd",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/monitoring/__init__.py": {
+        "sha256": "0fc9106fa334f7afc164bab50878c12bd96da1f7c7338a0593ff30a5ac6c923d",
+        "sha256_lf": "0fc9106fa334f7afc164bab50878c12bd96da1f7c7338a0593ff30a5ac6c923d",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/monitoring/drift_detector.py": {
+        "sha256": "f95feaa974ff118714b3febdada546e5dc6c53067e3080895661525fb03ee295",
+        "sha256_lf": "f95feaa974ff118714b3febdada546e5dc6c53067e3080895661525fb03ee295",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/reporting/__init__.py": {
+        "sha256": "2969c08c0c4402d5f4ab5489f7af6267a269be8a10d23a650d553e3ed448dc73",
+        "sha256_lf": "2969c08c0c4402d5f4ab5489f7af6267a269be8a10d23a650d553e3ed448dc73",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/reporting/decision_diagnostics.py": {
+        "sha256": "e12e2def0b4ef357d5e79219567db1336a6d2e85f969fe021798613f5912534b",
+        "sha256_lf": "e12e2def0b4ef357d5e79219567db1336a6d2e85f969fe021798613f5912534b",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/reporting/generate_readme_metrics.py": {
+        "sha256": "7005dcfaa05340f724f5f80945b3ab143ec10ea62f8223812b479005d9c1c47d",
+        "sha256_lf": "7005dcfaa05340f724f5f80945b3ab143ec10ea62f8223812b479005d9c1c47d",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/reporting/generate_research_tables.py": {
+        "sha256": "77243695e9da75c581a0a079695b03314d1d99f8908ad26c4ee98eee4388d5c2",
+        "sha256_lf": "77243695e9da75c581a0a079695b03314d1d99f8908ad26c4ee98eee4388d5c2",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/reporting/plot_research.py": {
+        "sha256": "ef9d92eb2cdb5651460ba9d8760c071d2e67f3c20759a527978ca0cdcf76896d",
+        "sha256_lf": "ef9d92eb2cdb5651460ba9d8760c071d2e67f3c20759a527978ca0cdcf76896d",
+        "matches_commit_after_eol_normalization": true
+      },
+      "src/reporting/premerge_diagnostics.py": {
+        "sha256": "081436f4cfabb8c83cc5200740d5bbb4183bff91fc0e10b45902da36a3e68dbf",
+        "sha256_lf": "081436f4cfabb8c83cc5200740d5bbb4183bff91fc0e10b45902da36a3e68dbf",
+        "matches_commit_after_eol_normalization": true
+      }
+    },
+    "input_sha256": {
+      "data/processed/features.parquet": "5e99b15c4b7a5bef47be0dd0c91136a0135888060ec1a582cd7c01f847fc92c8",
+      "data/processed/dataset.parquet": "8e8e7f4675a64ad7f3cfb289f1e0965ce9c7e7a975c8a9f71d6a3c3f32c5276a",
+      "data/processed/grid.csv": "d3d26ee88b26940ff2346c3433b0454122615534c75e37684ae84d769a523830",
+      "models/training_metadata.json": "0a20029c9dcaa156cf8788954d728fc0845c22107ad9a16872b47aa5e0f6bee6"
+    },
+    "python": "3.12.10",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "versions": {
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "scikit-learn": "1.7.2",
+      "lightgbm": "4.6.0",
+      "torch": "2.5.1+cpu",
+      "scipy": "1.14.1",
+      "mlflow": "2.22.2",
+      "dvc": "3.59.2"
+    },
+    "note": "Captured before execution. Matching source bytes do not prove source-data publication timing."
+  },
   "seq_len": 14,
   "feature_cols": [
     "T2M_MAX",
@@ -21,12 +242,12 @@
   "training_stride": 1,
   "test_stride": 1,
   "lstm_parameters": 21569,
-  "lstm_training_seconds": 109.42145480000181,
-  "lgb_training_seconds": 7.615391600003932,
-  "lstm_inference_seconds": 1.9309902000240982,
-  "lgb_inference_seconds": 0.5086329000187106,
-  "lstm_ms_per_row_batch4096": 0.007577027090752519,
-  "lgb_ms_per_row_full_batch": 0.001995828493920732,
+  "lstm_training_seconds": 113.47323870000037,
+  "lgb_training_seconds": 7.711158800000703,
+  "lstm_inference_seconds": 1.950841500000024,
+  "lgb_inference_seconds": 0.5012698999998975,
+  "lstm_ms_per_row_batch4096": 0.007654921757282867,
+  "lgb_ms_per_row_full_batch": 0.001966936762304972,
   "sequence_array_bytes": 716136960,
   "comparison_note": "Same eligible training/calibration/test keys, different raw sequence versus engineered representations. Hyperparameters inherited from main training-only CV, not chosen using test.",
   "paired_AP_difference": {

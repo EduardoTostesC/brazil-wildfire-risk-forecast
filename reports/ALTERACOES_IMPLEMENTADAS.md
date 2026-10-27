@@ -29,6 +29,7 @@ Branch de trabalho separada: `audit/pre-merge-2026-10-26`. A auditoria anterior 
 |---|---|---|
 | `cf47abc` | Consulta remota, diffs dos 25 commits e nova base de testes | Branch original 14 à frente; 87 aprovados em cada Python; sem commits remotos posteriores |
 | `eaef23b` | Configuração temporal coerente; entradas do processamento validadas; alvo funciona com uma célula; faixas neutras; drift histórico; snapshots de fonte antes da execução; Top-K fracionário; Actions oficiais por SHA | 98 testes locais após os novos casos; análises adicionais e reprodução em checkout separado têm logs próprios |
+| `3478d94` | Revisão individual dos 25 commits, protocolo futuro JSON/hash, comparações exploratórias, planos de publicação/réplica externa, badges por branch e esclarecimentos SHAP | Protocolo verificado sem dados futuros; fonte usada na reprodução final, com resultados idênticos aos originais |
 
 Revisão por commit: [REVISAO_25_COMMITS](REVISAO_25_COMMITS.md). Problemas por arquivo/linha e testes: [MATRIZ_DE_RASTREABILIDADE](MATRIZ_DE_RASTREABILIDADE.md). Resultados desta rodada não transformam a revisão interna em replicação científica externa.
 

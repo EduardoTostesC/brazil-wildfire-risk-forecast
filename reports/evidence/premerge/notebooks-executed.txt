@@ -1,0 +1,2 @@
+01_eda.ipynb: executed, code_cells=5, errors=0
+02_modeling.ipynb: executed, code_cells=7, errors=0

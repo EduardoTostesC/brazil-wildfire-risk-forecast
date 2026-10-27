@@ -11,3 +11,18 @@ Revisão crítica interna da auditoria de 23/10/2026. Esta avaliação não é i
 | Operação real | Contrato rejeita explicitamente operação indisponível | Não há sistema operacional validado; ingestão, disponibilidade, qualidade contínua, utilidade em campo e infraestrutura não foram demonstradas |
 
 O projeto pode ser apresentado como plataforma de pesquisa e análise retrospectiva de risco de focos detectáveis, com evidências concretas. Não deve ser apresentado como previsão operacional de incêndios ou como sistema de validade científica incontestável. As pendências têm procedimentos objetivos em [PENDENCIAS_REAIS](PENDENCIAS_REAIS.md).
+
+## Revisão pré-merge de 26/10/2026
+
+A avaliação anterior permanece histórica. A rodada atual examinou os 25 commits de referência e encontrou/corrigiu inconsistências reais de configuração, processamento e comunicação. A réplica interna em checkout separado reproduziu os 13 artefatos binários e as 16 tabelas científicas, sem alterar os resultados negativos. A recomendação de integração depende do CI do candidato final e das verificações registradas em [REVISAO_PRE_MERGE](REVISAO_PRE_MERGE.md), não apenas dessa reprodução anterior.
+
+| Finalidade | Parecer atualizado |
+|---|---|
+| PR de engenharia retrospectiva | Pode ser submetido à revisão do proprietário com checks verdes e limitações explícitas; não exige dados futuros ou sistema operacional |
+| Portfólio / entrevista | Sustentado pela rastreabilidade, casos de falha, resultados negativos e separação entre evidência local/remota/externalidade |
+| Demo pública | Implementação local/container exercitada; publicação e teste na plataforma ainda não executados |
+| Artigo científico | Requer revisão externa, proveniência temporal mais completa e tratamento dos limites de CV/seleção exploratória/transferência espacial; não há aceite acadêmico |
+| Estudo confirmatório | Protocolo future-2027-v1 especificado e hash-verificado, sem executor final ou avaliação dos desfechos; não chamar análises novas de 2024–2025 de confirmação |
+| Operação real | Continua não implementada/não validada; não mobilizar recursos com base no protótipo |
+
+A revisão é interna, pelo mesmo agente, sem independência institucional. As mensagens de faixas/SHAP/drift foram ajustadas para que a interface não extrapole esse parecer. Merge e release não são executados sem aprovação explícita.

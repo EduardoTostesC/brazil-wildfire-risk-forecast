@@ -1,0 +1,2 @@
+Manifest verified: hashes, sizes, schemas and source coverage match.
+

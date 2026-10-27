@@ -1,7 +1,9 @@
 {
   "report_type": "historical_drift_analysis",
-  "description": "Retrospective distribution drift comparing historical training baseline (2016-2023) against out-of-time test period (2024-2025). Operational streaming drift monitoring operates on near-real-time telemetry sliding windows and is marked standby while operational ingestion is disconnected.",
+  "description": "Retrospective covariate distribution comparison; the reference includes training and calibration years. No continuous monitoring is implemented. Covariate shift alone does not establish concept drift or predictive degradation.",
   "monitoring_mode": "retrospective_evaluation",
+  "continuous_monitoring": false,
+  "performance_degradation_assessed": false,
   "inference_limitations": "PSI is descriptive covariate shift. KS p-values assume independent samples and are not inferentially valid for these dependent cell-days. Neither establishes concept drift.",
   "baseline_period": "<= 2023",
   "current_period": ">= 2024",

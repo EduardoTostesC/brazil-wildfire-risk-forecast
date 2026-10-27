@@ -71,6 +71,8 @@ This is historical replay. Daily observations from D were not necessarily publis
 
 AP varies with prevalence. Top-K metrics count cell-days with overlapping future windows, not distinct fires, field visits or avoided losses. Bootstrap intervals condition on these observed cells; they do not establish nationwide generalization. SHAP explains raw model log-odds before calibration and does not establish causality. Visual low/medium/high bands are conventions at 0.25 and 0.55, separate from validation-selected decision thresholds.
 
+Historical Top-K tables retain their original tie ordering. The [fractional tie sensitivity](reports/research/premerge/top_k_ties.json) shows why discrete baselines require care. The additional paired North interval includes zero; the point advantage of logistic regression is not a confirmed superiority claim. These follow-up analyses of already inspected 2024–2025 data are exploratory.
+
 ## Run locally
 
 Python 3.11 or 3.12. Create and activate a virtual environment, then install the CPU dependency lock, including hashed PyTorch CPU wheels:

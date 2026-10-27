@@ -58,6 +58,8 @@ AP depende da prevalência. AP/prevalência e AP-prevalência são diagnósticos
 
 Resultados negativos são mantidos: sem histórico local recente a climatologia pode superar LightGBM; um modelo simples pode superar o complexo numa região retida. SHAP e ablação são análises preditivas, sem identificação causal.
 
+A revisão pré-merge adiciona análises exploratórias de [empates Top-K](research/premerge/top_k_ties.json), [diferença pareada no Norte](research/premerge/north_paired_ap.json) e [calibração por ano](research/premerge/yearly_calibration.csv). As tabelas históricas e suas métricas não são substituídas. O IC da diferença no Norte inclui zero; não deve ser apresentado como prova de superioridade da regressão. O [protocolo futuro](PROTOCOLO_CONFIRMATORIO_CONGELADO.md) ainda não foi executado.
+
 ## Limitações de dados
 
 Downloads legados da POWER usaram o padrão LST e os focos foram agrupados em UTC. Nos 290.019 registros arquivados, as horas UTC 16–19 mantêm a mesma data sob deslocamentos de -3, -4 e -5 horas; não foi detectada alteração do dia dos focos. Faltam horários históricos de publicação e metadados das respostas climáticas originais. O produto INPE é de referência, mas os CSVs locais não têm satélite por linha. Hashes locais não demonstram reaquisição independente ou cobertura física perfeita do sensor.

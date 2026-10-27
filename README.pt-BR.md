@@ -71,6 +71,8 @@ O sistema faz replay histórico. Observações diárias de D podem ter sido publ
 
 AP depende da prevalência. Top-K mede células-dias positivas em janelas futuras sobrepostas, sem contar incêndios distintos, vistorias reais ou perdas evitadas. Os intervalos bootstrap são condicionais às células observadas. SHAP explica log-odds do modelo bruto, antes da calibração, e não comprova causalidade. As faixas visuais baixo/médio/alto são convenções em 0,25 e 0,55, distintas dos limiares escolhidos na validação.
 
+As tabelas históricas Top-K mantêm a ordenação original dos empates. A [sensibilidade fracionária](reports/research/premerge/top_k_ties.json) mostra a cautela necessária com baselines discretos. O intervalo pareado adicional no Norte inclui zero; a vantagem pontual da regressão não estabelece superioridade estatística. Essas análises adicionais de 2024–2025 já observado são exploratórias.
+
 ## Executar localmente
 
 Python 3.11 ou 3.12. Crie e ative um ambiente virtual; instale o lock CPU, incluindo hashes dos wheels CPU do PyTorch:

@@ -73,6 +73,23 @@ def test_missing_values_preserved(api_registry):
     assert TestClient(api_registry.app).post("/predict", json=REQUEST).status_code == 200
 
 
+def test_unfitted_calibrator_returns_service_unavailable(api_registry, monkeypatch):
+    from src.models.calibration import PlattCalibrator
+    monkeypatch.setitem(api_registry._calibrators, 7, PlattCalibrator())
+    response = TestClient(api_registry.app).post("/predict", json=REQUEST)
+    assert response.status_code == 503
+
+
+def test_invalid_drift_schema_returns_503_without_rewriting(api_registry, tmp_path, monkeypatch):
+    folder = tmp_path / "reports"
+    folder.mkdir()
+    path = folder / "drift_report.json"
+    path.write_text("[]")
+    monkeypatch.setattr(api_registry, "_PROJECT_ROOT", tmp_path)
+    assert TestClient(api_registry.app).get("/drift").status_code == 503
+    assert path.read_text() == "[]"
+
+
 def test_internal_error_controlled(api_registry, monkeypatch):
     def fail(*args):
         raise RuntimeError("sensitive internal filesystem path")

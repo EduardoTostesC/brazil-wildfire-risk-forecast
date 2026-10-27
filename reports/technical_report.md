@@ -1,6 +1,6 @@
 # Retrospective prediction of satellite hotspot detections in Mato Grosso
 
-Eduardo Tostes. Technical research draft, revised 23 October 2026. This document is not a peer-reviewed or accepted paper. Current experiment tables are generated in [VALIDACAO_CIENTIFICA](VALIDACAO_CIENTIFICA.md); previous text and numerical claims are preserved in [archived audits](../docs/audits/README.md).
+Eduardo Tostes. Technical research draft, revised 26 October 2026. This document is not a peer-reviewed or accepted paper. Current experiment tables are generated in [VALIDACAO_CIENTIFICA](VALIDACAO_CIENTIFICA.md); previous text and numerical claims are preserved in [archived audits](../docs/audits/README.md).
 
 ## Abstract
 
@@ -54,6 +54,10 @@ ROC-AUC, Brier, ECE, prevalence and descriptive Top-K precision/recall complemen
 
 The paired moving-date-block bootstrap resamples complete date clusters, with 500 repetitions and sensitivity to 7/14/21/30-day blocks. Confidence intervals condition on observed cells. They do not capture random sampling of new geographical regions. A zero proportion of negative bootstrap differences is not reported as p=0 or as a null-hypothesis test. [Bootstrap distributions](research/bootstrap_sensitivity.json).
 
+The pre-merge review adds explicitly exploratory analyses of already inspected 2024–2025 outcomes. Fractional Top-K tie expectations and ordering bounds leave historical ranking tables unchanged. For persistence, Top-10% precision can range from 0.4735 to 0.8841 under alternative ordering of the tied cutoff group; these are combinatorial bounds, not confidence intervals. The expected precision under exchangeable ties is 0.6790. [Tie sensitivity](research/premerge/top_k_ties.json).
+
+The reproduced North holdout has paired AP difference LightGBM minus logistic of −0.01397, with date-block 95% interval [−0.03161, 0.00589]. The point estimate favors logistic regression, but the interval includes zero. North was selected for additional analysis after its earlier results were known; this is not an independent confirmatory comparison. [Paired review](research/premerge/north_paired_ap.json).
+
 ## 7. Results
 
 Principal and multi-horizon tables are maintained automatically in [VALIDACAO_CIENTIFICA](VALIDACAO_CIENTIFICA.md), rather than copied into this narrative. The current LightGBM improves aggregate AP over persistence and climatology, and Platt calibration reduces probability error relative to raw class-weighted scores.
@@ -66,6 +70,8 @@ The perfect-future-weather ORACLE is isolated from serving and adds actually obs
 
 Annual performance is reported with prevalence, AP/prevalence, AP-prevalence, ROC-AUC, Brier and ECE. Higher AP in a year with higher prevalence does not, by itself, establish greater intrinsic skill. [Yearly results](research/yearly_prevalence.csv).
 
+With the same frozen 2023 Platt calibrator, ECE is 0.0188 in 2024 and 0.0555 in 2025; Brier is 0.1525 and 0.1137 respectively. Different prevalence and populations prevent interpreting these measures as a single universal ranking of years. Reliability bins and date-block intervals are available in the [annual calibration review](research/premerge/yearly_calibration.csv); no test-year recalibration was selected.
+
 ## 8. Explanation and serving
 
 Native LightGBM TreeSHAP contributions are checked for additivity to the raw model margin. The calibrated probability is returned separately. These are predictive attributions, not causal fire mechanisms or an additive decomposition of the final calibrated probability. SHAP's general attribution framework is described by [Lundberg and Lee (2017)](https://proceedings.neurips.cc/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html).
@@ -77,6 +83,8 @@ Historical replay accepts only exact archive records and a point covered by the 
 [REPRODUCIBILIDADE](REPRODUCIBILIDADE.md) documents commands, environment locks, source hashes, missingness, seeds, DVC dependencies and strict MLflow registration. Complete historical inputs are local rather than publicly versioned. Docker runtime, external deployment and independent data reacquisition must be distinguished from local verification.
 
 This audit is an internal code-and-experiment review. It does not establish independent scientific replication or institutional approval. Remaining methodological work includes temporal-source alignment, availability-aware archived forecasting, richer spatial uncertainty, genuinely external regions, full process-memory benchmarks and a verified official fire-risk comparison if suitable archived products can be obtained.
+
+Original runtime metadata were retained in Git. Forensic checks match the recorded training source under Windows line endings and all 31 declared DVC source dependencies to committed source, but cannot retroactively capture every module loaded at runtime. New executions capture source bytes, input hashes, versions and Git state before fitting. The [pre-merge review](REVISAO_PRE_MERGE.md) distinguishes those executions from the original records and from external replication. A [future 2027 evaluation protocol](PROTOCOLO_CONFIRMATORIO_CONGELADO.md) is specified and hash-checked; its evaluator and outcome assessment have not been executed.
 
 ## 10. Conclusion
 

@@ -1,0 +1,218 @@
+{
+  "reference": "03adf8d667f97d5e83a5a44b47c33e9a26d15f99",
+  "reproduction_code": "eaef23b6d378d7f5fbfb5580a10940fdd88b4813",
+  "models": [
+    {
+      "file": "feature_cols.joblib",
+      "reference_sha256": "d162c45e571ad81730eadbe8c04274e4b23be9a1d8ae163b7d1edeabcfc58f11",
+      "reproduced_sha256": "d162c45e571ad81730eadbe8c04274e4b23be9a1d8ae163b7d1edeabcfc58f11",
+      "exact_bytes": true
+    },
+    {
+      "file": "lightgbm_model.joblib",
+      "reference_sha256": "91c04f70ac586886ce8478744206845844eeb85d350a88dd7b1e375d7d7c22cd",
+      "reproduced_sha256": "91c04f70ac586886ce8478744206845844eeb85d350a88dd7b1e375d7d7c22cd",
+      "exact_bytes": true
+    },
+    {
+      "file": "lightgbm_1d.joblib",
+      "reference_sha256": "975e4ba034b4074217905fbd776cf96ec8690240671221c50d584aa170e0ec6b",
+      "reproduced_sha256": "975e4ba034b4074217905fbd776cf96ec8690240671221c50d584aa170e0ec6b",
+      "exact_bytes": true
+    },
+    {
+      "file": "lightgbm_3d.joblib",
+      "reference_sha256": "c7e7e22decc6bba557d9de66126fa8f21e37b991a96cdd3f60973d8c16e8afce",
+      "reproduced_sha256": "c7e7e22decc6bba557d9de66126fa8f21e37b991a96cdd3f60973d8c16e8afce",
+      "exact_bytes": true
+    },
+    {
+      "file": "platt_calibrator.joblib",
+      "reference_sha256": "6ec003697addb8f2948f86db193b84435ef1a13f382ef87e65b7eaf378e33adc",
+      "reproduced_sha256": "6ec003697addb8f2948f86db193b84435ef1a13f382ef87e65b7eaf378e33adc",
+      "exact_bytes": true
+    },
+    {
+      "file": "platt_calibrator_1d.joblib",
+      "reference_sha256": "9b4ff8f0f66ba831f7cf538fca5e5e200aa55a9162db494c52ad6acb9fc41bfd",
+      "reproduced_sha256": "9b4ff8f0f66ba831f7cf538fca5e5e200aa55a9162db494c52ad6acb9fc41bfd",
+      "exact_bytes": true
+    },
+    {
+      "file": "platt_calibrator_3d.joblib",
+      "reference_sha256": "576b4c2ff7e68803c9d0f3b12903ee8c734574ae018748aee1233826556e4adf",
+      "reproduced_sha256": "576b4c2ff7e68803c9d0f3b12903ee8c734574ae018748aee1233826556e4adf",
+      "exact_bytes": true
+    },
+    {
+      "file": "logistic_regression.joblib",
+      "reference_sha256": "189f34867a15ac67ea70c47abedde7e2920063495090ca0be29f13bc2c1834ee",
+      "reproduced_sha256": "189f34867a15ac67ea70c47abedde7e2920063495090ca0be29f13bc2c1834ee",
+      "exact_bytes": true
+    },
+    {
+      "file": "logistic_calibrator.joblib",
+      "reference_sha256": "8ccc988675c01a2112458946efbdd96e07f4dcbd03aaa999b9daf4e3df1d3e0e",
+      "reproduced_sha256": "8ccc988675c01a2112458946efbdd96e07f4dcbd03aaa999b9daf4e3df1d3e0e",
+      "exact_bytes": true
+    },
+    {
+      "file": "scaler.joblib",
+      "reference_sha256": "669b831c7c0770c5ac504d83b5079169e0c64c3f13588ae029f85bbf7b37b72b",
+      "reproduced_sha256": "669b831c7c0770c5ac504d83b5079169e0c64c3f13588ae029f85bbf7b37b72b",
+      "exact_bytes": true
+    },
+    {
+      "file": "lstm_model.pt",
+      "reference_sha256": "6d8850ebcdf64f2cac18d8cf989d5341ce0ee61097414b9170b852d9d93c8aa6",
+      "reproduced_sha256": "6d8850ebcdf64f2cac18d8cf989d5341ce0ee61097414b9170b852d9d93c8aa6",
+      "exact_bytes": true
+    },
+    {
+      "file": "lstm_calibrator.joblib",
+      "reference_sha256": "776ce45cb88dffd5ece0255fa71bfe7684a68bf29149d9a98d14d550c4a2e6f9",
+      "reproduced_sha256": "776ce45cb88dffd5ece0255fa71bfe7684a68bf29149d9a98d14d550c4a2e6f9",
+      "exact_bytes": true
+    },
+    {
+      "file": "lstm_preprocessing.joblib",
+      "reference_sha256": "6bb1bf16a99aec6727cd7c8ed442034575440bd19e99241649de730802a68e96",
+      "reproduced_sha256": "6bb1bf16a99aec6727cd7c8ed442034575440bd19e99241649de730802a68e96",
+      "exact_bytes": true
+    }
+  ],
+  "tables": [
+    {
+      "file": "reports/ablation_study.csv",
+      "rows": 8,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/feature_importance.csv",
+      "rows": 39,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/lstm_comparison.csv",
+      "rows": 4,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/model_comparison.csv",
+      "rows": 7,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/multi_horizon_comparison.csv",
+      "rows": 3,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/operational_decision_metrics.csv",
+      "rows": 5,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/walk_forward_metrics.csv",
+      "rows": 5,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/ablation.csv",
+      "rows": 16,
+      "excluded_timing_columns": [
+        "seconds"
+      ],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/baselines.csv",
+      "rows": 5,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/climate_slices.csv",
+      "rows": 27,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/frozen_threshold_diagnostics.csv",
+      "rows": 24,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/matched_lstm.csv",
+      "rows": 4,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/no_recent_fire.csv",
+      "rows": 120,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/oracle.csv",
+      "rows": 3,
+      "excluded_timing_columns": [
+        "seconds"
+      ],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/spatial_generalization.csv",
+      "rows": 12,
+      "excluded_timing_columns": [
+        "seconds"
+      ],
+      "exact_scientific_values": true,
+      "difference": null
+    },
+    {
+      "file": "reports/research/yearly_prevalence.csv",
+      "rows": 2,
+      "excluded_timing_columns": [],
+      "exact_scientific_values": true,
+      "difference": null
+    }
+  ],
+  "data": [
+    {
+      "file": "data/processed/dataset.parquet",
+      "exact_bytes": true
+    },
+    {
+      "file": "data/processed/features.parquet",
+      "exact_bytes": true
+    },
+    {
+      "file": "data/processed/grid.csv",
+      "exact_bytes": true
+    }
+  ]
+}

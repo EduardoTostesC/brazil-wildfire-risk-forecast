@@ -22,3 +22,5 @@ As respostas HTTP efetivamente obtidas nesta auditoria estão em [real-http-exam
 | Falha inesperada na inferência | 500 com mensagem controlada |
 
 `data_timestamp` e `availability_timestamp` são nulos porque os horários históricos não foram comprovados. `processed_at` é o horário real de processamento; não deve ser interpretado como disponibilidade da observação. A origem diferencia arquivo completo local e amostra demonstrativa. O digest de versão identifica o par de artefatos do horizonte.
+
+`risk_level` é uma faixa visual convencional: low abaixo de 0,25, medium de 0,25 até menos de 0,55 e high a partir de 0,55. Não constitui recomendação de mobilização ou resposta emergencial. `/drift` lê um relatório histórico de covariáveis, com `continuous_monitoring=false` e `performance_degradation_assessed=false`; não executa telemetria contínua nem comprova concept drift.

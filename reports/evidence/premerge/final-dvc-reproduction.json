@@ -1,0 +1,16 @@
+{
+  "execution_code_commit": "3478d9495738bc91e65ba5ea856fb32cf61a90c4",
+  "command": [
+    "python",
+    "-m",
+    "dvc",
+    "repro"
+  ],
+  "note": "Final candidate source committed before execution. Original 03adf8d metadata remain immutable in Git; new metadata describe a genuinely new execution.",
+  "exit_code": 0,
+  "status": {
+    "exit_code": 0,
+    "stdout": "{}\n",
+    "stderr": ""
+  }
+}

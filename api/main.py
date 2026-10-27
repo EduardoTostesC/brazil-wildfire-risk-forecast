@@ -165,7 +165,8 @@ def _prepare(request):
         raise HTTPException(422, "Invalid horizon_days: must be 1, 3, or 7")
     if request.date.year < 2016 or request.date.year > 2030:
         raise HTTPException(422, "Date outside supported query range [2016, 2030]")
-    if not _model_loaded or request.horizon_days not in _models or request.horizon_days not in _calibrators:
+    if (not _model_loaded or request.horizon_days not in _models or request.horizon_days not in _calibrators
+            or not getattr(_calibrators.get(request.horizon_days), "is_fitted_", False)):
         raise HTTPException(503, "Required model/calibrator pair unavailable for requested horizon")
     grid_id, _ = _resolve_grid_cell(request.latitude, request.longitude)
     values = _get_feature_vector(request.latitude, request.longitude, request.date, grid_id, request.inference_mode)
@@ -219,8 +220,15 @@ def explain(request: ExplainRequest):
 def drift_report():
     path = _PROJECT_ROOT / "reports/drift_report.json"
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
+        report = json.loads(path.read_text(encoding="utf-8"))
+        if (not isinstance(report, dict) or report.get("report_type") != "historical_drift_analysis"
+                or report.get("monitoring_mode") != "retrospective_evaluation"
+                or not isinstance(report.get("summary"), dict) or not isinstance(report.get("features"), list)
+                or report["summary"].get("total_monitored") != len(report["features"])
+                or report.get("continuous_monitoring", False) is not False):
+            raise ValueError("Invalid historical covariate report schema")
+        return report
+    except (OSError, ValueError, TypeError) as exc:
         raise HTTPException(503, "Historical drift report unavailable or invalid") from exc
 
 

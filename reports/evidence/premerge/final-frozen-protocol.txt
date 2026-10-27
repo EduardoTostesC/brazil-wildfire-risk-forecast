@@ -1,0 +1,2 @@
+Frozen protocol and model/schema hashes verified; no future observations accessed
+

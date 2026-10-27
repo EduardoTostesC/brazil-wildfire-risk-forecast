@@ -81,3 +81,7 @@ python -m dvc status
 ```
 
 Docker foi executado no CI Linux; o host Windows continua sem o binário. Deploy público e benchmark operacional não foram executados. A inferência e os testes foram verificados em Windows/Linux; macOS e treinamento bit a bit idêntico entre plataformas não foram verificados.
+
+## Nova rodada de 26/10/2026
+
+A base recém-executada em 03adf8d passou em 87 testes por Python, antes das correções desta rodada. Logs novos ficam em `evidence/premerge/`, separados da execução de 23/10. O resultado final, incluindo os novos testes de API e as reproduções DVC, está em [REVISAO_PRE_MERGE](REVISAO_PRE_MERGE.md). As contagens anteriores neste documento são históricas, não a contagem atual do candidato.

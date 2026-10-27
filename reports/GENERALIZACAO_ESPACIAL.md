@@ -34,3 +34,5 @@ No Norte retido, a regressão logística supera LightGBM em AP. No Centro e no S
 É possível conhecer o histórico recente de focos de uma região onde não houve treinamento. Portanto, o cenário é transferência do mapeamento preditivo para novas células com observações disponíveis, e não previsão sem observações da região. A retirada de vizinhança evita incorporar rótulos da região retida nas features espaciais das regiões de origem.
 
 [CSV completo](research/spatial_generalization.csv) · [Parâmetros e protocolo](research/metadata.json). Intervalos espaciais de amostragem de novas regiões não foram estimados; há somente três regiões definidas.
+
+Revisão exploratória de 26/10/2026: o resultado pontual do Norte foi reproduzido com os parâmetros/buffer originais. A diferença AP LightGBM−logística foi −0,01397, IC95% temporal pareado [−0,03161; 0,00589]. O intervalo inclui zero; não estabelece superioridade de nenhum dos dois. A escolha do Norte para análise adicional ocorreu após observar os resultados e não constitui confirmação independente. [Evidência](research/premerge/north_paired_ap.json).

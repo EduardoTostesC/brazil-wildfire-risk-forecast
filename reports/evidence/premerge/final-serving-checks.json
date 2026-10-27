@@ -1,0 +1,65 @@
+[
+  {
+    "check": "final-py312",
+    "command": [
+      "-m",
+      "pytest",
+      "tests/",
+      "-v",
+      "--tb=short",
+      "--junitxml=reports\\evidence\\premerge\\final-py312.xml"
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "final-ruff",
+    "command": [
+      "-m",
+      "ruff",
+      "check",
+      "."
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "final-artifacts",
+    "command": [
+      "-m",
+      "src.models.artifacts",
+      "--verify"
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "final-frozen-protocol",
+    "command": [
+      "scripts/verify_frozen_protocol.py"
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "final-readme-check",
+    "command": [
+      "-m",
+      "src.reporting.generate_readme_metrics",
+      "--check"
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "final-research-check",
+    "command": [
+      "-m",
+      "src.reporting.generate_research_tables",
+      "--check"
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "final-links",
+    "command": [
+      "scripts/check_doc_links.py"
+    ],
+    "exit_code": 0
+  }
+]
