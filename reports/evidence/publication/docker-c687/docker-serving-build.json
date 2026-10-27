@@ -1,0 +1,20 @@
+{
+  "command": [
+    "docker",
+    "build",
+    "--file",
+    "Dockerfile.serving",
+    "--tag",
+    "wildfire-serving:ci",
+    "--target",
+    "api",
+    "."
+  ],
+  "elapsed_build_seconds": 59.575025314000015,
+  "size_bytes": 285192666,
+  "image_id": "sha256:0f174644877240f00e2c4ffa56b0d40d02354c8b8ffbb1877b06c2c58950193a",
+  "os": "linux",
+  "architecture": "amd64",
+  "dockerfile_sha256": "8833fd38324960c015baff10d92d1ade932688b7a9e0636ba526742c0e6bea47",
+  "cache_policy": "Normal Docker layer cache; base layers may already be available. Not a guaranteed cold build."
+}

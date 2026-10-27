@@ -1,0 +1,2157 @@
+INFO:     Started server process [9820]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8012 (Press CTRL+C to quit)
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "GET /health HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57183 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57185 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57187 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57188 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57186 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57189 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57190 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57191 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57192 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57193 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57194 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57197 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57196 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57198 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57199 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57200 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57201 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57195 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57202 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57203 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57204 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57205 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57206 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57207 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57208 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57211 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57209 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57210 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57212 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57214 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57213 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57215 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57217 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57216 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57219 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57218 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57220 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57221 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57222 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57223 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57225 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57224 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57226 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57227 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57229 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57228 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57230 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57231 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57233 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57232 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57235 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57234 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57236 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57237 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57239 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57238 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57241 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57240 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57242 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57244 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57245 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57246 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57243 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57247 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57249 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57248 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57250 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57251 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57252 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57253 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57255 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57254 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57257 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57256 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57258 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57259 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57261 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57260 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57262 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57263 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57264 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57265 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57266 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57267 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57268 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57269 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57271 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57270 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57275 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57273 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57272 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57274 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57277 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57276 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57279 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57278 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57283 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57281 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57282 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57280 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57287 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57286 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57284 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57285 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57289 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57288 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57291 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57290 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57292 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57295 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57293 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57294 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57297 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57299 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57296 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57298 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57301 - "POST /predict HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57300 - "POST /explain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57303 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57302 - "POST /explain HTTP/1.1" 200 OK
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+<workspace>\.venv\serving312\Lib\site-packages\sklearn\utils\validation.py:2749: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+INFO:     127.0.0.1:57304 - "POST /explain HTTP/1.1" 200 OK

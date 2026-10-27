@@ -46,6 +46,7 @@ def main():
     parser.add_argument("--candidate-url")
     parser.add_argument("--reference-python", default=sys.executable)
     parser.add_argument("--candidate-python", default=sys.executable)
+    parser.add_argument("--candidate-thread-limit", type=int, default=0)
     parser.add_argument("--output", type=Path, default=ROOT / "reports/evidence/publication/serving-parity.json")
     args = parser.parse_args()
     if bool(args.reference_url) != bool(args.candidate_url):
@@ -56,10 +57,13 @@ def main():
     try:
         if not args.reference_url:
             for python, port in [(args.reference_python, 8008), (args.candidate_python, 8009)]:
+                environment = dict(os.environ, WILDFIRE_USE_SAMPLE="1", PYTHONIOENCODING="utf-8")
+                if port == 8009 and args.candidate_thread_limit:
+                    environment["OMP_THREAD_LIMIT"] = str(args.candidate_thread_limit)
                 log = (args.output.parent / f"parity-server-{port}.txt").open("w", encoding="utf-8")
                 logs.append(log)
                 processes.append(subprocess.Popen([python, "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", str(port)],
-                    cwd=ROOT, env=dict(os.environ, WILDFIRE_USE_SAMPLE="1", PYTHONIOENCODING="utf-8"), stdout=log, stderr=subprocess.STDOUT,
+                    cwd=ROOT, env=environment, stdout=log, stderr=subprocess.STDOUT,
                     creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0))
         for url in urls:
             for _ in range(120):
@@ -96,6 +100,7 @@ def main():
                 assert status == expected
         record = {"git_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
             "api_source_sha256": hashlib.sha256((ROOT / "api/main.py").read_bytes()).hexdigest(),
+            "candidate_OMP_THREAD_LIMIT": args.candidate_thread_limit or None,
             "absolute_tolerance": TOLERANCE, "relative_tolerance": 0, "ignored_dynamic_field": "processed_at",
             "success_response_pairs": len(results), "error_responses_checked": 6,
             "maximum_absolute_numeric_difference": max(x["max_absolute_numeric_difference"] for x in results), "cases": results}

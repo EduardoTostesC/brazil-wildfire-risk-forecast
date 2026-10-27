@@ -1,0 +1,18 @@
+{
+  "invalid_measurement": "Only the Windows venv launcher PID was monitored; its RSS/CPU do not describe the API child. Latency measurements are not used in the final report either.",
+  "invalid_scope_peak_rss_bytes": [
+    3555328,
+    3530752,
+    3534848
+  ],
+  "invalid_scope_cpu_seconds": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "original_instrumentation_sha256": "83e31bf29f58f38ad9759e10b221cc03ceebb62c9fcc7ce9032ca774488adddb",
+  "correction": "Enumerate process descendants; report largest-process API RSS and simultaneous tree sum separately; sum CPU time deltas for the process tree. Repeat all three independent runs.",
+  "full_invalid_raw_evidence_retained_locally": ".venv/benchmark-invalid-launcher-scope",
+  "corrected_evidence": "reports/benchmarks/reference",
+  "experimental_evidence": "reports/benchmarks/serving"
+}
